@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="description" content="NQ Impact — Nasdaq Futures Intelligence static HTML dashboard">
+<title>NQ Impact — Nasdaq Futures Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>/* ─────────────────────────────────────────────────────────────────────────────
+   NQ IMPACT DASHBOARD  ·  Professional dark-theme CSS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Reset & base */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:      #060d14;
+  --bg-panel:     #0b1520;
+  --bg-card:      #0f1e2c;
+  --bg-hover:     #132233;
+  --border:       #1a3040;
+  --border-light: #1e3a4e;
+
+  --txt-primary:  #e8f4ff;
+  --txt-secondary:#7a9bb5;
+  --txt-muted:    #4a6880;
+
+  --accent:       #5dd6ff;
+  --accent-dim:   rgba(93,214,255,.12);
+
+  --bullish:      #38e38b;
+  --bullish-bg:   rgba(56,227,139,.10);
+  --bearish:      #ff657a;
+  --bearish-bg:   rgba(255,101,122,.10);
+  --sideways:     #e9c85c;
+  --sideways-bg:  rgba(233,200,92,.10);
+
+  --risk-low:     #38e38b;
+  --risk-medium:  #e9c85c;
+  --risk-high:    #ff657a;
+  --risk-very-high:#ff3d5a;
+
+  --sidebar-w:    240px;
+  --topbar-h:     64px;
+  --radius:       12px;
+  --radius-sm:    8px;
+  --radius-xs:    5px;
+
+  --font:        'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:   'JetBrains Mono', 'Fira Code', monospace;
+  --shadow:       0 4px 24px rgba(0,0,0,.45);
+  --shadow-card:  0 2px 12px rgba(0,0,0,.35);
+}
+
+html { font-size: 14px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg-base);
+  color: var(--txt-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; font-family: var(--font); }
+code {
+  font-family: var(--font-mono);
+  font-size: .85em;
+  background: rgba(93,214,255,.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+/* ── Auth page ───────────────────────────────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(93,214,255,.08), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(56,227,139,.05), transparent),
+    var(--bg-base);
+  padding: 24px;
+  position: relative;
+}
+
+.auth-glow {
+  position: fixed;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(93,214,255,.06), transparent 70%);
+  pointer-events: none;
+}
+
+.auth-card {
+  width: min(440px, 100%);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow), 0 0 0 1px rgba(93,214,255,.04);
+}
+
+.auth-brand {
+  background: linear-gradient(135deg, #0f1e2c, #0c1922);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
+.brand-nq   { color: var(--txt-primary); }
+.brand-impact { color: var(--accent); }
+
+.brand-ticker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--txt-muted);
+}
+
+.auth-body { padding: 32px; }
+
+.auth-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.auth-sub   { color: var(--txt-secondary); font-size: 13px; margin-bottom: 24px; }
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+.alert-error  { background: rgba(255,101,122,.12); border: 1px solid rgba(255,101,122,.3); color: #ff9baa; }
+.alert-icon   { font-size: 15px; flex-shrink: 0; }
+
+.field-group  { margin-bottom: 16px; }
+.field-label  { display: block; font-size: 12px; font-weight: 600; color: var(--txt-secondary); letter-spacing: .5px; margin-bottom: 7px; }
+.field-wrap   { position: relative; display: flex; align-items: center; }
+.field-icon   { position: absolute; left: 13px; color: var(--txt-muted); pointer-events: none; display: flex; }
+.field-input  {
+  width: 100%;
+  padding: 11px 44px 11px 40px;
+  background: var(--bg-base);
+  color: var(--txt-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+}
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(93,214,255,.12);
+}
+.field-input::placeholder { color: var(--txt-muted); }
+.toggle-pw {
+  position: absolute; right: 12px;
+  background: transparent; border: none;
+  color: var(--txt-muted); padding: 4px;
+  display: flex; align-items: center;
+  transition: color .2s;
+}
+.toggle-pw:hover { color: var(--txt-secondary); }
+
+.btn-login {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--accent), #3ab8e0);
+  color: #060d14;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  transition: opacity .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 20px rgba(93,214,255,.25);
+}
+.btn-login:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(93,214,255,.35); }
+.btn-login:active { transform: translateY(0); }
+.btn-arrow { font-size: 17px; }
+
+.auth-footer {
+  padding: 14px 32px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--txt-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--bullish);
+  box-shadow: 0 0 6px var(--bullish);
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .5; }
+}
+
+/* ── Dashboard layout ─────────────────────────────────────────────────────── */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  transition: transform .25s ease;
+}
+
+.sidebar-brand {
+  padding: 22px 20px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-nav {
+  padding: 16px 12px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--txt-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--bg-hover); color: var(--txt-primary); text-decoration: none; }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 600; }
+
+.sidebar-stats {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+.stat-label { font-size: 11px; color: var(--txt-muted); font-weight: 500; }
+.stat-val   { font-size: 14px; font-weight: 700; color: var(--accent); font-family: var(--font-mono); }
+
+.sidebar-bottom { padding: 16px 12px; }
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--bullish);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+.pulse-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bullish);
+  animation: pulse-live 1.5s infinite;
+}
+@keyframes pulse-live {
+  0%,100% { box-shadow: 0 0 0 0 rgba(56,227,139,.6); }
+  50%      { box-shadow: 0 0 0 6px rgba(56,227,139,0); }
+}
+
+.btn-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--txt-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.btn-logout:hover { background: rgba(255,101,122,.08); color: var(--bearish); border-color: rgba(255,101,122,.3); }
+
+/* ── Main content ─────────────────────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+.topbar {
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(11,21,32,.8);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-left  { display: flex; align-items: center; gap: 14px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xs);
+  color: var(--txt-secondary);
+  padding: 6px 9px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.page-title { font-size: 15px; font-weight: 700; }
+.page-sub   { font-size: 11px; color: var(--txt-muted); }
+
+.refresh-info {
+  font-size: 12px;
+  color: var(--txt-muted);
+  font-family: var(--font-mono);
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(93,214,255,.2);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background .15s, border-color .15s;
+}
+.btn-refresh:hover { background: rgba(93,214,255,.2); border-color: rgba(93,214,255,.4); }
+
+/* ── Content area ─────────────────────────────────────────────────────────── */
+.content-area {
+  padding: 24px;
+  max-width: 1400px;
+  width: 100%;
+}
+
+/* ── Bias hero card ──────────────────────────────────────────────────────── */
+.bias-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  gap: 32px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+.bias-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .04;
+  pointer-events: none;
+}
+.bias-card.bullish { border-left: 3px solid var(--bullish); }
+.bias-card.bullish::before { background: var(--bullish); }
+.bias-card.bearish { border-left: 3px solid var(--bearish); }
+.bias-card.bearish::before { background: var(--bearish); }
+.bias-card.sideways { border-left: 3px solid var(--sideways); }
+.bias-card.sideways::before { background: var(--sideways); }
+
+.bias-left  { flex: 1; }
+.bias-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--txt-muted);
+  margin-bottom: 8px;
+}
+.bias-headline { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.bias-sub       { font-size: 13px; color: var(--txt-secondary); margin-bottom: 16px; }
+.bias-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--txt-secondary);
+}
+
+.bias-score-block {
+  text-align: center;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+.bias-score {
+  font-family: var(--font-mono);
+  font-size: 54px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.bullish .bias-score { color: var(--bullish); text-shadow: 0 0 30px rgba(56,227,139,.3); }
+.bearish .bias-score { color: var(--bearish); text-shadow: 0 0 30px rgba(255,101,122,.3); }
+.sideways .bias-score{ color: var(--sideways); text-shadow: 0 0 30px rgba(233,200,92,.3); }
+
+.bias-signal {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  margin-bottom: 14px;
+}
+.bullish .bias-signal { color: var(--bullish); }
+.bearish .bias-signal { color: var(--bearish); }
+.sideways .bias-signal{ color: var(--sideways); }
+
+.bias-scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--txt-muted);
+  letter-spacing: 1px;
+}
+.scale-bar {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.scale-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width .5s ease;
+}
+
+/* ── Panels grid ─────────────────────────────────────────────────────────── */
+.panels-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-card);
+}
+
+.panel-head {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,.01);
+}
+.panel-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.panel-sub   { font-size: 11px; color: var(--txt-muted); }
+
+/* ── Feed items ──────────────────────────────────────────────────────────── */
+.feed { flex: 1; overflow-y: auto; }
+
+.feed-item {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-item:hover { background: var(--bg-hover); }
+
+.feed-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.feed-source {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.source-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a3a50, #0f2535);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.event-avatar { background: linear-gradient(135deg, #1a2e40, #0f2030); }
+
+.source-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(93,214,255,.1);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Impact chip */
+.impact-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: .5px;
+  min-width: 70px;
+  text-align: center;
+}
+.impact-score { font-family: var(--font-mono); font-size: 15px; font-weight: 800; }
+.impact-label { font-size: 9px; letter-spacing: 1px; opacity: .8; }
+
+.impact-chip.impact-bullish { background: var(--bullish-bg); color: var(--bullish); border: 1px solid rgba(56,227,139,.25); }
+.impact-chip.impact-bearish { background: var(--bearish-bg); color: var(--bearish); border: 1px solid rgba(255,101,122,.25); }
+.impact-chip.impact-sideways{ background: var(--sideways-bg); color: var(--sideways); border: 1px solid rgba(233,200,92,.25); }
+
+/* Feed text */
+.feed-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--txt-secondary);
+  margin-bottom: 10px;
+}
+.feed-link { color: var(--txt-secondary); }
+.feed-link:hover { color: var(--txt-primary); text-decoration: underline; }
+
+/* Confidence & risk */
+.feed-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.conf-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+}
+.conf-bar {
+  display: inline-block;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 10px;
+  opacity: .6;
+  min-width: 4px;
+}
+.conf-label { font-size: 10px; color: var(--txt-muted); white-space: nowrap; }
+
+.risk-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+.risk-badge.risk-low       { background: rgba(56,227,139,.1);  color: var(--risk-low);       border: 1px solid rgba(56,227,139,.2);  }
+.risk-badge.risk-medium    { background: rgba(233,200,92,.1);  color: var(--risk-medium);     border: 1px solid rgba(233,200,92,.2);  }
+.risk-badge.risk-high      { background: rgba(255,101,122,.1); color: var(--risk-high);       border: 1px solid rgba(255,101,122,.2); }
+.risk-badge.risk-very-high { background: rgba(255,61,90,.15);  color: var(--risk-very-high);  border: 1px solid rgba(255,61,90,.3);   }
+
+/* Reasons */
+.reasons { border-top: 1px solid var(--border); padding-top: 10px; }
+.reason {
+  font-size: 11.5px;
+  color: var(--txt-muted);
+  line-height: 1.5;
+  padding: 3px 0;
+}
+
+/* Event details */
+.event-time {
+  font-size: 11px;
+  color: var(--txt-muted);
+  font-family: var(--font-mono);
+}
+.event-details { margin-bottom: 10px; }
+.event-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+}
+.detail-label   { color: var(--txt-muted); }
+.detail-val     { font-weight: 600; color: var(--txt-primary); }
+.forecast-val   { color: var(--accent); font-family: var(--font-mono); }
+.event-pending  {
+  font-size: 11.5px;
+  color: var(--sideways);
+  opacity: .8;
+  padding: 8px 10px;
+  background: var(--sideways-bg);
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(233,200,92,.2);
+}
+
+/* Empty state */
+.empty-state {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--txt-muted);
+}
+.empty-icon  { font-size: 32px; margin-bottom: 12px; }
+.empty-title { font-size: 14px; font-weight: 600; color: var(--txt-secondary); margin-bottom: 6px; }
+.empty-sub   { font-size: 12px; line-height: 1.6; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .panels-grid { grid-template-columns: 1fr; }
+  .bias-card   { flex-direction: column; align-items: flex-start; gap: 24px; }
+  .bias-score-block { width: 100%; display: flex; align-items: center; gap: 20px; }
+  .bias-scale { flex: 1; }
+}
+
+@media (max-width: 768px) {
+  :root { --sidebar-w: 240px; }
+
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 200;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 20px rgba(0,0,0,.5);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .menu-toggle { display: block; }
+  .topbar { padding: 0 16px; }
+  .content-area { padding: 16px; }
+
+  .bias-card { padding: 20px; }
+  .bias-headline { font-size: 18px; }
+  .bias-score { font-size: 40px; }
+
+  .refresh-info { display: none; }
+}
+
+@media (max-width: 480px) {
+  .feed-top { flex-direction: column; gap: 8px; }
+  .impact-chip { align-self: flex-start; flex-direction: row; }
+  .bias-score-block { flex-direction: column; align-items: flex-start; }
+  .bias-scale { width: 100%; }
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #2a4a60; }
+
+/* Static HTML edition */
+.settings-btn,.btn-secondary,.btn-danger{border:1px solid var(--border-light);background:var(--bg-card);color:var(--txt-secondary);border-radius:var(--radius-sm);padding:8px 11px;font-size:12px;font-weight:700}
+.settings-btn:hover,.btn-secondary:hover{color:var(--txt-primary);border-color:var(--accent)}
+.btn-danger{color:#ff9baa;border-color:rgba(255,101,122,.3)}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal-backdrop.open{display:flex}.modal{width:min(620px,100%);background:var(--bg-panel);border:1px solid var(--border-light);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}.modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.modal-head h3{font-size:16px}.modal-body{padding:20px}.modal-row{margin-bottom:16px}.modal-row label{display:block;font-size:12px;font-weight:700;color:var(--txt-secondary);margin-bottom:7px}.modal-row input,.modal-row select{width:100%;padding:10px 12px;background:var(--bg-base);color:var(--txt-primary);border:1px solid var(--border-light);border-radius:8px;outline:none}.modal-row input:focus,.modal-row select:focus{border-color:var(--accent)}.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}.small-note{font-size:11px;color:var(--txt-muted);line-height:1.5}.source-live{color:var(--bullish)}.source-demo{color:var(--sideways)}.api-status{font-size:12px;margin-top:8px}.hidden{display:none!important}.toast{position:fixed;right:20px;bottom:20px;z-index:1200;background:var(--bg-card);border:1px solid var(--border-light);padding:12px 15px;border-radius:10px;box-shadow:var(--shadow);font-size:12px}.feed-link{cursor:pointer}.brand-mark{font-size:11px;color:var(--txt-muted);letter-spacing:1px;margin-top:2px}.live-badge.clickable{cursor:pointer}.event-pending{font-size:11px}.topbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn-refresh{display:flex;gap:6px;align-items:center}
+@media(max-width:800px){.topbar{padding:0 14px}.content-area{padding:14px}.topbar-left{gap:8px}.page-title{font-size:14px}.refresh-info{display:none}.toolbar{justify-content:flex-end}}
+</style>
+</head>
+<body>
+<div id="loginPage" class="auth-page">
+  <div class="auth-glow"></div><div class="auth-card">
+    <div class="auth-brand"><div class="brand-logo"><span class="brand-nq">NQ</span><span class="brand-impact">IMPACT</span></div><div class="brand-ticker">▲ NASDAQ FUTURES INTELLIGENCE</div></div>
+    <div class="auth-body"><h2 class="auth-title">Admin Access</h2><p class="auth-sub">Static HTML edition · browser-only access gate.</p>
+      <div id="loginError" class="alert alert-error hidden"><span class="alert-icon">⚠</span><span id="loginErrorText"></span></div>
+      <form id="loginForm" autocomplete="off">
+        <div class="field-group"><label class="field-label" for="username">Username</label><div class="field-wrap"><span class="field-icon">👤</span><input id="username" class="field-input" value="admin" required autocomplete="username"></div></div>
+        <div class="field-group"><label class="field-label" for="password">Password</label><div class="field-wrap"><span class="field-icon">🔒</span><input id="password" class="field-input" type="password" placeholder="Enter password" required autocomplete="current-password"><button class="toggle-pw" type="button" onclick="togglePw()">◉</button></div></div>
+        <button class="btn-login" type="submit"><span class="btn-text">SIGN IN</span><span class="btn-arrow">→</span></button>
+      </form>
+    </div>
+    <div class="auth-footer"><span class="status-dot"></span> Browser-only edition · no server required</div>
+  </div>
+</div>
+
+<div id="app" class="layout hidden">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><span class="brand-nq">NQ</span><span class="brand-impact">IMPACT</span></div>
+  <div class="brand-mark">STATIC HTML EDITION</div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" onclick="return false"><span>▦</span> Dashboard</a>
+    <a href="#settings" class="nav-item" onclick="openSettings();return false"><span>⚙</span> Settings</a>
+  </nav>
+  <div class="sidebar-stats"><div class="stat-item"><span class="stat-label">News Items</span><span id="newsCount" class="stat-val">0</span></div><div class="stat-item"><span class="stat-label">Scheduled Events</span><span id="eventCount" class="stat-val">0</span></div></div>
+  <div class="sidebar-bottom"><div id="liveBadge" class="live-badge clickable" onclick="loadNews()"><span class="pulse-dot"></span><span id="liveBadgeText">LIVE RSS</span></div><button class="btn-logout" onclick="logout()">⇥ Logout</button></div>
+</aside>
+<div class="main-content">
+<header class="topbar"><div class="topbar-left"><button class="menu-toggle" onclick="toggleSidebar()" title="Toggle menu">☰</button><div><div class="page-title">Nasdaq Futures Intelligence</div><div class="page-sub">Real-time event impact analysis</div></div></div>
+<div class="topbar-right"><div class="refresh-info">Auto-refresh in <span id="countdown">60</span>s</div><div class="toolbar"><button class="settings-btn" onclick="openSettings()">⚙ Settings</button><button class="btn-refresh" onclick="refreshNow()">↻ Refresh</button></div></div></header>
+<div class="content-area">
+<div id="biasCard" class="bias-card bias-sideways"><div class="bias-left"><div class="bias-eyebrow">NASDAQ FUTURES IMPACT ENGINE</div><div class="bias-headline">Current NQ Market Bias</div><div id="biasSub" class="bias-sub">Loading signals…</div><div class="bias-pills"><span class="pill">◷ <span id="updatedText">Starting</span></span><span class="pill" id="sourcePill">Live RSS</span><span class="pill">Event framework</span></div></div><div class="bias-score-block"><div id="biasScore" class="bias-score">+0</div><div id="biasSignal" class="bias-signal">SIDEWAYS</div><div class="bias-scale"><span>BEAR</span><div class="scale-bar"><div id="scaleFill" class="scale-fill" style="width:50%;background:#e9c85c"></div></div><span>BULL</span></div></div></div>
+<div class="panels-grid">
+<div class="panel"><div class="panel-head"><div><div class="panel-title">🔥 Live News Impact</div><div id="newsSub" class="panel-sub">Loading news…</div></div></div><div id="newsFeed" class="feed"></div></div>
+<div class="panel"><div class="panel-head"><div><div class="panel-title">📅 Upcoming Events</div><div id="eventSub" class="panel-sub">Scheduled impact framework</div></div></div><div id="eventFeed" class="feed"></div></div>
+</div>
+</div></div></div>
+
+<div id="settingsModal" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3>Dashboard Settings</h3><button class="settings-btn" onclick="closeSettings()">✕</button></div><div class="modal-body">
+<div class="modal-row"><label>News mode</label><select id="newsMode"><option value="rss">Live Google News RSS (browser fetch)</option><option value="demo">Demo data</option></select></div>
+<div class="modal-row"><label>RSS search query</label><input id="rssQuery" value="Nasdaq futures Fed yields inflation" placeholder="e.g. Nasdaq futures Fed yields inflation"></div>
+<div class="modal-row"><label>Local access password</label><input id="localPassword" type="password" value="NQ@2026"><div class="small-note">This is only a browser-side gate. It is not real server security because the password exists in the HTML/source. Do not use this for sensitive/private deployment.</div></div>
+<div class="modal-row"><label>Refresh interval (seconds)</label><input id="refreshInterval" type="number" min="15" max="3600" value="60"></div>
+<div class="api-status" id="apiStatus"></div>
+</div><div class="modal-foot"><button class="btn-secondary" onclick="resetSettings()">Reset</button><button class="btn-secondary" onclick="closeSettings()">Cancel</button><button class="settings-btn" onclick="saveSettings()">Save & Refresh</button></div></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const DEMO_NEWS=[{"time": "", "source": "Reuters", "text": "Treasury yields edge lower as investors assess the path for US rates.", "category": "Rates", "surprise": 0, "link": "https://www.reuters.com/markets/"}, {"time": "", "source": "Federal Reserve", "text": "Fed officials emphasize watching inflation progress before further easing.", "category": "Fed", "surprise": 0, "link": "https://www.federalreserve.gov/newsevents.htm"}, {"time": "", "source": "BLS", "text": "Economic data comes in close to expectations, reducing immediate policy surprise.", "category": "Macro", "surprise": 0, "link": "https://www.bls.gov/news.release/"}, {"time": "", "source": "Markets", "text": "Nasdaq futures traders monitor yields, inflation expectations and mega-cap earnings.", "category": "Markets", "surprise": 0, "link": "https://news.google.com/"}];
+const DEMO_EVENTS=[{"time": "", "name": "CPI", "category": "Inflation", "impact": "Very High", "forecast": "2.8%", "previous": "2.9%"}, {"time": "", "name": "FOMC Rate Decision", "category": "Fed", "impact": "Very High", "forecast": "Hold", "previous": "Hold"}, {"time": "", "name": "NVDA Earnings", "category": "Earnings", "impact": "Very High", "forecast": "Consensus", "previous": "Prior quarter"}];
+const WEIGHTS={"federalreserve":1.25,"bls":1.25,"BLS_gov":1.25,"BEA_News":1.2,"USTreasury":1.2,"Reuters":1.15,"AP":1.1,"WSJ":1.1,"FT":1.1,"NickTimiraos":1.2,"zerohedge":.85,"unusual_whales":.9};
+const DEFAULT_SETTINGS={newsMode:"rss",rssQuery:"Nasdaq futures Fed yields inflation",localPassword:"NQ@2026",refreshInterval:60};
+let settings=loadSettings(), secs=settings.refreshInterval, newsData=[], eventData=[];
+function loadSettings(){try{return {...DEFAULT_SETTINGS,...JSON.parse(localStorage.getItem('nq_html_settings')||'{}')}}catch(e){return {...DEFAULT_SETTINGS}}}
+function saveSettings(){settings={newsMode:document.getElementById('newsMode').value,rssQuery:document.getElementById('rssQuery').value.trim()||DEFAULT_SETTINGS.rssQuery,localPassword:document.getElementById('localPassword').value||DEFAULT_SETTINGS.localPassword,refreshInterval:Math.max(15,Math.min(3600,Number(document.getElementById('refreshInterval').value)||60))};localStorage.setItem('nq_html_settings',JSON.stringify(settings));secs=settings.refreshInterval;closeSettings();showToast('Settings saved');refreshNow()}
+function resetSettings(){settings={...DEFAULT_SETTINGS};localStorage.setItem('nq_html_settings',JSON.stringify(settings));openSettings()}
+function openSettings(){document.getElementById('newsMode').value=settings.newsMode;document.getElementById('rssQuery').value=settings.rssQuery;document.getElementById('localPassword').value=settings.localPassword;document.getElementById('refreshInterval').value=settings.refreshInterval;document.getElementById('settingsModal').classList.add('open');}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
+function showToast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.remove('hidden');clearTimeout(window._toast);window._toast=setTimeout(()=>x.classList.add('hidden'),2500)}
+function togglePw(){const p=document.getElementById('password');p.type=p.type==='password'?'text':'password'}
+function login(){document.getElementById('loginPage').classList.add('hidden');document.getElementById('app').classList.remove('hidden');sessionStorage.setItem('nq_logged','1');refreshNow()}
+function logout(){sessionStorage.removeItem('nq_logged');location.reload()}
+document.getElementById('loginForm').addEventListener('submit',e=>{e.preventDefault();const u=document.getElementById('username').value.trim();const p=document.getElementById('password').value;if(u==='admin'&&p===settings.localPassword){login()}else{document.getElementById('loginError').classList.remove('hidden');document.getElementById('loginErrorText').textContent='Invalid username or password';}});
+function cleanText(v){const d=document.createElement('div');d.innerHTML=v||'';return (d.textContent||'').replace(/\s+/g,' ').trim()}
+function signal(s){return s>=40?'BULLISH':s<=-40?'BEARISH':'SIDEWAYS'}
+function clamp(x){return Math.max(-100,Math.min(100,Math.round(x)))}
+function analyze(x){const t=(x.text||'').toLowerCase();let s=0,r=[];if(/yields lower|yield falls|yields fall|dovish|rate cuts|easing/.test(t)){s+=32;r.push('Lower yields/easier policy expectations support growth valuations.')}if(/yields rise|yield higher|hawkish|higher for longer|rate hike/.test(t)){s-=32;r.push('Higher yields/tighter policy expectations pressure growth valuations.')}if(t.includes('inflation')){if(/cool|lower|slows|falls|downside/.test(t)){s+=28;r.push('Cooling inflation can improve Fed-easing expectations.')}if(/hot|higher|rises|sticky|upside/.test(t)){s-=30;r.push('Hot inflation can reduce Fed-easing expectations.')}}if(/war|attack|escalation|conflict|sanction/.test(t)){s-=20;r.push('Geopolitical escalation can trigger risk-off behavior.')}if(/ceasefire|de-escalation|peace deal/.test(t)){s+=16;r.push('De-escalation can reduce immediate risk-off pressure.')}if(/earnings beat|revenue beat|guidance raised/.test(t)){s+=30;r.push('Positive mega-cap earnings/guidance can support Nasdaq.')}if(/earnings miss|revenue miss|guidance cut|guidance lowered/.test(t)){s-=30;r.push('Weak mega-cap earnings/guidance can pressure Nasdaq.')}if(t.includes('fed')||String(x.source||'').toLowerCase()==='federalreserve'){if(/cut|ease|patient|progress/.test(t)){s+=20;r.push('Fed language is relatively supportive.')}if(/tighten|restrictive|hike|hawkish/.test(t)){s-=25;r.push('Fed language is relatively restrictive.')}}s+=Number(x.surprise||0)*20;s=clamp(s*(WEIGHTS[x.source]||1));if(!r.length)r.push('No strong Nasdaq transmission channel detected.');const c=Math.min(97,Math.max(45,55+Math.floor(Math.abs(s)/3)));const risk=Math.abs(s)>=70?'HIGH':Math.abs(s)>=40?'MEDIUM':'LOW';return {score:s,signal:signal(s),confidence:c,risk,reasons:r}}
+function eventImpact(e){const risk=e.impact||'Medium';const c={'Very High':82,'High':72,'Medium':62}[risk]||55;return {score:0,signal:'SIDEWAYS',confidence:c,risk,reasons:[`${risk} scheduled event: ${e.name}.`,'Direction remains neutral until actual-vs-forecast information is available.']}}
+function fmtTime(v){if(!v)return 'Updated just now';const d=new Date(v);return isNaN(d)?v:d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function render(){const scored=newsData.map(x=>({...x,impact:analyze(x)}));const events=eventData.map(x=>({...x,impact:eventImpact(x)}));const vals=scored.map(x=>x.impact.score);const score=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;const sig=signal(score);document.getElementById('newsCount').textContent=scored.length;document.getElementById('eventCount').textContent=events.length;document.getElementById('biasScore').textContent=(score>=0?'+':'')+score;document.getElementById('biasSignal').textContent=sig;document.getElementById('biasCard').className='bias-card bias-'+sig.toLowerCase();document.getElementById('scaleFill').style.width=((score+100)/2)+'%';document.getElementById('scaleFill').style.background=sig==='BULLISH'?'#38e38b':sig==='BEARISH'?'#ff657a':'#e9c85c';document.getElementById('biasSub').textContent=`Aggregated from ${scored.length} news signals + ${events.length} scheduled events`;document.getElementById('updatedText').textContent='Updated '+new Date().toLocaleTimeString();document.getElementById('newsSub').textContent=`${scored.length} item${scored.length===1?'':'s'} · scored by NQ engine`;document.getElementById('eventSub').textContent=`${events.length} scheduled · impact pending actual data`;
+const nf=document.getElementById('newsFeed');nf.innerHTML=scored.length?scored.map(n=>`<div class="feed-item"><div class="feed-top"><div class="feed-source"><div class="source-avatar">${esc((n.source||'?')[0]).toUpperCase()}</div><span class="source-name">@${esc(n.source||'News')}</span>${n.category?`<span class="tag">${esc(n.category)}</span>`:''}</div><div class="impact-chip impact-${n.impact.signal.toLowerCase()}"><span class="impact-score">${n.impact.score>=0?'+':''}${n.impact.score}</span><span class="impact-label">${n.impact.signal}</span></div></div><p class="feed-text">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer" class="feed-link">${esc(n.text)}</a>`:esc(n.text)}</p><div class="feed-meta"><span class="conf-bar-wrap" title="Confidence ${n.impact.confidence}%"><span class="conf-bar" style="width:${n.impact.confidence}%"></span><span class="conf-label">${n.impact.confidence}% conf.</span></span><span class="risk-badge risk-${n.impact.risk.toLowerCase()}">${n.impact.risk} RISK</span></div>${n.impact.reasons.map(r=>`<div class="reason">▸ ${esc(r)}</div>`).join('')}</div>`).join(''):`<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-title">No news loaded</div><div class="empty-sub">Switch to Demo mode or allow RSS network access.</div></div>`;
+const ef=document.getElementById('eventFeed');ef.innerHTML=events.map(e=>`<div class="feed-item event-item"><div class="feed-top"><div class="feed-source"><div class="source-avatar event-avatar">📊</div><div><div class="source-name">${esc(e.name)}</div><div class="event-time">${esc(fmtTime(e.time))}</div></div></div><div class="impact-chip impact-sideways"><span class="impact-label">${esc(e.impact.risk)}</span></div></div><div class="event-details"><div class="event-detail-row"><span class="detail-label">Category</span><span class="detail-val">${esc(e.category)}</span></div><div class="event-detail-row"><span class="detail-label">Forecast</span><span class="detail-val forecast-val">${esc(e.forecast)}</span></div>${e.previous?`<div class="event-detail-row"><span class="detail-label">Previous</span><span class="detail-val">${esc(e.previous)}</span></div>`:''}</div><div class="event-pending">🟡 Direction neutral until actual-vs-forecast data available</div></div>`).join('');}
+async function loadNews(){const badge=document.getElementById('liveBadgeText');badge.textContent='LOADING…';if(settings.newsMode==='demo'){newsData=DEMO_NEWS.map(x=>({...x,time:new Date().toISOString()}));document.getElementById('sourcePill').textContent='Demo data';document.getElementById('sourcePill').className='pill source-demo';badge.textContent='DEMO DATA';render();return}const q=encodeURIComponent(settings.rssQuery);const targets=[`https://api.allorigins.win/raw?url=${encodeURIComponent('https://news.google.com/rss/search?q='+q+'&hl=en-US&gl=US&ceid=US:en')}`,`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://news.google.com/rss/search?q='+q+'&hl=en-US&gl=US&ceid=US:en')}`];let items=[];for(const url of targets){try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)continue;const text=await r.text();if(text.trim().startsWith('{')){const j=JSON.parse(text);items=(j.items||[]).map(i=>({time:i.pubDate,source:(i.author||'Google News').split(' - ')[0]||'Google News',text:cleanText(i.title),category:'News',surprise:0,link:i.link}));}else{const doc=new DOMParser().parseFromString(text,'text/xml');items=[...doc.querySelectorAll('item')].slice(0,20).map(i=>({time:i.querySelector('pubDate')?.textContent||'',source:'Google News',text:cleanText(i.querySelector('title')?.textContent||''),category:'News',surprise:0,link:i.querySelector('link')?.textContent||''}));}if(items.length)break;}catch(e){}}if(!items.length){newsData=DEMO_NEWS.map(x=>({...x,time:new Date().toISOString()}));document.getElementById('sourcePill').textContent='Demo fallback';document.getElementById('sourcePill').className='pill source-demo';badge.textContent='DEMO FALLBACK';showToast('RSS unavailable — showing demo data');}else{newsData=items;document.getElementById('sourcePill').textContent='Live RSS';document.getElementById('sourcePill').className='pill source-live';badge.textContent='LIVE RSS';}render()}
+function loadEvents(){eventData=DEMO_EVENTS.map((e,i)=>({...e,time:new Date(Date.now()+[80,225,1440][i]*60000).toISOString()}));render()}
+function refreshNow(){secs=settings.refreshInterval;loadEvents();loadNews()}
+function tick(){secs--;document.getElementById('countdown').textContent=secs;if(secs<=0){refreshNow()}setTimeout(tick,1000)}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+if(sessionStorage.getItem('nq_logged')==='1')login();
+else{document.getElementById('loginPage').classList.remove('hidden');document.getElementById('app').classList.add('hidden')}
+setTimeout(tick,1000);
+</script>
+</body></html>
