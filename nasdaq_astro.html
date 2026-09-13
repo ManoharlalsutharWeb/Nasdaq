@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NASDAQ Financial Astrology System</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #0f0f1a;
+    --bg3: #141428;
+    --accent: #6c63ff;
+    --gold: #f0b90b;
+    --green: #00d084;
+    --red: #ff4757;
+    --yellow: #ffd32a;
+    --text: #e0e0f0;
+    --muted: #6b6b8a;
+    --border: #1e1e3a;
+  }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; font-size:14px; }
+  .app { max-width:1600px; margin:0 auto; padding:10px; }
+
+  /* HEADER */
+  .header { text-align:center; padding:20px 0 10px; border-bottom:1px solid var(--border); margin-bottom:12px; }
+  .header h1 { font-size:22px; color:var(--gold); letter-spacing:2px; text-transform:uppercase; }
+  .header p { color:var(--muted); font-size:12px; margin-top:4px; }
+  .birth-badge { display:inline-flex; gap:20px; margin-top:8px; background:var(--bg3); padding:6px 20px; border-radius:20px; border:1px solid var(--border); font-size:12px; }
+  .birth-badge span { color:var(--gold); }
+
+  /* GRID */
+  .main-grid { display:grid; grid-template-columns:320px 1fr 280px; gap:10px; }
+  .panel { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px; }
+  .panel-title { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+
+  /* SIGNAL BOX */
+  .signal-box { text-align:center; padding:16px; border-radius:10px; margin-bottom:10px; }
+  .signal-box.bullish { background:linear-gradient(135deg,#003d20,#00d08422); border:2px solid var(--green); }
+  .signal-box.bearish { background:linear-gradient(135deg,#3d0000,#ff475722); border:2px solid var(--red); }
+  .signal-box.neutral { background:linear-gradient(135deg,#1a1a00,#ffd32a22); border:2px solid var(--yellow); }
+  .signal-label { font-size:28px; font-weight:900; letter-spacing:3px; }
+  .signal-box.bullish .signal-label { color:var(--green); }
+  .signal-box.bearish .signal-label { color:var(--red); }
+  .signal-box.neutral .signal-label { color:var(--yellow); }
+  .signal-score { font-size:13px; margin-top:6px; color:var(--muted); }
+  .strength-bar { height:6px; background:var(--bg3); border-radius:3px; margin:8px 0; overflow:hidden; }
+  .strength-fill { height:100%; border-radius:3px; transition:width 1s; }
+
+  /* 3-SESSION VIEW */
+  .sessions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:10px; }
+  .session-card { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:8px; text-align:center; }
+  .session-name { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+  .session-signal { font-size:16px; font-weight:700; margin:4px 0; }
+  .session-time { font-size:10px; color:var(--muted); }
+  .gap-indicator { display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; background:var(--bg3); border-radius:8px; margin-bottom:10px; }
+  .gap-label { font-size:11px; color:var(--muted); }
+  .gap-val { font-size:15px; font-weight:700; }
+  .gap-up { color:var(--green); }
+  .gap-down { color:var(--red); }
+
+  /* KUNDALI */
+  #kundali-svg { width:100%; max-width:300px; display:block; margin:0 auto; }
+  .house-info { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:8px; }
+  .house-pill { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:4px 6px; font-size:11px; }
+  .house-pill .h-num { color:var(--gold); font-weight:700; }
+  .house-pill .h-sign { color:var(--accent); }
+  .house-pill .h-planets { color:var(--green); font-size:10px; }
+
+  /* PLANET TABLE */
+  .planet-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .planet-table th { color:var(--muted); font-size:10px; text-transform:uppercase; padding:4px 6px; text-align:left; border-bottom:1px solid var(--border); }
+  .planet-table td { padding:5px 6px; border-bottom:1px solid #1a1a2e; }
+  .planet-table tr:hover td { background:var(--bg3); }
+  .benefic { color:var(--green); }
+  .malefic { color:var(--red); }
+  .neutral-p { color:var(--yellow); }
+
+  /* TRANSIT TABLE */
+  .transit-row { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+  .transit-row:last-child { border:none; }
+  .t-aspect { width:80px; font-weight:700; font-size:11px; }
+  .t-pos { color:var(--green); }
+  .t-neg { color:var(--red); }
+  .t-score { margin-left:auto; font-weight:700; min-width:30px; text-align:right; }
+
+  /* WEEKLY / MONTHLY */
+  .week-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+  .week-day { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:6px; text-align:center; }
+  .week-day.today { border-color:var(--accent); }
+  .wd-name { font-size:10px; color:var(--muted); }
+  .wd-date { font-size:11px; margin:2px 0; }
+  .wd-signal { font-size:13px; font-weight:700; }
+  .month-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-top:8px; }
+  .month-day { background:var(--bg3); border:1px solid var(--border); border-radius:4px; padding:4px 2px; text-align:center; min-height:42px; }
+  .month-day.today-m { border-color:var(--gold); }
+  .md-num { font-size:10px; color:var(--muted); }
+  .md-sig { font-size:11px; font-weight:700; }
+  .md-score { font-size:9px; color:var(--muted); }
+
+  /* DASHA */
+  .dasha-box { background:var(--bg3); border-radius:8px; padding:10px; margin-bottom:8px; }
+  .dasha-label { font-size:10px; color:var(--muted); text-transform:uppercase; }
+  .dasha-planet { font-size:16px; font-weight:700; color:var(--accent); }
+  .dasha-period { font-size:11px; color:var(--muted); }
+
+  /* BHAVA TABLE */
+  .bhava-table { width:100%; font-size:11px; border-collapse:collapse; }
+  .bhava-table td { padding:4px 6px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .bhava-table .b-num { color:var(--gold); font-weight:700; width:24px; }
+  .bhava-table .b-sign { color:var(--accent); width:60px; }
+  .bhava-table .b-lord { color:var(--yellow); width:50px; }
+  .bhava-table .b-planets { color:var(--green); }
+  .bhava-table .b-effect { color:var(--muted); font-size:10px; }
+
+  /* TABS */
+  .tabs { display:flex; gap:4px; margin-bottom:10px; }
+  .tab { padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; background:var(--bg3); border:1px solid var(--border); color:var(--muted); }
+  .tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  /* VERDICT */
+  .verdict-box { background:linear-gradient(135deg,var(--bg3),#1a0a3a); border:1px solid var(--accent); border-radius:10px; padding:14px; margin-top:10px; }
+  .verdict-title { color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .verdict-text { line-height:1.7; color:var(--text); font-size:12px; }
+
+  /* YOGA BOX */
+  .yoga-item { display:flex; align-items:flex-start; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:11px; }
+  .yoga-name { font-weight:700; color:var(--accent); min-width:100px; }
+  .yoga-effect { color:var(--muted); }
+  .yoga-active { color:var(--green); font-size:10px; }
+
+  /* HORA */
+  .hora-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:3px; }
+  .hora-cell { background:var(--bg3); border:1px solid var(--border); border-radius:4px; padding:4px; text-align:center; font-size:10px; }
+  .hora-cell.sun-hora { border-color:#f0b90b; }
+  .hora-cell.moon-hora { border-color:#8888ff; }
+  .hora-cell .h-time { color:var(--muted); font-size:9px; }
+  .hora-cell .h-lord { font-weight:700; }
+
+  .date-picker { background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:4px 8px; border-radius:6px; font-size:12px; }
+  .btn { background:var(--accent); color:#fff; border:none; padding:5px 14px; border-radius:6px; cursor:pointer; font-size:12px; }
+  .btn:hover { opacity:0.85; }
+  .footer { text-align:center; padding:16px; color:var(--muted); font-size:11px; margin-top:10px; border-top:1px solid var(--border); }
+
+  @media(max-width:1100px) { .main-grid { grid-template-columns:1fr 1fr; } }
+  @media(max-width:700px) { .main-grid { grid-template-columns:1fr; } .sessions { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>&#9737; NASDAQ Financial Astrology System</h1>
+    <p>Vedic Jyotish &bull; 12 Bhava Analysis &bull; Transit &bull; Dasha &bull; Hora &bull; Panchang</p>
+    <div class="birth-badge">
+      <span>NASDAQ Born:</span> Feb 8, 1971 &nbsp;|
+      <span>Time:</span> 10:00 AM EST &nbsp;|
+      <span>Place:</span> New York, USA &nbsp;|
+      <span>Ayanamsha:</span> Lahiri
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <label style="font-size:12px;color:var(--muted);">Analysis Date:</label>
+    <input type="date" id="analysisDate" class="date-picker">
+    <button class="btn" onclick="runAnalysis()">&#9654; Analyze</button>
+    <button class="btn" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);" onclick="setToday()">Today</button>
+  </div>
+
+  <div class="main-grid">
+    <!-- LEFT: Kundali + Houses -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">&#9737; NASDAQ Natal Kundali (Janma Patrika)</div>
+        <svg id="kundali-svg" viewBox="0 0 300 300"></svg>
+        <div style="margin-top:8px;">
+          <div class="panel-title" style="margin-top:8px;">12 Bhava Sthiti</div>
+          <table class="bhava-table" id="bhavaTable"></table>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">&#9654; Active Yogas (Natal + Transit)</div>
+        <div id="yogaList"></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: Main Analysis -->
+    <div>
+      <!-- Signal + Sessions -->
+      <div class="panel">
+        <div class="panel-title">&#9733; Daily Verdict & 3-Session View</div>
+        <div id="signalBox" class="signal-box neutral">
+          <div class="signal-label" id="mainSignal">CALCULATING...</div>
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill" style="width:0%;background:var(--yellow);"></div></div>
+          <div class="signal-score" id="signalScore"></div>
+        </div>
+        <!-- Gap Up/Down -->
+        <div class="gap-indicator">
+          <span class="gap-label">Open Gap Prediction:</span>
+          <span class="gap-val" id="gapPrediction">--</span>
+          <span class="gap-label" style="margin-left:10px;">|</span>
+          <span class="gap-label">Probability:</span>
+          <span class="gap-val" id="gapProb">--%</span>
+        </div>
+        <!-- 3 Sessions -->
+        <div class="sessions">
+          <div class="session-card">
+            <div class="session-name">Pre-Market</div>
+            <div class="session-signal" id="sess1Signal">--</div>
+            <div class="session-time">4:00 AM - 9:30 AM EST</div>
+          </div>
+          <div class="session-card">
+            <div class="session-name">Regular Session</div>
+            <div class="session-signal" id="sess2Signal">--</div>
+            <div class="session-time">9:30 AM - 4:00 PM EST</div>
+          </div>
+          <div class="session-card">
+            <div class="session-name">After Hours</div>
+            <div class="session-signal" id="sess3Signal">--</div>
+            <div class="session-time">4:00 PM - 8:00 PM EST</div>
+          </div>
+        </div>
+        <!-- Verdict -->
+        <div class="verdict-box">
+          <div class="verdict-title">&#9889; Final Astrological Verdict</div>
+          <div class="verdict-text" id="verdictText">Analyzing planetary configurations...</div>
+        </div>
+      </div>
+
+      <!-- Weekly / Monthly -->
+      <div class="panel" style="margin-top:10px;">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('week')">Weekly View</div>
+          <div class="tab" onclick="switchTab('month')">Monthly View</div>
+          <div class="tab" onclick="switchTab('hora')">Hora Chart</div>
+        </div>
+        <div id="weekView">
+          <div class="panel-title">5-Day Forecast (Mon-Fri)</div>
+          <div class="week-grid" id="weekGrid"></div>
+        </div>
+        <div id="monthView" style="display:none;">
+          <div class="panel-title">Monthly Forecast Calendar</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+            <div style="text-align:center;font-size:10px;color:var(--muted);">Mon</div>
+            <div style="text-align:center;font-size:10px;color:var(--muted);">Tue</div>
+            <div style="text-align:center;font-size:10px;color:var(--muted);">Wed</div>
+            <div style="text-align:center;font-size:10px;color:var(--muted);">Thu</div>
+            <div style="text-align:center;font-size:10px;color:var(--muted);">Fri</div>
+            <div style="text-align:center;font-size:10px;color:var(--muted);">Sat</div>
+            <div style="text-align:center;font-size:10px;color:var(--muted);">Sun</div>
+          </div>
+          <div class="month-grid" id="monthGrid"></div>
+        </div>
+        <div id="horaView" style="display:none;">
+          <div class="panel-title">Hora Chart (Today's Planetary Hours)</div>
+          <div class="hora-grid" id="horaGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Planets + Transits + Dasha -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">&#11088; Natal Planets (Janma Grah)</div>
+        <table class="planet-table" id="natalTable">
+          <thead><tr><th>Graha</th><th>Rashi</th><th>Deg</th><th>Bhava</th><th>Status</th></tr></thead>
+          <tbody id="natalBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">&#8651; Current Transits vs Natal</div>
+        <div id="transitList"></div>
+      </div>
+
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">&#9711; Vimshottari Dasha</div>
+        <div class="dasha-box">
+          <div class="dasha-label">Mahadasha</div>
+          <div class="dasha-planet" id="maha">--</div>
+          <div class="dasha-period" id="mahaPeriod"></div>
+        </div>
+        <div class="dasha-box">
+          <div class="dasha-label">Antardasha</div>
+          <div class="dasha-planet" id="antar">--</div>
+          <div class="dasha-period" id="antarPeriod"></div>
+        </div>
+        <div class="dasha-box">
+          <div class="dasha-label">Pratyantardasha</div>
+          <div class="dasha-planet" id="pratyantar">--</div>
+        </div>
+        <div class="verdict-box" style="margin-top:8px;">
+          <div class="verdict-title">Dasha Market Interpretation</div>
+          <div class="verdict-text" id="dashaVerdict"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">&#9679; Panchang</div>
+        <table class="planet-table" id="panchangTable">
+          <tbody id="panchangBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Knowledge belongs to all. Credit: Vedic Astrology &amp; AI &bull; No copyright &bull; Free to use &bull; Open Source
+    <br>Method: Parashari Jyotish &bull; Lahiri Ayanamsha &bull; Vimshottari Dasha &bull; NASDAQ Born: 08-02-1971, 10:00 AM EST, New York
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CORE ASTRONOMICAL ENGINE
+// Jean Meeus "Astronomical Algorithms" based implementations
+// ============================================================
+
+const DEG2RAD = Math.PI / 180;
+const RAD2DEG = 180 / Math.PI;
+
+// Julian Day Number
+function julianDay(year, month, day, hour=0) {
+  if(month <= 2) { year -= 1; month += 12; }
+  const A = Math.floor(year/100);
+  const B = 2 - A + Math.floor(A/4);
+  return Math.floor(365.25*(year+4716)) + Math.floor(30.6001*(month+1)) + day + hour/24 + B - 1524.5;
+}
+
+function jdToDate(jd) {
+  const z = Math.floor(jd + 0.5);
+  const f = jd + 0.5 - z;
+  let A = z;
+  if(z >= 2299161) { const alpha = Math.floor((z-1867216.25)/36524.25); A = z+1+alpha-Math.floor(alpha/4); }
+  const B = A + 1524;
+  const C = Math.floor((B-122.1)/365.25);
+  const D = Math.floor(365.25*C);
+  const E = Math.floor((B-D)/30.6001);
+  const day = B-D-Math.floor(30.6001*E);
+  const month = E < 14 ? E-1 : E-13;
+  const year = month > 2 ? C-4716 : C-4715;
+  const hour = f*24;
+  return {year, month, day, hour};
+}
+
+// Normalize angle to 0-360
+function norm360(a) { return ((a % 360) + 360) % 360; }
+function norm180(a) { a = norm360(a); return a > 180 ? a-360 : a; }
+
+// Lahiri Ayanamsha (approximate)
+function lahiriAyanamsha(jd) {
+  const T = (jd - 2451545.0) / 36525.0;
+  return 23.85844 + 0.013678*T - 0.000030*T*T; // simplified Lahiri
+}
+
+// Sun longitude (ecliptic, tropical)
+function sunLongitude(jd) {
+  const T = (jd - 2451545.0) / 36525.0;
+  const L0 = norm360(280.46646 + 36000.76983*T + 0.0003032*T*T);
+  const M = norm360(357.52911 + 35999.05029*T - 0.0001537*T*T);
+  const Mr = M * DEG2RAD;
+  const C = (1.914602 - 0.004817*T - 0.000014*T*T)*Math.sin(Mr)
+           + (0.019993 - 0.000101*T)*Math.sin(2*Mr)
+           + 0.000289*Math.sin(3*Mr);
+  const sunLon = L0 + C;
+  const omega = 125.04 - 1934.136*T;
+  const apparent = sunLon - 0.00569 - 0.00478*Math.sin(omega*DEG2RAD);
+  return norm360(apparent);
+}
+
+// Moon longitude (simplified)
+function moonLongitude(jd) {
+  const T = (jd - 2451545.0) / 36525.0;
+  const D = norm360(297.85036 + 445267.111480*T - 0.0019142*T*T + T*T*T/189474);
+  const M = norm360(357.52772 + 35999.050340*T - 0.0001603*T*T - T*T*T/300000);
+  const Mp = norm360(134.96298 + 477198.867398*T + 0.0086972*T*T + T*T*T/56250);
+  const F = norm360(93.27191 + 483202.017538*T - 0.0036825*T*T + T*T*T/327270);
+  const Dr=D*DEG2RAD, Mr=M*DEG2RAD, Mpr=Mp*DEG2RAD, Fr=F*DEG2RAD;
+  let L = norm360(218.3165 + 481267.8813*T);
+  L += 6.28875*Math.sin(Mpr) + 1.27402*Math.sin(2*Dr-Mpr) + 0.66008*Math.sin(2*Dr)
+     + 0.21317*Math.sin(2*Mpr) - 0.18590*Math.sin(Mr) - 0.11470*Math.sin(2*Fr)
+     - 0.05592*Math.sin(2*Dr-2*Mpr) + 0.04736*Math.sin(2*Dr+Mpr) - 0.04684*Math.sin(2*Dr-Mr)
+     + 0.03402*Math.sin(2*Dr-Mp-Mr) + 0.02803*Math.sin(2*Dr+Mp) - 0.02699*Math.sin(2*Dr-Mp)
+     + 0.02348*Math.sin(Mp) - 0.02084*Math.sin(2*Dr-2*Mp+Mr);
+  return norm360(L);
+}
+
+// Mercury longitude (simplified VSOP)
+function mercuryLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  const L = 252.250906 + 149472.6746358*T - 0.00000535*T*T;
+  const M = norm360(174.7948 + 4.09233*((jd-2451545)/365.25)*360/0.2408467);
+  const Mr = M*DEG2RAD;
+  const eq = 23.4400*Math.sin(Mr) + 2.9818*Math.sin(2*Mr) + 0.5255*Math.sin(3*Mr) + 0.1058*Math.sin(4*Mr);
+  return norm360(L + eq);
+}
+
+// Venus longitude
+function venusLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  const L = 181.979801 + 58517.8156760*T;
+  const M = norm360(50.4161 + 1.60214*(jd-2451545)/365.25*360/0.6151976);
+  const Mr = M*DEG2RAD;
+  const eq = 0.7758*Math.sin(Mr) + 0.0033*Math.sin(2*Mr);
+  return norm360(L + eq);
+}
+
+// Mars longitude
+function marsLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  const L = 355.433 + 19140.2993313*T;
+  const M = norm360(19.3870 + 0.52402*(jd-2451545)/365.25*360/1.8808476);
+  const Mr = M*DEG2RAD;
+  const eq = 10.6912*Math.sin(Mr) + 0.6228*Math.sin(2*Mr) + 0.0503*Math.sin(3*Mr);
+  return norm360(L + eq);
+}
+
+// Jupiter longitude
+function jupiterLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  const L = 34.351519 + 3034.9056606*T;
+  const M = norm360(20.9 + 0.08309*(jd-2451545)/365.25*360/11.8618);
+  const Mr = M*DEG2RAD;
+  const eq = 5.5549*Math.sin(Mr) + 0.1683*Math.sin(2*Mr);
+  return norm360(L + eq);
+}
+
+// Saturn longitude
+function saturnLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  const L = 50.077444 + 1222.1138488*T;
+  const M = norm360(317.0 + 0.03344*(jd-2451545)/365.25*360/29.4571);
+  const Mr = M*DEG2RAD;
+  const eq = 6.3585*Math.sin(Mr) + 0.2204*Math.sin(2*Mr);
+  return norm360(L + eq);
+}
+
+// Rahu (Mean North Node)
+function rahuLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  return norm360(125.0445479 - 1934.1362608*T + 0.0020762*T*T);
+}
+
+// Uranus longitude (simplified)
+function uranusLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  return norm360(314.055005 + 428.4669983*T);
+}
+
+// Neptune longitude
+function neptuneLongitude(jd) {
+  const T = (jd-2451545)/36525;
+  return norm360(304.348665 + 218.4862002*T);
+}
+
+// Get all planet positions
+function getAllPlanets(jd, ayanamsha) {
+  const p = [
+    { name:'Sun',    sym:'☉', lon: sunLongitude(jd),     nature:'neutral-p' },
+    { name:'Moon',   sym:'☽', lon: moonLongitude(jd),    nature:'benefic'   },
+    { name:'Mercury',sym:'☿', lon: mercuryLongitude(jd), nature:'neutral-p' },
+    { name:'Venus',  sym:'♀', lon: venusLongitude(jd),   nature:'benefic'   },
+    { name:'Mars',   sym:'♂', lon: marsLongitude(jd),    nature:'malefic'   },
+    { name:'Jupiter',sym:'♃', lon: jupiterLongitude(jd), nature:'benefic'   },
+    { name:'Saturn', sym:'♄', lon: saturnLongitude(jd),  nature:'malefic'   },
+    { name:'Rahu',   sym:'☊', lon: rahuLongitude(jd),    nature:'malefic'   },
+    { name:'Ketu',   sym:'☋', lon: norm360(rahuLongitude(jd)+180), nature:'malefic' },
+    { name:'Uranus', sym:'♅', lon: uranusLongitude(jd),  nature:'neutral-p' },
+    { name:'Neptune',sym:'♆', lon: neptuneLongitude(jd), nature:'neutral-p' },
+  ];
+  // Convert to sidereal (Vedic)
+  p.forEach(pl => { pl.siderealLon = norm360(pl.lon - ayanamsha); });
+  p.forEach(pl => {
+    pl.rashi = Math.floor(pl.siderealLon / 30);
+    pl.rashiName = RASHIS[pl.rashi];
+    pl.deg = pl.siderealLon % 30;
+    pl.nakshatra = Math.floor(pl.siderealLon / (360/27));
+    pl.nakshatraName = NAKSHATRAS[pl.nakshatra];
+  });
+  return p;
+}
+
+// Ascendant (Lagna) calculation - simplified
+function calcLagna(jd, lat, lon) {
+  const T = (jd-2451545)/36525;
+  const GMST = 280.46061837 + 360.98564736629*(jd-2451545) + 0.000387933*T*T;
+  const LST = norm360(GMST + lon);
+  // Obliquity
+  const eps = 23.439291111 - 0.013004167*T;
+  const epsr = eps*DEG2RAD;
+  const latr = lat*DEG2RAD;
+  const LSTr = LST*DEG2RAD;
+  // Ascendant
+  let asc = Math.atan2(Math.cos(LSTr), -(Math.sin(LSTr)*Math.cos(epsr) + Math.tan(latr)*Math.sin(epsr)));
+  asc = norm360(asc*RAD2DEG);
+  return asc;
+}
+
+// Whole sign houses from Lagna
+function getHouses(lagnaLon) {
+  const lagnaSign = Math.floor(lagnaLon / 30);
+  const houses = [];
+  for(let i=0; i<12; i++) {
+    houses.push({ house: i+1, sign: (lagnaSign+i)%12, signName: RASHIS[(lagnaSign+i)%12] });
+  }
+  return houses;
+}
+
+// Aspect between two longitudes
+function getAspect(lon1, lon2) {
+  const diff = Math.abs(norm180(lon2-lon1));
+  if(diff <= 8)  return {name:'Conjunction', orb:diff, weight:1.0};
+  if(Math.abs(diff-60) <= 6) return {name:'Sextile', orb:Math.abs(diff-60), weight:0.5};
+  if(Math.abs(diff-90) <= 8) return {name:'Square', orb:Math.abs(diff-90), weight:0.8};
+  if(Math.abs(diff-120) <= 8) return {name:'Trine', orb:Math.abs(diff-120), weight:1.0};
+  if(Math.abs(diff-150) <= 4) return {name:'Quincunx', orb:Math.abs(diff-150), weight:0.3};
+  if(Math.abs(diff-180) <= 8) return {name:'Opposition', orb:Math.abs(diff-180), weight:0.9};
+  return null;
+}
+
+// Impact of transit planet+aspect on market
+function transitImpact(transitPlanet, natalPlanet, aspect) {
+  const planetScores = {
+    'Jupiter': { benefic:5, malefic:-3 },
+    'Venus':   { benefic:4, malefic:-2 },
+    'Moon':    { benefic:2, malefic:-2 },
+    'Mercury': { benefic:2, malefic:-2 },
+    'Sun':     { benefic:2, malefic:-2 },
+    'Mars':    { benefic:2, malefic:-4 },
+    'Saturn':  { benefic:2, malefic:-5 },
+    'Rahu':    { benefic:1, malefic:-4 },
+    'Ketu':    { benefic:1, malefic:-3 },
+    'Uranus':  { benefic:2, malefic:-3 },
+    'Neptune': { benefic:1, malefic:-2 },
+  };
+  const beneficAspects = ['Trine','Sextile'];
+  const maleficAspects = ['Square','Opposition'];
+  const sc = planetScores[transitPlanet] || {benefic:1, malefic:-1};
+  const aw = aspect.weight;
+  let score = 0;
+  if(beneficAspects.includes(aspect.name)) score = sc.benefic * aw;
+  else if(maleficAspects.includes(aspect.name)) score = sc.malefic * aw;
+  else if(aspect.name==='Conjunction') {
+    // conjunction: depends on both planets
+    const malefics = ['Mars','Saturn','Rahu','Ketu'];
+    const benefics = ['Jupiter','Venus','Moon'];
+    if(malefics.includes(transitPlanet) && malefics.includes(natalPlanet)) score = -5;
+    else if(benefics.includes(transitPlanet) && benefics.includes(natalPlanet)) score = 5;
+    else score = malefics.includes(transitPlanet) ? -3 : 2;
+  }
+  return score * aw;
+}
+
+// ============================================================
+// STATIC DATA
+// ============================================================
+const RASHIS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+                'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const RASHI_SYM = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const RASHI_LORD = ['Mars','Venus','Mercury','Moon','Sun','Mercury',
+                    'Venus','Mars','Jupiter','Saturn','Saturn','Jupiter'];
+const NAKSHATRAS = ['Ashwini','Bharani','Krittika','Rohini','Mrigashira','Ardra',
+  'Punarvasu','Pushya','Ashlesha','Magha','Purva Phalguni','Uttara Phalguni',
+  'Hasta','Chitra','Swati','Vishakha','Anuradha','Jyeshtha',
+  'Mula','Purva Ashadha','Uttara Ashadha','Shravana','Dhanishtha','Shatabhisha',
+  'Purva Bhadrapada','Uttara Bhadrapada','Revati'];
+const NAKSHATRA_LORD = ['Ketu','Venus','Sun','Moon','Mars','Rahu','Jupiter','Saturn','Mercury',
+  'Ketu','Venus','Sun','Moon','Mars','Rahu','Jupiter','Saturn','Mercury',
+  'Ketu','Venus','Sun','Moon','Mars','Rahu','Jupiter','Saturn','Mercury'];
+const DASHA_YEARS = {Ketu:7,Venus:20,Sun:6,Moon:10,Mars:7,Rahu:18,Jupiter:16,Saturn:19,Mercury:17};
+const DASHA_ORDER = ['Ketu','Venus','Sun','Moon','Mars','Rahu','Jupiter','Saturn','Mercury'];
+
+const BHAVA_SIGNIF = [
+  'Self, Image, Beginnings — Market Open, Overall Trend',
+  'Wealth, Assets, Revenue — Cash Flow, Earnings',
+  'Communications, Technology — News Impact, Volatility',
+  'Base, Security, Foundation — Support Levels, Stability',
+  'Speculation, Gains, Creativity — Bull Runs, Momentum',
+  'Obstacles, Debt, Disputes — Corrections, Headwinds',
+  'Partnerships, Contracts — M&A, Institutional Moves',
+  'Transformation, Hidden — Systemic Risk, Crashes',
+  'Fortune, Expansion — Long-term Growth, Optimism',
+  'Authority, Career, Status — Regulatory Impact, Leadership',
+  'Gains, Networks, Dreams — Rally Potential, Volume',
+  'Hidden Losses, Endings — Drawdowns, Exits'
+];
+
+const YOGA_RULES = [
+  { name:'Dhana Yoga', condition:(p,h)=>{ const l2=h[1]; const l11=h[10]; return (p.find(x=>x.name===RASHI_LORD[l2.sign])?.rashi===l11.sign)||(p.find(x=>x.name===RASHI_LORD[l11.sign])?.rashi===l2.sign); }, effect:'Strong revenue, market gains — BULLISH', market:4 },
+  { name:'Raj Yoga', condition:(p,h)=>{ const kendra=[0,3,6,9]; const trikona=[0,4,8]; const lords=kendra.map(i=>RASHI_LORD[h[i].sign]); return lords.some(l=>trikona.map(i=>RASHI_LORD[h[i].sign]).includes(l)); }, effect:'Power and authority — Institutional Accumulation', market:3 },
+  { name:'Gajakesari Yoga', condition:(p)=>{ const jup=p.find(x=>x.name==='Jupiter'); const moon=p.find(x=>x.name==='Moon'); if(!jup||!moon) return false; const diff=Math.abs(norm180(jup.siderealLon-moon.siderealLon)); return diff<=30||Math.abs(diff-90)<=10||Math.abs(diff-180)<=10; }, effect:'Wisdom, long-term gains — Strong Jupiter period', market:4 },
+  { name:'Kemadruma Yoga', condition:(p)=>{ const moon=p.find(x=>x.name==='Moon'); if(!moon) return false; const prev2=norm360(moon.siderealLon-60); const next2=norm360(moon.siderealLon+60); return !p.filter(x=>!['Rahu','Ketu','Sun'].includes(x.name)&&x.name!=='Moon').some(x=>Math.abs(norm180(x.siderealLon-moon.siderealLon))<=30); }, effect:'Isolation, sudden falls — BEARISH warning', market:-4 },
+  { name:'Shubha Yoga', condition:(_,__,panchang)=>panchang&&['Siddha','Amrit','Ravi','Shubha','Guru'].includes(panchang.yoga), effect:'Auspicious — Market Favorable', market:3 },
+  { name:'Ashubha Yoga', condition:(_,__,panchang)=>panchang&&['Vishkambha','Vajra','Vyaghata','Parigha','Indra'].includes(panchang.yoga), effect:'Inauspicious — Market Caution', market:-3 },
+  { name:'Grahan Yoga', condition:(p)=>{ const rahu=p.find(x=>x.name==='Rahu'); const sun=p.find(x=>x.name==='Sun'); if(!rahu||!sun) return false; return Math.abs(norm180(rahu.siderealLon-sun.siderealLon))<=15; }, effect:'Eclipse energy — Extreme volatility', market:-3 },
+  { name:'Budh-Aditya Yoga', condition:(p)=>{ const mer=p.find(x=>x.name==='Mercury'); const sun=p.find(x=>x.name==='Sun'); if(!mer||!sun) return false; return Math.abs(norm180(mer.siderealLon-sun.siderealLon))<=12; }, effect:'Intellect+Communication — Tech sector strong', market:2 },
+];
+
+// NASDAQ Birth: Feb 8 1971 10:00 AM EST = Feb 8 1971 15:00 UTC
+const NASDAQ_JD = julianDay(1971, 2, 8, 15); // UTC
+const NASDAQ_LAT = 40.714;
+const NASDAQ_LON = -74.006;
+
+// ============================================================
+// VIMSHOTTARI DASHA
+// ============================================================
+function calcDasha(moonLonSidereal, fromJD) {
+  const nak = Math.floor(moonLonSidereal / (360/27));
+  const lord = NAKSHATRA_LORD[nak];
+  const fraction = (moonLonSidereal % (360/27)) / (360/27);
+  const lordIdx = DASHA_ORDER.indexOf(lord);
+  const yearsFraction = DASHA_YEARS[lord] * fraction;
+  // Start of current maha dasha
+  let totalYears = 0;
+  for(let i=0; i<9; i++) {
+    const idx = (lordIdx+i)%9;
+    const pl = DASHA_ORDER[idx];
+    const yrs = DASHA_YEARS[pl];
+    const startJD = NASDAQ_JD - (yearsFraction*365.25) + totalYears*365.25;
+    const endJD = startJD + yrs*365.25;
+    if(fromJD >= startJD && fromJD < endJD) {
+      // Found maha dasha. Now antardasha.
+      const elapsed = fromJD - startJD;
+      let antarTotal = 0;
+      for(let j=0; j<9; j++) {
+        const aidx=(idx+j)%9; const apl=DASHA_ORDER[aidx];
+        const ayrs = yrs*(DASHA_YEARS[apl]/120);
+        const aend = antarTotal + ayrs*365.25;
+        if(elapsed >= antarTotal && elapsed < aend) {
+          // Pratyantar
+          const aelapsed = elapsed - antarTotal;
+          let pratTotal = 0;
+          for(let k=0; k<9; k++) {
+            const pidx=(aidx+k)%9; const ppl=DASHA_ORDER[pidx];
+            const pyrs = ayrs*(DASHA_YEARS[ppl]/120);
+            const pend = pratTotal + pyrs*365.25;
+            if(aelapsed >= pratTotal && aelapsed < pend) {
+              return {
+                maha: pl, mahaStart: new Date((startJD-2440587.5)*86400000), mahaEnd: new Date((endJD-2440587.5)*86400000),
+                antar: apl, antarStart: new Date((startJD+antarTotal/365.25*365.25-2440587.5)*86400000),
+                pratyantar: ppl
+              };
+            }
+            pratTotal = pend;
+          }
+        }
+        antarTotal = aend;
+      }
+    }
+    totalYears += yrs;
+    if(totalYears > 120) totalYears -= 120;
+  }
+  return { maha: lord, antar: lord, pratyantar: lord };
+}
+
+// ============================================================
+// PANCHANG
+// ============================================================
+function calcPanchang(jd) {
+  const sunLon = sunLongitude(jd);
+  const moonLon = moonLongitude(jd);
+  const ayan = lahiriAyanamsha(jd);
+  const sunSid = norm360(sunLon - ayan);
+  const moonSid = norm360(moonLon - ayan);
+
+  // Tithi
+  const lunarLon = norm360(moonLon - sunLon);
+  const tithi = Math.floor(lunarLon/12) + 1;
+  const TITHIS = ['Pratipada','Dwitiya','Tritiya','Chaturthi','Panchami','Shashthi','Saptami','Ashtami','Navami','Dashami','Ekadashi','Dwadashi','Trayodashi','Chaturdashi','Purnima/Amavasya'];
+  const tithiName = TITHIS[(tithi-1)%15];
+  const paksha = lunarLon < 180 ? 'Shukla' : 'Krishna';
+
+  // Nakshatra
+  const nak = Math.floor(moonSid/(360/27));
+  const nakName = NAKSHATRAS[nak];
+
+  // Yoga
+  const yogaLon = norm360(sunSid + moonSid);
+  const yogaIdx = Math.floor(yogaLon/(360/27));
+  const YOGAS = ['Vishkambha','Priti','Ayushman','Saubhagya','Shobhana','Atiganda','Sukarma','Dhriti','Shula','Ganda','Vriddhi','Dhruva','Vyaghata','Harshana','Vajra','Siddhi','Vyatipata','Variyan','Parigha','Shiva','Siddha','Sadhya','Shubha','Shukla','Brahma','Indra','Vaidhriti'];
+  const yogaName = YOGAS[yogaIdx % 27];
+
+  // Karana
+  const karanaIdx = Math.floor(lunarLon/6);
+  const KARANAS = ['Bava','Balava','Kaulava','Taitila','Garaja','Vanija','Vishti','Shakuni','Chatushpada','Naga'];
+  const karanaName = KARANAS[karanaIdx % 11];
+
+  // Var (weekday)
+  const VARS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const varName = VARS[Math.floor(jd + 1.5) % 7];
+
+  // Panchang signal
+  const badNaks = ['Ashlesha','Jyeshtha','Mula','Vishakha','Ardra'];
+  const goodNaks = ['Pushya','Rohini','Hasta','Revati','Anuradha','Swati'];
+  const badYogas = ['Vishkambha','Vajra','Vyaghata','Parigha','Indra','Atiganda','Shula','Vaidhriti'];
+  const goodYogas = ['Siddhi','Priti','Shubha','Siddha','Amrit','Sadhya','Dhruva'];
+  const badKarana = ['Vishti'];
+  let pScore = 0;
+  if(badNaks.includes(nakName)) pScore -= 3;
+  if(goodNaks.includes(nakName)) pScore += 3;
+  if(badYogas.includes(yogaName)) pScore -= 2;
+  if(goodYogas.includes(yogaName)) pScore += 2;
+  if(badKarana.includes(karanaName)) pScore -= 2;
+  if(paksha === 'Shukla') pScore += 1;
+  else pScore -= 1;
+  if([8,14,15].includes(tithi%15||15)) pScore -= 2; // Ashtami, Chaturdashi, Amavasya/Purnima
+
+  return { tithi:tithi+'('+paksha+') '+tithiName, nakshatra:nakName, yoga:yogaName, karana:karanaName, var:varName, score:pScore, paksha, tithiNum:tithi };
+}
+
+// ============================================================
+// HORA (Planetary Hours)
+// ============================================================
+function calcHora(jd, lat, lon) {
+  // Sunrise approx for New York
+  const dateObj = jdToDate(jd);
+  const localJD = jd + lon/360; // rough local noon
+  // Use 6 AM EST = 11 UTC as sunrise approx
+  const sunriseUTC = Math.floor(jd) + 0.5 + (11/24);
+  const dayLength = 0.5; // ~12 hours day
+  const HORA_LORDS_SUN = ['Sun','Venus','Mercury','Moon','Saturn','Jupiter','Mars'];
+  const weekday = Math.floor(jd + 1.5) % 7; // 0=Sun
+  const DAY_LORDS = ['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'];
+  const dayLord = DAY_LORDS[weekday];
+  const startIdx = HORA_LORDS_SUN.indexOf(dayLord);
+  const hours = [];
+  for(let h=0; h<24; h++) {
+    const lordIdx = (startIdx + h) % 7;
+    const lord = HORA_LORDS_SUN[lordIdx];
+    const startH = 6 + h; // approx EST
+    const endH = startH + 1;
+    const benefic = ['Sun','Venus','Jupiter','Moon'].includes(lord);
+    hours.push({ lord, startH: startH%24, endH: endH%24, benefic });
+  }
+  return hours.slice(0, 18); // Show 6AM - 11PM
+}
+
+// ============================================================
+// DASHA MARKET INTERPRETATION
+// ============================================================
+function dashaMarketInterpret(maha, antar) {
+  const interpretations = {
+    'Jupiter': { market:5, desc:'Jupiter Mahadasha: Expansion, optimism, institutional buying. Long-term bull trend favorable.' },
+    'Venus':   { market:4, desc:'Venus Mahadasha: Consumer, luxury, tech accumulation. Market pleasures but watch overvaluation.' },
+    'Mercury': { market:3, desc:'Mercury Mahadasha: Communication, tech volatility, rapid moves. Day trading opportunities.' },
+    'Moon':    { market:2, desc:'Moon Mahadasha: Emotional swings, public sentiment drives. Monthly cycles important.' },
+    'Sun':     { market:2, desc:'Sun Mahadasha: Authority focus, blue-chip strength. Government/regulatory themes.' },
+    'Mars':    { market:-2, desc:'Mars Mahadasha: Aggressive moves, sudden spikes and falls. High volatility. Energy/defense sectors.' },
+    'Saturn':  { market:-3, desc:'Saturn Mahadasha: Structural corrections, slow bear phases, consolidation. Long-term caution.' },
+    'Rahu':    { market:-2, desc:'Rahu Mahadasha: Illusion, speculation, sudden crashes and irrational exuberance. Extreme swings.' },
+    'Ketu':    { market:-3, desc:'Ketu Mahadasha: Sudden losses, market confusion, spiritualization. Avoid leverage.' },
+  };
+  const m = interpretations[maha] || {market:0, desc:'Neutral period.'};
+  const a = interpretations[antar] || {market:0, desc:''};
+  return { score: m.market + (a.market*0.4), desc: m.desc + ' | Antardasha '+antar+': '+a.desc.split(':')[1] };
+}
+
+// ============================================================
+// MAIN ANALYSIS ENGINE
+// ============================================================
+let NATAL_PLANETS = null;
+let NATAL_LAGNA = null;
+let NATAL_HOUSES = null;
+let NATAL_AYAN = null;
+
+function initNatal() {
+  NATAL_AYAN = lahiriAyanamsha(NASDAQ_JD);
+  NATAL_PLANETS = getAllPlanets(NASDAQ_JD, NATAL_AYAN);
+  const lagnaT = calcLagna(NASDAQ_JD, NASDAQ_LAT, NASDAQ_LON);
+  NATAL_LAGNA = norm360(lagnaT - NATAL_AYAN);
+  NATAL_HOUSES = getHouses(NATAL_LAGNA);
+}
+
+function analyzeDay(targetDate) {
+  if(!NATAL_PLANETS) initNatal();
+  
+  const [y,m,d] = targetDate.split('-').map(Number);
+  const targetJD = julianDay(y, m, d, 15); // Noon UTC
+  const targetAyan = lahiriAyanamsha(targetJD);
+  const transitPlanets = getAllPlanets(targetJD, targetAyan);
+  const panchang = calcPanchang(targetJD);
+  
+  // Assign planets to houses
+  NATAL_PLANETS.forEach(p => {
+    const houseIdx = NATAL_HOUSES.findIndex(h => h.sign === p.rashi);
+    p.house = houseIdx + 1;
+  });
+  transitPlanets.forEach(p => {
+    const houseIdx = NATAL_HOUSES.findIndex(h => h.sign === p.rashi);
+    p.transitHouse = houseIdx + 1;
+  });
+
+  // Calculate transit aspects to natal
+  const transits = [];
+  transitPlanets.forEach(tp => {
+    NATAL_PLANETS.forEach(np => {
+      const aspect = getAspect(tp.siderealLon, np.siderealLon);
+      if(aspect) {
+        const score = transitImpact(tp.name, np.name, aspect);
+        transits.push({
+          from: tp.name, to: np.name,
+          aspect: aspect.name, orb: aspect.orb.toFixed(1),
+          score: score,
+          positive: score > 0
+        });
+      }
+    });
+  });
+
+  // Total transit score
+  const transitScore = transits.reduce((s,t) => s+t.score, 0);
+  
+  // Panchang score
+  const panScore = panchang.score;
+  
+  // Dasha
+  const natalMoon = NATAL_PLANETS.find(p=>p.name==='Moon');
+  const dasha = calcDasha(natalMoon.siderealLon, targetJD);
+  const dashaInterp = dashaMarketInterpret(dasha.maha, dasha.antar);
+  
+  // Yogas
+  const activeYogas = YOGA_RULES.filter(y => y.condition(transitPlanets, NATAL_HOUSES, panchang));
+  const yogaScore = activeYogas.reduce((s,y) => s+y.market, 0);
+
+  // Final score
+  const rawScore = transitScore*2 + panScore*5 + dashaInterp.score*3 + yogaScore*4;
+  const finalScore = Math.max(-100, Math.min(100, rawScore));
+  
+  // Session analysis (Moon speed and hora)
+  const hora = calcHora(targetJD, NASDAQ_LAT, NASDAQ_LON);
+  const moonNow = transitPlanets.find(p=>p.name==='Moon');
+  
+  // Pre-market (4-9:30 AM): hora 4-9
+  const preHoras = hora.slice(0, 6);
+  const preScore = preHoras.reduce((s,h) => s + (['Jupiter','Venus','Sun'].includes(h.lord)?2:-1), 0);
+  
+  // Regular (9:30AM-4PM): hora 9-16
+  const regHoras = hora.slice(5, 12);
+  const regScore = regHoras.reduce((s,h) => s + (['Jupiter','Venus','Sun','Moon'].includes(h.lord)?2:-2), 0);
+  
+  // After hours (4-8PM): hora 16-20
+  const aftHoras = hora.slice(12, 16);
+  const aftScore = aftHoras.reduce((s,h) => s + (['Jupiter','Venus'].includes(h.lord)?2:-1), 0);
+
+  // Gap prediction
+  const prevJD = targetJD - 1;
+  const prevMoon = getAllPlanets(prevJD, lahiriAyanamsha(prevJD)).find(p=>p.name==='Moon');
+  const moonMovement = norm180(moonNow.siderealLon - prevMoon.siderealLon);
+  const gapScore = finalScore + moonMovement*0.5;
+  
+  return {
+    finalScore, transitScore, panScore, yogaScore,
+    transits, panchang, dasha, dashaInterp,
+    transitPlanets, activeYogas,
+    sessions: { pre: preScore, reg: regScore, aft: aftScore },
+    gapScore, hora
+  };
+}
+
+function scoreToSignal(score) {
+  if(score > 15) return {label:'BULLISH', cls:'bullish', color:'var(--green)'};
+  if(score < -15) return {label:'BEARISH', cls:'bearish', color:'var(--red)'};
+  return {label:'NEUTRAL', cls:'neutral', color:'var(--yellow)'};
+}
+
+// ============================================================
+// DRAW KUNDALI SVG (North Indian Style)
+// ============================================================
+function drawKundali(planets, lagna, houses) {
+  const svg = document.getElementById('kundali-svg');
+  const W = 300, H = 300, C = 150;
+  
+  const lagnaSign = Math.floor(lagna / 30);
+  
+  // North Indian house boxes layout (12 houses)
+  const boxes = [
+    {x:100,y:0,w:100,h:75},   // House 12
+    {x:200,y:0,w:100,h:75},   // House 1
+    {x:225,y:75,w:75,h:75},   // House 2
+    {x:200,y:150,w:100,h:75}, // House 3
+    {x:100,y:150,w:100,h:75}, // House 4
+    {x:0,y:150,w:100,h:75},   // House 5
+    {x:0,y:75,w:75,h:75},     // House 6
+    {x:0,y:0,w:100,h:75},     // House 7
+    {x:0,y:75,w:75,h:75},     // House 8 - overlap handled below
+    {x:100,y:75,w:100,h:75},  // Center area
+    {x:200,y:75,w:25,h:75},   // Thin
+    {x:100,y:75,w:100,h:75},  // Center
+  ];
+
+  // Simplified: draw diamond kundali
+  let html = `<rect width="300" height="300" fill="#0f0f1a" rx="8"/>`;
+  html += `<line x1="150" y1="0" x2="0" y2="150" stroke="#1e1e3a" stroke-width="1"/>`;
+  html += `<line x1="150" y1="0" x2="300" y2="150" stroke="#1e1e3a" stroke-width="1"/>`;
+  html += `<line x1="0" y1="150" x2="150" y2="300" stroke="#1e1e3a" stroke-width="1"/>`;
+  html += `<line x1="300" y1="150" x2="150" y2="300" stroke="#1e1e3a" stroke-width="1"/>`;
+  html += `<rect x="0" y="0" width="300" height="300" fill="none" stroke="#1e1e3a" stroke-width="1"/>`;
+  html += `<line x1="0" y1="0" x2="150" y2="150" stroke="#1e1e3a" stroke-width="0.5"/>`;
+  html += `<line x1="300" y1="0" x2="150" y2="150" stroke="#1e1e3a" stroke-width="0.5"/>`;
+  html += `<line x1="0" y1="300" x2="150" y2="150" stroke="#1e1e3a" stroke-width="0.5"/>`;
+  html += `<line x1="300" y1="300" x2="150" y2="150" stroke="#1e1e3a" stroke-width="0.5"/>`;
+
+  // House positions (center of each triangle/box)
+  const housePos = [
+    {x:225,y:50},  // H1 - Lagna (top right)
+    {x:260,y:120}, // H2
+    {x:225,y:200}, // H3
+    {x:150,y:250}, // H4
+    {x:75,y:200},  // H5
+    {x:40,y:120},  // H6
+    {x:75,y:50},   // H7
+    {x:150,y:30},  // H8... wait, let me do proper North Indian
+  ];
+
+  // Correct North Indian Kundali positions
+  const NI_POS = [
+    {x:225,y:38},  // H1 top-right triangle
+    {x:265,y:150}, // H2 right
+    {x:225,y:262}, // H3 bottom-right
+    {x:150,y:262}, // H4 bottom-center... 
+  ];
+
+  // Let's use a simpler but correct layout
+  // 12 houses: top row: 12,1,2 | middle: 11,center,3 | bottom: 10,4,... etc
+  // For display, show house number and planets as text in regions
+  const regions = [
+    {hNum:12, cx:75,  cy:38,  sign:(lagnaSign+11)%12},
+    {hNum:1,  cx:150, cy:38,  sign:lagnaSign,         lagna:true},
+    {hNum:2,  cx:225, cy:38,  sign:(lagnaSign+1)%12},
+    {hNum:11, cx:38,  cy:150, sign:(lagnaSign+10)%12},
+    {hNum:3,  cx:262, cy:150, sign:(lagnaSign+2)%12},
+    {hNum:10, cx:75,  cy:262, sign:(lagnaSign+9)%12},
+    {hNum:4,  cx:150, cy:262, sign:(lagnaSign+3)%12},
+    {hNum:5,  cx:225, cy:262, sign:(lagnaSign+4)%12},
+    {hNum:9,  cx:38,  cy:262, sign:(lagnaSign+8)%12},
+    {hNum:8,  cx:38,  cy:38,  sign:(lagnaSign+7)%12},
+    {hNum:7,  cx:262, cy:38,  sign:(lagnaSign+6)%12},
+    {hNum:6,  cx:262, cy:262, sign:(lagnaSign+5)%12},
+  ];
+
+  // Build planet map by house
+  const housePlanets = {};
+  planets.forEach(p => {
+    const h = p.house || 1;
+    if(!housePlanets[h]) housePlanets[h] = [];
+    housePlanets[h].push(p.name.substring(0,2));
+  });
+
+  regions.forEach(r => {
+    const isLagna = r.lagna;
+    const pList = housePlanets[r.hNum]||[];
+    const signSym = RASHI_SYM[r.sign];
+
+    if(isLagna) {
+      html += `<text x="${r.cx}" y="${r.cy-12}" text-anchor="middle" fill="#f0b90b" font-size="9" font-weight="bold">ASC/${RASHIS[r.sign].substring(0,3)}</text>`;
+    }
+    html += `<text x="${r.cx}" y="${r.cy+2}" text-anchor="middle" fill="${isLagna?'#6c63ff':'#4a4a6a'}" font-size="10" font-weight="bold">${r.hNum}</text>`;
+    html += `<text x="${r.cx}" y="${r.cy+14}" text-anchor="middle" fill="#555580" font-size="9">${signSym}</text>`;
+    if(pList.length > 0) {
+      html += `<text x="${r.cx}" y="${r.cy+26}" text-anchor="middle" fill="#00d084" font-size="8">${pList.join(',')}</text>`;
+    }
+  });
+
+  // Center text
+  html += `<text x="150" y="140" text-anchor="middle" fill="#f0b90b" font-size="9" font-weight="bold">NASDAQ</text>`;
+  html += `<text x="150" y="152" text-anchor="middle" fill="#6b6b8a" font-size="8">08-02-1971</text>`;
+  html += `<text x="150" y="164" text-anchor="middle" fill="#6b6b8a" font-size="8">10:00 AM EST</text>`;
+
+  svg.innerHTML = html;
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+function renderNatalTable(planets) {
+  const tbody = document.getElementById('natalBody');
+  tbody.innerHTML = planets.map(p => `
+    <tr>
+      <td>${p.sym} ${p.name}</td>
+      <td class="${p.nature}">${p.rashiName.substring(0,4)}</td>
+      <td>${p.deg.toFixed(1)}°</td>
+      <td>${p.house||'?'}</td>
+      <td class="${p.nature}" style="font-size:10px;">${p.nature==='benefic'?'Benefic':p.nature==='malefic'?'Malefic':'Neutral'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderBhavaTable(houses, planets) {
+  const tbody = document.getElementById('bhavaTable');
+  tbody.innerHTML = houses.map((h,i) => {
+    const hPlanets = planets.filter(p => p.house === h.house);
+    return `
+      <tr>
+        <td class="b-num">${h.house}</td>
+        <td class="b-sign">${h.signName.substring(0,4)}</td>
+        <td class="b-lord" style="font-size:10px;">${RASHI_LORD[h.sign].substring(0,3)}</td>
+        <td class="b-planets">${hPlanets.map(p=>p.sym).join(' ')}</td>
+        <td class="b-effect">${BHAVA_SIGNIF[i].split('—')[0].trim()}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderSignal(data) {
+  const sig = scoreToSignal(data.finalScore);
+  const box = document.getElementById('signalBox');
+  box.className = 'signal-box ' + sig.cls;
+  document.getElementById('mainSignal').textContent = sig.label;
+  const absScore = Math.abs(data.finalScore);
+  const fill = document.getElementById('strengthFill');
+  fill.style.width = absScore + '%';
+  fill.style.background = sig.color;
+  document.getElementById('signalScore').textContent =
+    `Score: ${data.finalScore.toFixed(1)} | Transit: ${data.transitScore.toFixed(1)} | Panchang: ${data.panScore} | Yoga: ${data.yogaScore}`;
+
+  // Gap
+  const gapUp = data.gapScore > 5;
+  const gapDown = data.gapScore < -5;
+  const gapEl = document.getElementById('gapPrediction');
+  const gapProb = document.getElementById('gapProb');
+  if(gapUp) { gapEl.textContent = '▲ GAP UP'; gapEl.className = 'gap-val gap-up'; gapProb.textContent = Math.min(90,55+data.finalScore/3).toFixed(0)+'%'; }
+  else if(gapDown) { gapEl.textContent = '▼ GAP DOWN'; gapEl.className = 'gap-val gap-down'; gapProb.textContent = Math.min(90,55-data.finalScore/3).toFixed(0)+'%'; }
+  else { gapEl.textContent = '→ FLAT'; gapEl.className = 'gap-val'; gapProb.textContent = '60%'; }
+
+  // Sessions
+  const s1 = scoreToSignal(data.sessions.pre*5);
+  const s2 = scoreToSignal(data.sessions.reg*5);
+  const s3 = scoreToSignal(data.sessions.aft*5);
+  document.getElementById('sess1Signal').textContent = s1.label;
+  document.getElementById('sess1Signal').style.color = s1.color;
+  document.getElementById('sess2Signal').textContent = s2.label;
+  document.getElementById('sess2Signal').style.color = s2.color;
+  document.getElementById('sess3Signal').textContent = s3.label;
+  document.getElementById('sess3Signal').style.color = s3.color;
+}
+
+function renderTransits(transits) {
+  const sorted = [...transits].sort((a,b) => Math.abs(b.score)-Math.abs(a.score)).slice(0,12);
+  document.getElementById('transitList').innerHTML = sorted.map(t => {
+    const cls = t.score > 0 ? 't-pos' : 't-neg';
+    const arrow = t.score > 0 ? '▲' : '▼';
+    return `
+      <div class="transit-row">
+        <span style="font-size:11px;color:var(--accent);min-width:55px;">${t.from}</span>
+        <span class="t-aspect" style="color:var(--muted);">${t.aspect}</span>
+        <span style="font-size:11px;min-width:55px;">N.${t.to}</span>
+        <span style="font-size:10px;color:var(--muted);">${t.orb}°</span>
+        <span class="t-score ${cls}">${arrow}${Math.abs(t.score).toFixed(1)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDasha(dasha, dashaInterp) {
+  document.getElementById('maha').textContent = dasha.maha;
+  document.getElementById('mahaPeriod').textContent = dasha.mahaStart ? `${dasha.mahaStart.getFullYear()} – ${dasha.mahaEnd?.getFullYear()}` : '';
+  document.getElementById('antar').textContent = dasha.antar;
+  document.getElementById('antarPeriod').textContent = '';
+  document.getElementById('pratyantar').textContent = dasha.pratyantar;
+  document.getElementById('dashaVerdict').textContent = dashaInterp.desc;
+}
+
+function renderPanchang(panchang) {
+  const rows = [
+    ['Var (Day)', panchang.var],
+    ['Tithi', panchang.tithi],
+    ['Nakshatra', panchang.nakshatra],
+    ['Yoga', panchang.yoga],
+    ['Karana', panchang.karana],
+    ['Panchang Score', panchang.score > 0 ? '▲ Favorable(+'+panchang.score+')' : panchang.score < 0 ? '▼ Unfavorable('+panchang.score+')' : '→ Neutral'],
+  ];
+  document.getElementById('panchangBody').innerHTML = rows.map(([k,v]) => `
+    <tr><td style="color:var(--muted);font-size:10px;">${k}</td><td style="color:var(--text);">${v}</td></tr>
+  `).join('');
+}
+
+function renderYogas(yogas, allRules, transitPlanets) {
+  if(yogas.length === 0) {
+    document.getElementById('yogaList').innerHTML = '<div style="color:var(--muted);font-size:11px;padding:8px;">No major yogas active today.</div>';
+    return;
+  }
+  document.getElementById('yogaList').innerHTML = yogas.map(y => `
+    <div class="yoga-item">
+      <span class="yoga-name">${y.name}</span>
+      <span class="yoga-effect">${y.effect}</span>
+      <span class="yoga-active">${y.market > 0 ? '▲ +'+y.market : '▼ '+y.market}</span>
+    </div>
+  `).join('');
+}
+
+function renderVerdict(data, dateStr) {
+  const sig = scoreToSignal(data.finalScore);
+  const { panchang, dasha, activeYogas } = data;
+  const yogaText = activeYogas.length > 0 ? activeYogas.map(y=>y.name).join(', ') : 'None';
+  
+  const goodTransits = data.transits.filter(t=>t.score>1).slice(0,2);
+  const badTransits = data.transits.filter(t=>t.score<-1).slice(0,2);
+
+  document.getElementById('verdictText').innerHTML = `
+    <strong style="color:${sig.color}">${sig.label} | Score: ${data.finalScore.toFixed(0)}</strong><br>
+    <strong>Dasha:</strong> ${dasha.maha} – ${dasha.antar} – ${dasha.pratyantar} 
+    (${data.dashaInterp.score>0?'Favorable':'Unfavorable'} for market)<br>
+    <strong>Key Transits:</strong> ${goodTransits.map(t=>t.from+' '+t.aspect+' N.'+t.to).join(' | ')||'None positive'} ${badTransits.map(t=>'⚠ '+t.from+' '+t.aspect+' N.'+t.to).join(' | ')}<br>
+    <strong>Panchang:</strong> ${panchang.nakshatra} Nakshatra, ${panchang.tithi.split('(')[0]}Tithi (${panchang.score>=0?'Favorable':'Unfavorable'})<br>
+    <strong>Active Yogas:</strong> ${yogaText}<br>
+    <strong>Open Gap:</strong> ${document.getElementById('gapPrediction').textContent} (${document.getElementById('gapProb').textContent} probability)
+  `;
+}
+
+function renderWeekly(baseDate) {
+  const [y,m,d] = baseDate.split('-').map(Number);
+  const base = new Date(y,m-1,d);
+  // Find Monday of current week
+  const dayOfWeek = base.getDay();
+  const monday = new Date(base);
+  monday.setDate(base.getDate() - (dayOfWeek===0?6:dayOfWeek-1));
+  
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri'];
+  const today = baseDate;
+  
+  for(let i=0; i<5; i++) {
+    const d2 = new Date(monday);
+    d2.setDate(monday.getDate() + i);
+    const ds = d2.toISOString().split('T')[0];
+    const data = analyzeDay(ds);
+    const sig = scoreToSignal(data.finalScore);
+    const isToday = ds === today;
+    grid.innerHTML += `
+      <div class="week-day ${isToday?'today':''}">
+        <div class="wd-name">${DAYS[i]}</div>
+        <div class="wd-date" style="font-size:10px;">${d2.getDate()}/${d2.getMonth()+1}</div>
+        <div class="wd-signal" style="color:${sig.color};">${sig.label}</div>
+        <div style="font-size:9px;color:var(--muted);">${data.finalScore.toFixed(0)}</div>
+        <div style="font-size:9px;color:var(--muted);">${data.panchang.nakshatra.substring(0,5)}</div>
+      </div>
+    `;
+  }
+}
+
+function renderMonthly(baseDate) {
+  const [y,m,d] = baseDate.split('-').map(Number);
+  const firstDay = new Date(y,m-1,1);
+  const lastDay = new Date(y,m,0).getDate();
+  const grid = document.getElementById('monthGrid');
+  grid.innerHTML = '';
+  // Pad start
+  let startDow = firstDay.getDay(); // 0=Sun
+  startDow = startDow === 0 ? 6 : startDow-1; // Make Mon=0
+  for(let i=0;i<startDow;i++) grid.innerHTML += '<div></div>';
+  
+  for(let day=1; day<=lastDay; day++) {
+    const ds = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const data = analyzeDay(ds);
+    const sig = scoreToSignal(data.finalScore);
+    const isToday = ds === baseDate;
+    const dow = new Date(y,m-1,day).getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    grid.innerHTML += `
+      <div class="month-day ${isToday?'today-m':''}" style="${isWeekend?'opacity:0.4;':''}"
+           title="${ds}: ${sig.label} (${data.finalScore.toFixed(0)}) | ${data.panchang.nakshatra}">
+        <div class="md-num">${day}</div>
+        <div class="md-sig" style="color:${sig.color};">${sig.label.substring(0,4)}</div>
+        <div class="md-score">${data.finalScore.toFixed(0)}</div>
+      </div>
+    `;
+  }
+}
+
+function renderHora(hora) {
+  const now = new Date();
+  const nowH = now.getHours();
+  document.getElementById('horaGrid').innerHTML = hora.map((h,i) => {
+    const isNow = h.startH <= nowH && nowH < h.endH;
+    const isBenefic = ['Sun','Jupiter','Venus','Moon'].includes(h.lord);
+    return `
+      <div class="hora-cell ${h.lord==='Sun'?'sun-hora':h.lord==='Moon'?'moon-hora':''}" 
+           style="${isNow?'border-color:var(--accent);background:var(--bg2);':''}">
+        <div class="h-time">${String(h.startH).padStart(2,'0')}:00</div>
+        <div class="h-lord" style="color:${isBenefic?'var(--green)':'var(--red)'}">${h.lord.substring(0,3)}</div>
+        <div style="font-size:8px;color:var(--muted);">${isBenefic?'▲':'▼'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// MAIN
+// ============================================================
+let currentTab = 'week';
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['week','month','hora'][i]===tab);
+  });
+  document.getElementById('weekView').style.display = tab==='week'?'':'none';
+  document.getElementById('monthView').style.display = tab==='month'?'':'none';
+  document.getElementById('horaView').style.display = tab==='hora'?'':'none';
+}
+
+function setToday() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('analysisDate').value = today;
+  runAnalysis();
+}
+
+function runAnalysis() {
+  const dateStr = document.getElementById('analysisDate').value;
+  if(!dateStr) return;
+  
+  if(!NATAL_PLANETS) initNatal();
+  
+  // Assign natal planet houses
+  NATAL_PLANETS.forEach(p => {
+    const h = NATAL_HOUSES.findIndex(h2 => h2.sign === p.rashi);
+    p.house = h + 1;
+  });
+
+  const data = analyzeDay(dateStr);
+  
+  // Render all
+  drawKundali(NATAL_PLANETS, NATAL_LAGNA, NATAL_HOUSES);
+  renderNatalTable(NATAL_PLANETS);
+  renderBhavaTable(NATAL_HOUSES, NATAL_PLANETS);
+  renderSignal(data);
+  renderTransits(data.transits);
+  renderDasha(data.dasha, data.dashaInterp);
+  renderPanchang(data.panchang);
+  renderYogas(data.activeYogas, YOGA_RULES, data.transitPlanets);
+  renderVerdict(data, dateStr);
+  
+  if(currentTab==='week') renderWeekly(dateStr);
+  else if(currentTab==='month') renderMonthly(dateStr);
+  else renderHora(data.hora);
+}
+
+// Init
+window.onload = function() {
+  initNatal();
+  setToday();
+  // Auto-refresh tab on switch
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.addEventListener('click', () => {
+      const tabs = ['week','month','hora'];
+      const tab = tabs[i];
+      const dateStr = document.getElementById('analysisDate').value;
+      if(tab==='week') renderWeekly(dateStr);
+      else if(tab==='month') renderMonthly(dateStr);
+      else {
+        const [y,m,d] = dateStr.split('-').map(Number);
+        const jd = julianDay(y,m,d,15);
+        renderHora(calcHora(jd, NASDAQ_LAT, NASDAQ_LON));
+      }
+    });
+  });
+};
+</script>
+</body>
+</html>
