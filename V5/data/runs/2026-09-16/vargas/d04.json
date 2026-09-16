@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D4",
+  "dateIST": "2026-09-16",
+  "div": 4,
+  "key": "D4",
+  "meta": {
+    "name": "चतुर्थांश",
+    "hi": "D4",
+    "mkt": "समर्थन",
+    "relevance": 60
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 60,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D4 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=4 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

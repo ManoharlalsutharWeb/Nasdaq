@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D1",
+  "dateIST": "2026-09-16",
+  "div": 1,
+  "key": "D1",
+  "meta": {
+    "name": "राशि",
+    "hi": "D1 मूल कुंडली",
+    "mkt": "समग्र",
+    "relevance": 100
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 100,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D1 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=1 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

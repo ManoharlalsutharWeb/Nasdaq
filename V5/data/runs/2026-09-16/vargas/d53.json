@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D53",
+  "dateIST": "2026-09-16",
+  "div": 53,
+  "key": "D53",
+  "meta": {
+    "name": "वर्ग53",
+    "hi": "D53",
+    "mkt": "विश्लेषण",
+    "relevance": 20
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 20,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": true,
+  "explanations": [
+    "D53 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3",
+    "⚠️ Accuracy Gated"
+  ],
+  "evidence": [
+    "div=53 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

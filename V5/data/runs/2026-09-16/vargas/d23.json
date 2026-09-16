@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D23",
+  "dateIST": "2026-09-16",
+  "div": 23,
+  "key": "D23",
+  "meta": {
+    "name": "वर्ग23",
+    "hi": "D23",
+    "mkt": "विश्लेषण",
+    "relevance": 27
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 27,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D23 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=23 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

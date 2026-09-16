@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D57",
+  "dateIST": "2026-09-16",
+  "div": 57,
+  "key": "D57",
+  "meta": {
+    "name": "वर्ग57",
+    "hi": "D57",
+    "mkt": "विश्लेषण",
+    "relevance": 20
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 20,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": true,
+  "explanations": [
+    "D57 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3",
+    "⚠️ Accuracy Gated"
+  ],
+  "evidence": [
+    "div=57 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

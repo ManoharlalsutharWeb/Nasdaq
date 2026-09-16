@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D22",
+  "dateIST": "2026-09-16",
+  "div": 22,
+  "key": "D22",
+  "meta": {
+    "name": "वर्ग22",
+    "hi": "D22",
+    "mkt": "विश्लेषण",
+    "relevance": 28
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 28,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D22 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=22 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}
