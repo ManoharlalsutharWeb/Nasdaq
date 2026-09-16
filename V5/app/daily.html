@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Daily Report — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div id="headerWrap"></div>
+  <div id="tickerWrap"></div>
+  <div id="crashWrap"></div>
+
+  <!-- DATE CONTROLS -->
+  <div class="panel" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="fs-10 text-muted">📅 तिथि:</span>
+    <input type="date" id="dateInput" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;outline:none;">
+    <button class="btn" onclick="changeDateLoad()">▶ विश्लेषण</button>
+    <button class="btn-outline" onclick="setToday()">📆 आज</button>
+    <button class="btn-outline" onclick="shiftDay(-1)">⏪ कल था</button>
+    <button class="btn-outline" onclick="shiftDay(1)">⏩ कल</button>
+    <button class="btn-outline" onclick="window.print()">🖨️ Print</button>
+    <button class="btn-outline" onclick="copyReport()">📋 Copy</button>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:10px;">
+    <!-- LEFT: SIGNAL + SCORES -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">🎯 आज का संकेत</div>
+        <div id="signalHero"></div>
+        <div id="scoreBars" style="margin-top:10px;"></div>
+        <div id="cvStatus" style="margin-top:10px;"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">📈 Gap Prediction</div>
+        <div id="gapPanel"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">📿 पंचांग</div>
+        <div id="panchangEl"></div>
+        <div class="hl-box" style="margin-top:8px;">
+          <div class="hl-title">पंचांग बाज़ार संकेत</div>
+          <div class="hl-text" id="panVerdict"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: TRANSITS + WINDOWS -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">↔ प्रमुख ट्रांज़िट पहलू <span class="panel-badge" id="aspectCt">0</span></div>
+        <div class="scroll-t" id="aspectList"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">⏰ Time Windows (IST)</div>
+        <div id="timeWindows"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">🔔 Pinpoint Alerts</div>
+        <div id="alertsList"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: DASHA + REASONS -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">⏳ विंशोत्तरी दशा</div>
+        <div id="dashaEl"></div>
+        <div class="hl-box" style="margin-top:8px;">
+          <div class="hl-title">दशा बाज़ार व्याख्या</div>
+          <div class="hl-text" id="dashaVerdict"></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">✅ मुख्य कारण (Top 5)</div>
+        <div id="topReasons"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">⚠️ जोखिम + Invalidation</div>
+        <div id="topRisks"></div>
+        <hr class="sep">
+        <div id="invalRules"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL VERDICT -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">⚡ अंतिम ज्योतिषीय निर्णय</div>
+    <div id="finalVerdict" class="hl-text" style="line-height:1.9;font-size:11px;padding:4px;"></div>
+  </div>
+
+  <div class="disclaimer">⚠️ ज्योतिषीय संभावना है, गारंटी नहीं। SEBI सलाहकार से परामर्श करें।</div>
+  <div class="footer">NASDAQ Vedic V5 | Kundali-First 60% | लाहिरी अयनांश | Jai Hind 🇮🇳</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+if(!ROUTER.gate()) throw new Error('Build incomplete');
+
+let currentDate = ROUTER.getDateParam();
+
+function setToday(){ currentDate=ROUTER.todayIST(); document.getElementById('dateInput').value=currentDate; loadPage(); }
+function shiftDay(n){
+  const[y,m,d]=currentDate.split('-').map(Number);
+  const d2=new Date(y,m-1,d+n);
+  currentDate=d2.toISOString().split('T')[0];
+  document.getElementById('dateInput').value=currentDate;
+  loadPage();
+}
+function changeDateLoad(){ currentDate=document.getElementById('dateInput').value||currentDate; loadPage(); }
+
+async function loadPage(){
+  UI.renderHeader('headerWrap','daily',currentDate);
+  document.getElementById('dateInput').value=currentDate;
+  UI.showLoading('signalHero','विश्लेषण लोड हो रहा है...');
+
+  const data=await ROUTER.loadMany(currentDate,['daily.json','alerts.json']);
+  const daily=data['daily.json'];
+  const alertsD=data['alerts.json'];
+
+  if(!daily){ UI.showError('signalHero','daily.json उपलब्ध नहीं'); return; }
+
+  const lbl=daily.finalCall==='BULL'?'तेज़ी (BULL)':daily.finalCall==='BEAR'?'मंदी (BEAR)':'तटस्थ (NEUT)';
+  UI.renderSignalHero('signalHero',daily.finalCall,daily.finalConfidence,daily.rawScore,lbl);
+  UI.renderScoreBars('scoreBars',daily.componentScores);
+
+  // CV status
+  const cv=daily.conflict||{};
+  document.getElementById('cvStatus').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:8px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:${cv.hasConflict?'var(--yellow)':'var(--green)'};" ></div>
+      <span style="font-size:10px;color:${cv.hasConflict?'var(--yellow)':'var(--green)'};">${cv.desc||'जाँच...'}</span>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-top:4px;">Varga Consensus: ${daily.vargaConsensus?.dir||'--'} (${daily.vargaConsensus?.conf||0}%)</div>`;
+
+  // Gap
+  const gap=daily.rawScore>10?'▲ GAP UP':daily.rawScore<-10?'▼ GAP DOWN':'→ FLAT';
+  const gc=daily.rawScore>10?'var(--green)':daily.rawScore<-10?'var(--red)':'var(--yellow)';
+  const gp=Math.min(88,55+Math.abs(daily.rawScore)/3);
+  document.getElementById('gapPanel').innerHTML=`
+    <div class="grid-3">
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">गैप दिशा</div>
+        <div style="font-size:16px;font-weight:800;color:${gc};margin:4px 0;">${gap}</div></div>
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">प्रायिकता</div>
+        <div style="font-size:16px;font-weight:800;color:${gc};margin:4px 0;">${gp.toFixed(0)}%</div></div>
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">चंद्र गति</div>
+        <div style="font-size:16px;font-weight:800;color:var(--accent2);margin:4px 0;">${(daily.moonSpeed||0).toFixed(2)}°</div></div>
+    </div>`;
+
+  UI.renderPanchang('panchangEl',daily.panchang);
+  document.getElementById('panVerdict').textContent=
+    daily.panchang?.nakMode==='STRONG_BULL'?'मजबूत बुलिश नक्षत्र — खरीदारी अनुकूल।':
+    daily.panchang?.nakMode?.includes('BEAR')||daily.panchang?.nakMode==='CRASH'?'बियरिश नक्षत्र — सावधान।':
+    daily.panchang?.nakMode?.includes('TRAP')?'⚠️ Trap नक्षत्र — सावधानी से ट्रेड करें।':
+    'सामान्य नक्षत्र — मिश्रित संकेत।';
+
+  // Aspects
+  const asp=daily.topAspects||[];
+  document.getElementById('aspectCt').textContent=asp.length;
+  document.getElementById('aspectList').innerHTML=asp.map(a=>{
+    const col=a.score>0?'var(--green)':a.score<0?'var(--red)':'var(--yellow)';
+    return`<div style="display:flex;align-items:center;gap:5px;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;">
+      <span style="color:var(--accent2);width:48px;">${a.from||''}</span>
+      <span style="color:var(--muted);width:58px;">${a.aspect||''}</span>
+      <span style="width:48px;">${a.to||''}</span>
+      <span style="color:var(--muted);font-size:9px;">${a.orb||''}°</span>
+      <span style="margin-left:auto;color:${col};font-weight:700;">${(a.score||0)>0?'+':''}${(a.score||0).toFixed(1)}</span>
+    </div>`;
+  }).join('');
+
+  UI.renderTimeWindows('timeWindows',[...(daily.bestWindows||[]),...(daily.avoidWindows||[])].slice(0,4));
+  UI.renderAlerts('alertsList',(alertsD?.alerts||[]).slice(0,5));
+  UI.renderDasha('dashaEl',daily.dasha);
+
+  const di=daily.componentScores?.kundali;
+  document.getElementById('dashaVerdict').textContent=
+    `${daily.dasha?.mahaHi||''} महादशा — ${di?.score>0?'बुलिश काल, विस्तार अनुकूल।':'बियरिश काल, सावधानी आवश्यक।'}`;
+
+  document.getElementById('topReasons').innerHTML=
+    (daily.topReasons||[]).map(r=>`<div style="font-size:10px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border);">✅ ${r}</div>`).join('');
+  document.getElementById('topRisks').innerHTML=
+    (daily.topRisks||[]).map(r=>`<div style="font-size:10px;color:var(--red);padding:3px 0;">⚠️ ${r}</div>`).join('');
+  document.getElementById('invalRules').innerHTML=
+    (daily.invalidationRules||[]).map(r=>`<div style="font-size:9px;color:var(--muted);padding:3px 0;">🔸 ${r}</div>`).join('');
+
+  // Crash
+  UI.renderCrashAlert('crashWrap',daily.crashRegimeWindows);
+
+  // Final verdict
+  const fc=daily.finalCall;
+  const sig=fc==='BULL'?'🐂 तेज़ी':fc==='BEAR'?'🐻 मंदी':'⚖️ तटस्थ';
+  document.getElementById('finalVerdict').innerHTML=`
+    <strong style="color:${fc==='BULL'?'var(--green)':fc==='BEAR'?'var(--red)':'var(--yellow)'};">${sig} | स्कोर: ${(daily.rawScore||0).toFixed(0)} | आत्मविश्वास: ${daily.finalConfidence}%</strong><br>
+    <strong>दशा:</strong> ${daily.dasha?.mahaHi||''}–${daily.dasha?.antarHi||''}–${daily.dasha?.pratyantarHi||''}<br>
+    <strong>नक्षत्र:</strong> ${daily.panchang?.nakshatra||''} | <strong>योग:</strong> ${daily.panchang?.yoga||''}<br>
+    <strong>कारण:</strong> ${(daily.topReasons||[]).slice(0,2).join(' | ')}<br>
+    <strong>जोखिम:</strong> ${(daily.topRisks||[]).slice(0,2).join(' | ')||'कोई नहीं'}<br>
+    <em style="color:var(--muted);font-size:9px;">यह ज्योतिषीय संभावना है। बाज़ार जोखिमों के अधीन।</em>`;
+
+  UI.renderTicker('tickerWrap',[
+    `📊 ${fc} | स्कोर: ${(daily.rawScore||0).toFixed(0)} | विश्वास: ${daily.finalConfidence}%`,
+    `🌙 ${daily.panchang?.nakshatra||''} | ${daily.panchang?.yoga||''}`,
+    `⏳ ${daily.dasha?.mahaHi||''}–${daily.dasha?.antarHi||''}`,
+    `📈 Gap: ${gap} (${gp.toFixed(0)}%)`,
+  ]);
+}
+
+function copyReport(){
+  const daily=window._daily||{};
+  const text=`NASDAQ Vedic V5 — ${currentDate}\n${'═'.repeat(40)}\nसंकेत: ${daily.finalCall||'--'} | स्कोर: ${(daily.rawScore||0).toFixed(0)} | विश्वास: ${daily.finalConfidence||0}%\nदशा: ${daily.dasha?.mahaHi||''}–${daily.dasha?.antarHi||''}\n${(daily.topReasons||[]).join('\n')}\nJai Hind 🇮🇳`;
+  navigator.clipboard?.writeText(text).then(()=>alert('✅ रिपोर्ट कॉपी हो गई!'));
+}
+
+window.addEventListener('load',loadPage);
+</script>
+</body>
+</html>

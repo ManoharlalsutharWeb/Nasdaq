@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sessions — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div id="headerWrap"></div>
+  <div id="tickerWrap"></div>
+
+  <div class="panel" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="fs-10 text-muted">📅 तिथि:</span>
+    <input type="date" id="dateInput" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;outline:none;">
+    <button class="btn" onclick="loadPage()">▶ लोड</button>
+    <button class="btn-outline" onclick="setToday()">📆 आज</button>
+    <div style="margin-left:auto;font-size:10px;color:var(--muted);">
+      IST समय | DST-aware | NASDAQ Futures केंद्रित
+    </div>
+  </div>
+
+  <!-- THREE SESSIONS DEEP -->
+  <div class="grid-3" style="margin-bottom:10px;">
+    <div id="sessAsianCard"></div>
+    <div id="sessLondonCard"></div>
+    <div id="sessNYCard"></div>
+  </div>
+
+  <!-- SESSION TIME WINDOWS -->
+  <div class="grid-3" style="margin-bottom:10px;">
+    <div class="panel">
+      <div class="panel-title">🌏 एशियन — Time Windows</div>
+      <div id="asianWindows"></div>
+      <a id="asianDeep" href="#" class="btn-outline" style="display:block;text-align:center;margin-top:8px;font-size:10px;padding:6px;">Deep Dive →</a>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🇬🇧 लंदन — Time Windows</div>
+      <div id="londonWindows"></div>
+      <a id="londonDeep" href="#" class="btn-outline" style="display:block;text-align:center;margin-top:8px;font-size:10px;padding:6px;">Deep Dive →</a>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🗽 NY — Time Windows</div>
+      <div id="nyWindows"></div>
+      <a id="nyDeep" href="#" class="btn-outline" style="display:block;text-align:center;margin-top:8px;font-size:10px;padding:6px;">NY Playbook →</a>
+    </div>
+  </div>
+
+  <!-- NY OPEN PLAYBOOK FULL -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">⚡ NY Open Playbook (7:00 PM IST = 9:30 AM EST) — NASDAQ Futures Open</div>
+    <div id="nyPlaybookFull"></div>
+  </div>
+
+  <div class="disclaimer">⚠️ सत्र विश्लेषण शैक्षिक है। NASDAQ Futures में बिना सलाह निवेश न करें।</div>
+  <div class="footer">NASDAQ Vedic V5 | Jai Hind 🇮🇳</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+if(!ROUTER.gate()) throw new Error('Build incomplete');
+let currentDate = ROUTER.getDateParam();
+
+function setToday(){ currentDate=ROUTER.todayIST(); document.getElementById('dateInput').value=currentDate; loadPage(); }
+
+function renderPlaybook(pb){
+  if(!pb) return '';
+  const dir=pb.playbookDirection||'NEUT';
+  const col=dir==='BULL'?'var(--green)':dir==='BEAR'?'var(--red)':'var(--yellow)';
+  return `
+  <div class="grid-3" style="margin-bottom:12px;">
+    <div class="card" style="text-align:center;">
+      <div class="fs-9 text-muted">Sweep Risk (19:00–19:15 IST)</div>
+      <div style="font-size:18px;font-weight:800;color:${pb.sweepRisk?.level==='HIGH'?'var(--red)':'var(--green)'};margin:6px 0;">${pb.sweepRisk?.level||'--'}</div>
+      <div class="fs-9 text-muted">${pb.sweepRisk?.desc||''}</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="fs-9 text-muted">Direction (19:15–19:45 IST)</div>
+      <div style="font-size:18px;font-weight:800;color:${col};margin:6px 0;">${pb.directionAttempt?.direction||'--'}</div>
+      <div class="fs-9 text-muted">${pb.directionAttempt?.desc||''}</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="fs-9 text-muted">Decision Zone (19:45–20:30 IST)</div>
+      <div style="font-size:18px;font-weight:800;color:${col};margin:6px 0;">${(pb.decisionZone?.trapType||'--').toUpperCase()}</div>
+      <div class="fs-9 text-muted">${pb.decisionZone?.desc||''}</div>
+    </div>
+  </div>
+  <div style="font-size:10px;color:var(--muted);line-height:1.8;">
+    ${(pb.explanations||[]).map(e=>`<div>• ${e}</div>`).join('')}
+  </div>
+  <div style="text-align:center;margin-top:10px;">
+    <a href="session_ny.html?date=${currentDate}" class="btn">🗽 NY Session Full Analysis →</a>
+  </div>`;
+}
+
+async function loadPage(){
+  UI.renderHeader('headerWrap','sessions',currentDate);
+  document.getElementById('dateInput').value=currentDate;
+
+  const data = await ROUTER.loadJSON(currentDate,'sessions.json');
+  if(!data){ UI.showError('sessAsianCard','sessions.json उपलब्ध नहीं'); return; }
+
+  UI.renderSessionCard('sessAsianCard', {signal:data.asian?.signal,confidence:data.asian?.confidence||0,hora:data.asian?.hora,trap:data.asian?.trap},'asian');
+  UI.renderSessionCard('sessLondonCard',{signal:data.london?.signal,confidence:data.london?.confidence||0,hora:data.london?.hora,trap:data.london?.trap},'london');
+  UI.renderSessionCard('sessNYCard',    {signal:data.newyork?.signal,confidence:data.newyork?.confidence||0,hora:data.newyork?.hora,trap:data.newyork?.trap},'newyork');
+
+  UI.renderTimeWindows('asianWindows', data.asian?.timeWindows||[]);
+  UI.renderTimeWindows('londonWindows',data.london?.timeWindows||[]);
+  UI.renderTimeWindows('nyWindows',    data.newyork?.timeWindows||[]);
+
+  document.getElementById('asianDeep').href=`session_asian.html?date=${currentDate}`;
+  document.getElementById('londonDeep').href=`session_london.html?date=${currentDate}`;
+  document.getElementById('nyDeep').href=`session_ny.html?date=${currentDate}`;
+
+  document.getElementById('nyPlaybookFull').innerHTML=renderPlaybook(data.nyPlaybook);
+
+  UI.renderTicker('tickerWrap',[
+    `🌏 Asian: ${data.asian?.signal||'--'} (${data.asian?.confidence||0}%)`,
+    `🇬🇧 London: ${data.london?.signal||'--'} (${data.london?.confidence||0}%)`,
+    `🗽 NY: ${data.newyork?.signal||'--'} (${data.newyork?.confidence||0}%)`,
+    `⚡ NY Playbook: ${data.nyPlaybook?.playbookDirection||'--'} | Trap: ${data.nyPlaybook?.trapType||'--'}`,
+  ]);
+}
+window.addEventListener('load',loadPage);
+</script>
+</body>
+</html>

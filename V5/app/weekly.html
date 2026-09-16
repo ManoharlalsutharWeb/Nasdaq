@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Weekly — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div id="headerWrap"></div>
+  <div id="tickerWrap"></div>
+
+  <div class="panel" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="fs-10 text-muted">📅 सप्ताह:</span>
+    <input type="date" id="dateInput" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;outline:none;">
+    <button class="btn" onclick="loadPage()">▶ लोड</button>
+    <button class="btn-outline" onclick="setToday()">📆 इस सप्ताह</button>
+    <button class="btn-outline" onclick="shiftWeek(-1)">⏪ पिछला</button>
+    <button class="btn-outline" onclick="shiftWeek(1)">⏩ अगला</button>
+    <button class="btn-outline" onclick="window.print()">🖨️ Print</button>
+  </div>
+
+  <!-- WEEK SUMMARY -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">📅 साप्ताहिक पूर्वानुमान — सोम से शुक्र</div>
+    <div id="weekGrid"></div>
+  </div>
+
+  <!-- WEEK DETAIL CARDS -->
+  <div id="weekDetailCards" style="margin-bottom:10px;"></div>
+
+  <!-- WEEK STATS -->
+  <div class="grid-3" style="margin-bottom:10px;">
+    <div class="panel">
+      <div class="panel-title">📈 सप्ताह सारांश</div>
+      <div id="weekStats"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🏆 Best Day</div>
+      <div id="bestDay"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">⚠️ Worst Day</div>
+      <div id="worstDay"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ साप्ताहिक पूर्वानुमान ज्योतिषीय संभावना है। बाज़ार जोखिमों के अधीन।</div>
+  <div class="footer">NASDAQ Vedic V5 | Weekly | Jai Hind 🇮🇳</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+if(!ROUTER.gate()) throw new Error('Build incomplete');
+let currentDate = ROUTER.getDateParam();
+
+function setToday(){ currentDate=ROUTER.todayIST(); document.getElementById('dateInput').value=currentDate; loadPage(); }
+function shiftWeek(n){
+  const[y,m,d]=currentDate.split('-').map(Number);
+  const d2=new Date(y,m-1,d+n*7);
+  currentDate=d2.toISOString().split('T')[0];
+  document.getElementById('dateInput').value=currentDate;
+  loadPage();
+}
+
+const SIG_COLOR = s => s==='BULL'?'var(--green)':s==='BEAR'?'var(--red)':'var(--yellow)';
+const DAYS_HI = ['सोमवार','मंगलवार','बुधवार','गुरुवार','शुक्रवार'];
+
+async function loadPage(){
+  UI.renderHeader('headerWrap','weekly',currentDate);
+  document.getElementById('dateInput').value=currentDate;
+  UI.showLoading('weekGrid','साप्ताहिक डेटा लोड हो रहा है...');
+
+  const data = await ROUTER.loadJSON(currentDate,'weekly.json');
+  if(!data){ UI.showError('weekGrid','weekly.json उपलब्ध नहीं'); return; }
+
+  const days = data.days||[];
+  UI.renderWeekGrid('weekGrid', days, currentDate);
+
+  // Detail cards
+  document.getElementById('weekDetailCards').innerHTML = `<div class="grid-3">
+    ${days.filter(d=>d.isMarketDay!==false).map((d,i)=>{
+      const col = SIG_COLOR(d.finalCall||'NEUT');
+      const dt = d.date||'';
+      const dayNum = dt.split('-')[2]||'';
+      const mo = dt.split('-')[1]||'';
+      return `<div class="panel" style="border-top:3px solid ${col};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div>
+            <div style="font-weight:700;color:var(--text);">${DAYS_HI[i]||d.day||''}</div>
+            <div style="font-size:10px;color:var(--muted);">${dayNum}/${mo}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:${col};">${d.finalCall||'NEUT'}</div>
+            <div style="font-size:9px;color:var(--muted);">${(d.score||0).toFixed(0)}</div>
+          </div>
+          <div class="conf-ring ${(d.confidence||0)>=70?'conf-high':(d.confidence||0)>=50?'conf-mid':'conf-low'}">${d.confidence||0}%</div>
+        </div>
+        <div style="font-size:9px;color:var(--accent2);">⭐ ${(d.nakshatra||'').substring(0,10)}</div>
+        ${d.isHoliday?'<div style="font-size:9px;color:var(--red);margin-top:4px;">🏛️ US अवकाश</div>':''}
+        <a href="daily.html?date=${dt}" class="btn-outline" style="display:block;text-align:center;margin-top:8px;font-size:9px;padding:4px;">विस्तार →</a>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  // Stats
+  const mktDays = days.filter(d=>!d.isHoliday);
+  const bulls = mktDays.filter(d=>d.finalCall==='BULL').length;
+  const bears = mktDays.filter(d=>d.finalCall==='BEAR').length;
+  const neuts = mktDays.filter(d=>d.finalCall==='NEUT').length;
+  const avgScore = mktDays.reduce((s,d)=>s+(d.score||0),0)/(mktDays.length||1);
+  const weekDir = bulls>bears?'BULL':bears>bulls?'BEAR':'NEUT';
+  const wCol = SIG_COLOR(weekDir);
+
+  document.getElementById('weekStats').innerHTML = `
+    <div style="text-align:center;margin-bottom:10px;">
+      <div style="font-size:24px;font-weight:900;color:${wCol};">${weekDir}</div>
+      <div style="font-size:10px;color:var(--muted);">सप्ताह की दिशा</div>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">🐂 बुलिश दिन</div><div style="font-size:18px;font-weight:700;color:var(--green);">${bulls}</div></div>
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">🐻 बियरिश दिन</div><div style="font-size:18px;font-weight:700;color:var(--red);">${bears}</div></div>
+    </div>
+    <div style="margin-top:8px;font-size:10px;color:var(--muted);">
+      तटस्थ: ${neuts} | औसत स्कोर: ${avgScore.toFixed(1)}
+    </div>`;
+
+  // Best / Worst
+  const sorted = [...mktDays].sort((a,b)=>(b.score||0)-(a.score||0));
+  const best = sorted[0];
+  const worst = sorted[sorted.length-1];
+
+  function dayCard(d, label){
+    if(!d) return '<div style="color:var(--muted);font-size:10px;">डेटा नहीं</div>';
+    const col = SIG_COLOR(d.finalCall||'NEUT');
+    return `<div style="text-align:center;">
+      <div style="font-size:12px;color:var(--muted);">${d.date||''}</div>
+      <div style="font-size:22px;font-weight:900;color:${col};margin:6px 0;">${d.finalCall||'NEUT'}</div>
+      <div style="font-size:11px;">स्कोर: <strong style="color:${col};">${(d.score||0).toFixed(0)}</strong></div>
+      <div style="font-size:9px;color:var(--accent2);">⭐ ${d.nakshatra||''}</div>
+      <a href="daily.html?date=${d.date}" class="btn" style="font-size:9px;padding:4px 10px;margin-top:8px;display:inline-block;">विस्तार →</a>
+    </div>`;
+  }
+  document.getElementById('bestDay').innerHTML = dayCard(best,'Best');
+  document.getElementById('worstDay').innerHTML = dayCard(worst,'Worst');
+
+  // Ticker
+  UI.renderTicker('tickerWrap',[
+    `📅 सप्ताह: ${weekDir} | 🐂${bulls} 🐻${bears} ⚖️${neuts}`,
+    `📊 औसत स्कोर: ${avgScore.toFixed(1)}`,
+    ...(days.map(d=>`${d.date}: ${d.finalCall||'NEUT'} (${(d.score||0).toFixed(0)})`)),
+  ]);
+}
+window.addEventListener('load',loadPage);
+</script>
+</body>
+</html>

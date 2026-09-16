@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Asian Session — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div id="headerWrap"></div>
+  <div id="tickerWrap"></div>
+  <div class="panel" style="margin-bottom:10px;background:linear-gradient(135deg,rgba(255,211,42,.05),var(--bg2));border-color:rgba(255,211,42,.2);">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:32px;">🌏</span>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--yellow);">एशियन सत्र — Deep Analysis</div>
+        <div style="font-size:11px;color:var(--muted);">IST: 5:30 AM – 2:00 PM | Tokyo / Nikkei / SGX / Hang Seng</div>
+        <div style="font-size:10px;color:var(--muted);">NASDAQ Futures इस सत्र में overnight gap establish करता है</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:10px;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">🎯 एशियन संकेत</div>
+        <div id="asianSig"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">🎭 Trap विश्लेषण</div>
+        <div id="trapEl"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title">⏰ Time Windows (IST)</div>
+        <div id="timeWin"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">💡 विश्लेषण कारण</div>
+        <div id="explanations"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">📋 एशियन सत्र — ट्रेडिंग गाइड</div>
+    <div style="font-size:11px;color:var(--text2);line-height:2;">
+      <div>🕠 <strong>5:30 AM IST</strong> — Tokyo खुलता है। NASDAQ Futures के overnight positions settle होते हैं।</div>
+      <div>🕗 <strong>7:00 AM IST</strong> — Singapore (SGX) open। Volume बढ़ता है।</div>
+      <div>🕙 <strong>9:30 AM IST</strong> — Hong Kong (HSI) open। Asian momentum स्थापित होती है।</div>
+      <div>🕑 <strong>2:00 PM IST</strong> — Asian session बंद। London के लिए handoff।</div>
+      <div style="margin-top:8px;color:var(--muted);font-size:10px;">
+        ⚠️ इस सत्र में NASDAQ Futures liquidity कम होती है। Large moves trap हो सकते हैं।
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">NASDAQ Vedic V5 | Asian Session | Jai Hind 🇮🇳</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+if(!ROUTER.gate()) throw new Error('Build incomplete');
+const date = ROUTER.getDateParam();
+
+async function loadPage(){
+  UI.renderHeader('headerWrap','sessions',date);
+  const data = await ROUTER.loadJSON(date,'sessions.json');
+  if(!data){ UI.showError('asianSig','sessions.json उपलब्ध नहीं'); return; }
+  const asian = data.asian||{};
+  const sig=asian.signal||'NEUT';
+  const col=sig==='BULL'?'var(--green)':sig==='BEAR'?'var(--red)':'var(--yellow)';
+  document.getElementById('asianSig').innerHTML=`
+    <div class="signal-hero ${sig.toLowerCase()}" style="padding:14px;">
+      <div class="sig-label" style="color:${col};font-size:24px;">${sig}</div>
+      <div class="sig-score">आत्मविश्वास: ${asian.confidence||0}%</div>
+      <div class="sig-conf">होरा: ${asian.hora||'--'}</div>
+    </div>`;
+  const t=asian.trap||{type:'clear',title:'--',desc:'--'};
+  document.getElementById('trapEl').innerHTML=`
+    <div class="trap-box ${t.type||'clear'}">
+      <div class="trap-title ${t.type||'clear'}">${t.title||'--'}</div>
+      <div class="trap-desc">${t.desc||'--'}</div>
+    </div>`;
+  UI.renderTimeWindows('timeWin',asian.timeWindows||[]);
+  document.getElementById('explanations').innerHTML=(asian.explanations||[]).map(e=>`<div style="font-size:10px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--border);">• ${e}</div>`).join('');
+  UI.renderTicker('tickerWrap',[`🌏 Asian: ${sig} (${asian.confidence||0}%) | ${t.title||''}`]);
+}
+window.addEventListener('load',loadPage);
+</script>
+</body>
+</html>

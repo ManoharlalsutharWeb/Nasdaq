@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Vargas D1-D60 — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div id="headerWrap"></div>
+  <div id="tickerWrap"></div>
+
+  <div class="panel" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="fs-10 text-muted">📅 तिथि:</span>
+    <input type="date" id="dateInput" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;outline:none;">
+    <button class="btn" onclick="loadPage()">▶ लोड</button>
+    <button class="btn-outline" onclick="setToday()">📆 आज</button>
+    <div style="margin-left:auto;font-size:10px;color:var(--muted);">D1–D60 | लाहिरी अयनांश | Kundali-First 60%</div>
+  </div>
+
+  <!-- CONSENSUS -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">🔍 Varga Consensus (D1+D9+D10+D30+D2+D3)</div>
+    <div id="consensusPanel"></div>
+  </div>
+
+  <!-- KEY VARGAS -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">⭐ प्रमुख वर्ग (Market Relevance)</div>
+    <div id="keyVargas"></div>
+  </div>
+
+  <!-- ALL VARGAS GRID D1-D60 -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">🗂️ सभी वर्ग D1 – D60</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">
+      क्लिक करें → विस्तृत विश्लेषण | 🔒 = accuracy gated | relevance % दिखाया गया
+    </div>
+    <div id="vargaGrid" class="varga-grid"></div>
+  </div>
+
+  <!-- SELECTED VARGA DETAIL -->
+  <div class="panel" id="vargaDetail" style="margin-bottom:10px;display:none;">
+    <div class="panel-title" id="vargaDetailTitle">वर्ग विवरण</div>
+    <div id="vargaDetailBody"></div>
+  </div>
+
+  <div class="disclaimer">⚠️ D60 birth-time accuracy gated। D1–D10 सबसे reliable। वर्ग विश्लेषण शैक्षिक है।</div>
+  <div class="footer">NASDAQ Vedic V5 | Vargas D1-D60 | Jai Hind 🇮🇳</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+if(!ROUTER.gate()) throw new Error('Build incomplete');
+let currentDate = ROUTER.getDateParam();
+let vargaData = {};
+
+function setToday(){ currentDate=ROUTER.todayIST(); document.getElementById('dateInput').value=currentDate; loadPage(); }
+
+const SIG_COLOR = s => s==='BULL'?'var(--green)':s==='BEAR'?'var(--red)':'var(--yellow)';
+const SIG_EMOJI = s => s==='BULL'?'🐂':s==='BEAR'?'🐻':'⚖️';
+
+function showVargaDetail(div){
+  const r = vargaData[div];
+  if(!r) return;
+  const col = SIG_COLOR(r.directionHint||'NEUT');
+  const detail = document.getElementById('vargaDetail');
+  detail.style.display='';
+  document.getElementById('vargaDetailTitle').textContent = `${r.key||div} — ${r.meta?.hi||div}`;
+  document.getElementById('vargaDetailBody').innerHTML = `
+    <div class="grid-3" style="margin-bottom:10px;">
+      <div class="card" style="text-align:center;">
+        <div class="fs-9 text-muted">दिशा</div>
+        <div style="font-size:22px;font-weight:900;color:${col};">${r.directionHint||'NEUT'}</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="fs-9 text-muted">Relevance</div>
+        <div style="font-size:22px;font-weight:700;color:var(--accent2);">${r.relevanceScore||0}%</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="fs-9 text-muted">Impact</div>
+        <div style="font-size:22px;font-weight:700;color:${(r.confidenceImpact||0)>0?'var(--green)':'var(--red)'};">${(r.confidenceImpact||0).toFixed(1)}</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--gold);margin-bottom:4px;">Market Theme: ${r.meta?.mkt||'--'}</div>
+    ${r.accuracyWarning?'<div style="color:var(--yellow);font-size:10px;margin-bottom:6px;">⚠️ Accuracy gated — birth time precision required</div>':''}
+    <div style="font-size:10px;color:var(--text2);margin-bottom:6px;">${(r.explanations||[]).map(e=>`• ${e}`).join('<br>')}</div>
+    ${(r.riskTags||[]).length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">${r.riskTags.map(t=>`<span style="background:rgba(255,71,87,.1);color:var(--red);font-size:9px;padding:2px 8px;border-radius:4px;">${t}</span>`).join('')}</div>`:''}
+    <a href="vargas/d${String(r.div||1).padStart(2,'0')}.html?date=${currentDate}" class="btn" style="margin-top:10px;display:inline-block;font-size:11px;">D${r.div} Full Analysis →</a>`;
+  detail.scrollIntoView({behavior:'smooth'});
+}
+
+async function loadPage(){
+  UI.renderHeader('headerWrap','vargas',currentDate);
+  document.getElementById('dateInput').value=currentDate;
+  UI.showLoading('vargaGrid','Varga data लोड हो रही है...');
+
+  // Load all varga JSONs
+  const keys = Array.from({length:60},(_,i)=>`vargas/d${String(i+1).padStart(2,'0')}.json`);
+  const results = await ROUTER.loadMany(currentDate, keys);
+  vargaData = {};
+  keys.forEach((k,i)=>{ if(results[k]) vargaData[`D${i+1}`]=results[k]; });
+
+  // Consensus
+  const dirs = Object.values(vargaData).map(r=>r.directionHint||'NEUT');
+  const bulls = dirs.filter(d=>d==='BULL').length;
+  const bears = dirs.filter(d=>d==='BEAR').length;
+  const consDir = bulls>bears?'BULL':bears>bulls?'BEAR':'NEUT';
+  const consConf = Math.round(Math.max(bulls,bears)/dirs.length*100);
+  const cc = SIG_COLOR(consDir);
+  document.getElementById('consensusPanel').innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="text-align:center;">
+        <div style="font-size:28px;font-weight:900;color:${cc};">${consDir}</div>
+        <div class="fs-9 text-muted">Consensus Direction</div>
+      </div>
+      <div class="card" style="min-width:80px;text-align:center;"><div class="fs-9 text-muted">🐂 Bull</div><div style="font-size:18px;font-weight:700;color:var(--green);">${bulls}</div></div>
+      <div class="card" style="min-width:80px;text-align:center;"><div class="fs-9 text-muted">🐻 Bear</div><div style="font-size:18px;font-weight:700;color:var(--red);">${bears}</div></div>
+      <div class="card" style="min-width:80px;text-align:center;"><div class="fs-9 text-muted">Confidence</div><div style="font-size:18px;font-weight:700;color:${cc};">${consConf}%</div></div>
+      <div style="flex:1;font-size:10px;color:var(--muted);">
+        D1+D9+D10 सबसे important। D30 = TRAP/SPIKE। D60 = accuracy gated।<br>
+        Kundali weight: 60% | यह consensus final signal का हिस्सा है।
+      </div>
+    </div>`;
+
+  // Key vargas
+  const keyDivs = [1,2,3,9,10,30];
+  document.getElementById('keyVargas').innerHTML=`<div class="grid-3">${keyDivs.map(d=>{
+    const r = vargaData[`D${d}`];
+    if(!r) return `<div class="card"><div class="fs-9 text-muted">D${d}</div><div style="color:var(--muted);">लोड नहीं हुआ</div></div>`;
+    const col=SIG_COLOR(r.directionHint||'NEUT');
+    return`<div class="card" style="border-top:2px solid ${col};cursor:pointer;" onclick="showVargaDetail('D${d}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-weight:800;color:var(--accent2);">${r.key||`D${d}`}</div>
+          <div class="fs-9 text-muted">${r.meta?.hi||''}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:16px;font-weight:900;color:${col};">${r.directionHint||'NEUT'}</div>
+          <div class="fs-9 text-muted">${r.relevanceScore||0}%</div>
+        </div>
+      </div>
+      <div class="fs-9" style="color:var(--muted);margin-top:4px;">${r.meta?.mkt||''}</div>
+      ${r.accuracyWarning?'<div class="fs-9" style="color:var(--yellow);">⚠️ Accuracy Gated</div>':''}
+    </div>`;
+  }).join('')}</div>`;
+
+  // All vargas grid
+  document.getElementById('vargaGrid').innerHTML = Array.from({length:60},(_,i)=>{
+    const d=i+1, key=`D${d}`;
+    const r=vargaData[key];
+    if(!r) return `<div class="varga-cell" title="${key} — not loaded">
+      <div class="vc-key">${key}</div><div style="color:var(--muted);font-size:9px;">--</div></div>`;
+    const col=SIG_COLOR(r.directionHint||'NEUT');
+    return`<div class="varga-cell ${r.directionHint==='BULL'?'bull':r.directionHint==='BEAR'?'bear':''} ${r.accuracyWarning?'gated':''}"
+      title="${key}: ${r.directionHint||'NEUT'} | Rel:${r.relevanceScore}% | ${r.meta?.mkt||''}"
+      onclick="showVargaDetail('${key}')">
+      <div class="vc-key">${key}</div>
+      <div class="vc-dir" style="color:${col};">${SIG_EMOJI(r.directionHint||'NEUT')}</div>
+      <div class="vc-rel">${r.relevanceScore||0}%</div>
+    </div>`;
+  }).join('');
+
+  UI.renderTicker('tickerWrap',[
+    `🔭 Varga Consensus: ${consDir} (${consConf}%) | 🐂${bulls} 🐻${bears}`,
+    `D1:${vargaData.D1?.directionHint||'--'} D9:${vargaData.D9?.directionHint||'--'} D10:${vargaData.D10?.directionHint||'--'} D30:${vargaData.D30?.directionHint||'--'}`,
+  ]);
+}
+window.addEventListener('load',loadPage);
+</script>
+</body>
+</html>
