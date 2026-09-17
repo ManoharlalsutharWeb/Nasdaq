@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "daily",
+  "dateIST": "2026-09-16",
+  "finalCall": "BULL",
+  "finalConfidence": 55,
+  "rawScore": 28.4,
+  "topReasons": [
+    "[कुंडली] शुक्र महादशा (बुलिश)",
+    "[ट्रांज़िट] ट्रांज़िट स्कोर:2.5",
+    "[पंचांग] अनुराधा नक्षत्र (स्कोर:3)",
+    "[पंचांग] विष्कम्भ योग",
+    "[दशा] शनि अंतर्दशा"
+  ],
+  "topRisks": [
+    "शनि 8वें भाव पर नज़र",
+    "विष्टि करण में सावधानी",
+    "ज्योतिषीय संभावना — गारंटी नहीं"
+  ],
+  "bestWindows": [
+    {
+      "label": "शुभ समय",
+      "startIST": "10:00 IST",
+      "peakIST": "12:00 IST",
+      "endIST": "14:00 IST",
+      "severity": "P2",
+      "tags": [
+        "BULL"
+      ],
+      "notes": [
+        "अनुराधा शुभ"
+      ]
+    }
+  ],
+  "avoidWindows": [
+    {
+      "label": "NY Sweep",
+      "startIST": "19:00 IST",
+      "peakIST": "19:15 IST",
+      "endIST": "19:30 IST",
+      "severity": "P1",
+      "tags": [
+        "SWEEP"
+      ],
+      "notes": [
+        "NY Open Sweep Risk"
+      ]
+    }
+  ],
+  "invalidationRules": [
+    "ट्रांज़िट −15 पर सिग्नल बदल सकता है",
+    "चंद्र अनुराधा से बाहर जाए → पुनर्विचार",
+    "बाज़ार जोखिमों के अधीन"
+  ],
+  "crashRegimeWindows": [],
+  "componentScores": {
+    "kundali": {
+      "score": 5.6,
+      "weight": 0.6,
+      "direction": "BULL"
+    },
+    "transits": {
+      "score": 2.5,
+      "weight": 0.25,
+      "direction": "BULL"
+    },
+    "panchang": {
+      "score": 3,
+      "weight": 0.1,
+      "direction": "BULL"
+    },
+    "other": {
+      "score": 0,
+      "weight": 0.05
+    }
+  },
+  "conflict": {
+    "hasConflict": false,
+    "desc": "सिस्टम सहमत",
+    "penalty": 0
+  },
+  "vargaConsensus": {
+    "dir": "BULL",
+    "bull": 60,
+    "bear": 30,
+    "conf": 55
+  },
+  "panchang": {
+    "tithi": 6,
+    "paksha": "शुक्ल",
+    "nakshatra": "अनुराधा",
+    "nakshatraEn": "Anuradha",
+    "yoga": "विष्कम्भ",
+    "karana": "बव",
+    "var": "बुधवार",
+    "score": 3,
+    "nakMode": "BULL",
+    "nakTrap": "MED"
+  },
+  "dasha": {
+    "maha": "Venus",
+    "mahaHi": "शुक्र",
+    "antar": "Saturn",
+    "antarHi": "शनि",
+    "pratyantar": "Saturn",
+    "pratyantarHi": "शनि",
+    "mahaStart": "2013-03-28",
+    "mahaEnd": "2033-03-28",
+    "mahaPct": 67.4
+  },
+  "transitScore": 2.5,
+  "moonSpeed": 12.17,
+  "topAspects": [
+    {
+      "from": "बृहस्पति",
+      "fromEng": "Jupiter",
+      "to": "सूर्य",
+      "toEng": "Sun",
+      "aspect": "त्रिकोण",
+      "orb": 3.2,
+      "score": 4.5
+    },
+    {
+      "from": "शनि",
+      "fromEng": "Saturn",
+      "to": "चंद्र",
+      "toEng": "Moon",
+      "aspect": "वर्ग",
+      "orb": 4.1,
+      "score": -3.8
+    }
+  ],
+  "isHoliday": false,
+  "isMarketDay": true,
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

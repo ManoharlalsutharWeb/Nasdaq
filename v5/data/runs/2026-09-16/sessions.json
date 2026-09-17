@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "sessions",
+  "dateIST": "2026-09-16",
+  "asian": {
+    "signal": "NEUT",
+    "confidence": 40,
+    "score": 6.05,
+    "hora": "शनि",
+    "trap": {
+      "type": "sideways",
+      "title": "↔ SIDEWAYS",
+      "desc": "मिश्रित — Range-bound"
+    },
+    "timeWindows": [
+      {
+        "label": "एशियन सत्र",
+        "startIST": "05:30 IST",
+        "peakIST": "--",
+        "endIST": "14:00 IST",
+        "severity": "P2",
+        "tags": [
+          "SIDEWAYS"
+        ],
+        "notes": [
+          "मिश्रित — Range-bound"
+        ]
+      }
+    ],
+    "explanations": [
+      "होरा:2",
+      "ट्रांज़िट:2.5",
+      "दशा:2.8",
+      "पंचांग:3",
+      "मिश्रित — Range-bound"
+    ]
+  },
+  "london": {
+    "signal": "NEUT",
+    "confidence": 40,
+    "score": 6.05,
+    "hora": "बुध",
+    "trap": {
+      "type": "sideways",
+      "title": "↔ SIDEWAYS",
+      "desc": "मिश्रित — Range-bound"
+    },
+    "timeWindows": [
+      {
+        "label": "लंदन सत्र",
+        "startIST": "13:30 IST",
+        "peakIST": "--",
+        "endIST": "22:00 IST",
+        "severity": "P2",
+        "tags": [
+          "SIDEWAYS"
+        ],
+        "notes": [
+          "मिश्रित — Range-bound"
+        ]
+      }
+    ],
+    "explanations": [
+      "होरा:2",
+      "ट्रांज़िट:2.5",
+      "दशा:2.8",
+      "पंचांग:3",
+      "मिश्रित — Range-bound"
+    ]
+  },
+  "newyork": {
+    "signal": "NEUT",
+    "confidence": 40,
+    "score": 5.05,
+    "hora": "सूर्य",
+    "trap": {
+      "type": "sideways",
+      "title": "↔ SIDEWAYS",
+      "desc": "मिश्रित — Range-bound"
+    },
+    "timeWindows": [
+      {
+        "label": "न्यूयॉर्क सत्र",
+        "startIST": "19:00 IST",
+        "peakIST": "--",
+        "endIST": "01:30 IST",
+        "severity": "P2",
+        "tags": [
+          "SIDEWAYS"
+        ],
+        "notes": [
+          "मिश्रित — Range-bound"
+        ]
+      }
+    ],
+    "explanations": [
+      "होरा:0",
+      "ट्रांज़िट:2.5",
+      "दशा:2.8",
+      "पंचांग:3",
+      "मिश्रित — Range-bound"
+    ]
+  },
+  "nyPlaybook": {
+    "playbookDirection": "NEUT",
+    "playbookConfidence": 53,
+    "sweepRisk": {
+      "level": "LOW",
+      "severity": "P2",
+      "tags": [
+        "SWEEP"
+      ],
+      "desc": "Sweep LOW: अनुराधा + शनि होरा"
+    },
+    "directionAttempt": {
+      "direction": "NEUT",
+      "score": 2.74,
+      "desc": "Direction: NEUT (2.7)"
+    },
+    "decisionZone": {
+      "trapType": "one-way",
+      "score": 2.74,
+      "severity": "P2",
+      "desc": "One-Way Move — स्पष्ट दिशा"
+    },
+    "trapType": "one-way",
+    "timeWindows": [
+      {
+        "label": "Sweep Risk",
+        "startIST": "19:00 IST",
+        "peakIST": "19:07 IST",
+        "endIST": "19:15 IST",
+        "severity": "P2",
+        "tags": [
+          "SWEEP"
+        ],
+        "notes": [
+          "Risk:LOW"
+        ]
+      },
+      {
+        "label": "Direction",
+        "startIST": "19:15 IST",
+        "peakIST": "19:30 IST",
+        "endIST": "19:45 IST",
+        "severity": "P2",
+        "tags": [],
+        "notes": [
+          "Dir:NEUT"
+        ]
+      },
+      {
+        "label": "Decision Zone",
+        "startIST": "19:45 IST",
+        "peakIST": "20:00 IST",
+        "endIST": "20:30 IST",
+        "severity": "P2",
+        "tags": [
+          "one-way"
+        ],
+        "notes": [
+          "One-Way Move — स्पष्ट दिशा"
+        ]
+      }
+    ],
+    "explanations": [
+      "NY होरा:शनि",
+      "Sweep:LOW",
+      "Direction:NEUT",
+      "One-Way Move — स्पष्ट दिशा"
+    ]
+  },
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

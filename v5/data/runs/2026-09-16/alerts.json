@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "alerts",
+  "dateIST": "2026-09-16",
+  "alerts": [
+    {
+      "type": "MOON_NAKSHATRA",
+      "severity": "P3",
+      "label": "चंद्र अनुराधा नक्षत्र",
+      "startIST": "00:00 IST",
+      "peakIST": "12:00 IST",
+      "endIST": "23:59 IST",
+      "tags": [
+        "BULL"
+      ],
+      "notes": [
+        "अनुराधा: स्कोर 3"
+      ],
+      "score": 3
+    },
+    {
+      "type": "NY_SWEEP",
+      "severity": "P1",
+      "label": "NY Open Sweep Risk (19:00–19:15 IST)",
+      "startIST": "19:00 IST",
+      "peakIST": "19:07 IST",
+      "endIST": "19:15 IST",
+      "tags": [
+        "SWEEP",
+        "WHIPSAW"
+      ],
+      "notes": [
+        "NY Open Sweep — entry avoid 19:00-19:15"
+      ],
+      "score": -2
+    },
+    {
+      "type": "DASHA_PERIOD",
+      "severity": "P3",
+      "label": "शुक्र महादशा",
+      "startIST": "00:00 IST",
+      "peakIST": "12:00 IST",
+      "endIST": "23:59 IST",
+      "tags": [
+        "BULL"
+      ],
+      "notes": [
+        "महादशा 67% पूर्ण"
+      ],
+      "score": 4
+    }
+  ],
+  "totalAlerts": 3,
+  "hasCrashRisk": false,
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}
