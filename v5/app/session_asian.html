@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Asian Session — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div id="headerWrap"></div>
+  <div id="tickerWrap"></div>
+  <div class="panel" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="fs-10 text-muted">📅 तिथि:</span><input type="date" id="dateInput" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;outline:none;">
+    <button class="btn" onclick="loadPage()">▶ लोड</button><button class="btn-outline" onclick="setToday()">📆 आज</button>
+    <span class="fs-10 text-muted">समय:</span><input type="time" id="startTime" value="05:30"><span class="fs-10 text-muted">से</span><input type="time" id="endTime" value="14:00"><select id="stepTime"><option value="5">5 min</option><option value="15" selected>15 min</option><option value="30">30 min</option></select>
+  </div>
+  <div class="panel" style="margin-bottom:10px;background:linear-gradient(135deg,rgba(255,211,42,.05),var(--bg2));border-color:rgba(255,211,42,.2);">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:32px;">🌏</span>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--yellow);">एशियन सत्र — Deep Analysis</div>
+        <div style="font-size:11px;color:var(--muted);">IST: 5:30 AM – 2:00 PM | Tokyo / Nikkei / SGX / Hang Seng</div>
+        <div style="font-size:10px;color:var(--muted);">NASDAQ Futures इस सत्र में overnight gap establish करता है</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:10px;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">🎯 एशियन संकेत</div>
+        <div id="asianSig"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">🎭 Trap विश्लेषण</div>
+        <div id="trapEl"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title">⏰ Time Windows (IST)</div>
+        <div id="timeWin"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">💡 विश्लेषण कारण</div>
+        <div id="explanations"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:10px;"><div class="panel-title">📈 Asian Full-Session Intraday — Kundli + Transit</div><div id="intradayWrap"></div></div>
+
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">📋 एशियन सत्र — ट्रेडिंग गाइड</div>
+    <div style="font-size:11px;color:var(--text2);line-height:2;">
+      <div>🕠 <strong>5:30 AM IST</strong> — Tokyo खुलता है। NASDAQ Futures के overnight positions settle होते हैं।</div>
+      <div>🕗 <strong>7:00 AM IST</strong> — Singapore (SGX) open। Volume बढ़ता है।</div>
+      <div>🕙 <strong>9:30 AM IST</strong> — Hong Kong (HSI) open। Asian momentum स्थापित होती है।</div>
+      <div>🕑 <strong>2:00 PM IST</strong> — Asian session बंद। London के लिए handoff।</div>
+      <div style="margin-top:8px;color:var(--muted);font-size:10px;">
+        ⚠️ इस सत्र में NASDAQ Futures liquidity कम होती है। Large moves trap हो सकते हैं।
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">NASDAQ Vedic V5 | Asian Session | Jai Hind 🇮🇳</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+if(!ROUTER.gate()) throw new Error('Build incomplete');
+let date = ROUTER.getDateParam();
+function setToday(){date=ROUTER.todayIST();document.getElementById('dateInput').value=date;loadPage();}
+
+async function loadPage(){
+  date=document.getElementById('dateInput').value||date;
+  document.getElementById('dateInput').value=date;
+  UI.renderHeader('headerWrap','sessions',date);
+  const data = await ROUTER.loadJSON(date,'sessions.json');
+  if(!data){ UI.showError('asianSig','sessions.json उपलब्ध नहीं'); return; }
+  const asian = data.asian||{};
+  const start=document.getElementById('startTime').value, end=document.getElementById('endTime').value, step=document.getElementById('stepTime').value;
+  const intra=await ROUTER.loadJSON(date,`intraday_${start}_${end}_${step}.json`);
+  if(intra) document.getElementById('intradayWrap').innerHTML=`<div class="fs-10 text-muted">${intra.startIST}–${intra.endIST} IST | ${intra.stepMinutes} min | BULL ${intra.summary.bull} · BEAR ${intra.summary.bear} · NEUT ${intra.summary.neut}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:4px;margin-top:8px;">${intra.rows.map(r=>`<div class="card" style="padding:6px;text-align:center;"><div class="fs-9 text-muted">${r.timeIST}</div><strong style="color:${r.finalCall==='BULL'?'var(--green)':r.finalCall==='BEAR'?'var(--red)':'var(--yellow)'}">${r.finalCall}</strong><div class="fs-9">${r.confidence}% | ${r.transitScore}</div></div>`).join('')}</div>`;
+  const sig=asian.signal||'NEUT';
+  const col=sig==='BULL'?'var(--green)':sig==='BEAR'?'var(--red)':'var(--yellow)';
+  document.getElementById('asianSig').innerHTML=`
+    <div class="signal-hero ${sig.toLowerCase()}" style="padding:14px;">
+      <div class="sig-label" style="color:${col};font-size:24px;">${sig}</div>
+      <div class="sig-score">आत्मविश्वास: ${asian.confidence||0}%</div>
+      <div class="sig-conf">होरा: ${asian.hora||'--'}</div>
+    </div>`;
+  const t=asian.trap||{type:'clear',title:'--',desc:'--'};
+  document.getElementById('trapEl').innerHTML=`
+    <div class="trap-box ${t.type||'clear'}">
+      <div class="trap-title ${t.type||'clear'}">${t.title||'--'}</div>
+      <div class="trap-desc">${t.desc||'--'}</div>
+    </div>`;
+  UI.renderTimeWindows('timeWin',asian.timeWindows||[]);
+  document.getElementById('explanations').innerHTML=(asian.explanations||[]).map(e=>`<div style="font-size:10px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--border);">• ${e}</div>`).join('');
+  UI.renderTicker('tickerWrap',[`🌏 Asian: ${sig} (${asian.confidence||0}%) | ${t.title||''}`]);
+}
+window.addEventListener('load',loadPage);
+</script>
+</body>
+</html>

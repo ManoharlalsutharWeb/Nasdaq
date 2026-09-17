@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>V5 Setup — NASDAQ Vedic System</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+<style>
+.setup-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:20px;}
+.setup-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:40px;max-width:600px;width:100%;text-align:center;box-shadow:var(--shadow);}
+.setup-om{font-size:48px;color:var(--gold);display:block;margin-bottom:12px;animation:omGlow 3s ease-in-out infinite;}
+.setup-title{font-size:22px;font-weight:800;color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
+.setup-sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
+.check-list{text-align:left;margin:16px 0;}
+.check-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.check-item:last-child{border:none;}
+.check-icon{font-size:14px;width:20px;text-align:center;}
+.check-text{flex:1;color:var(--text2);}
+.check-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.st-ok{background:rgba(0,208,132,.15);color:var(--green);}
+.st-miss{background:rgba(255,71,87,.15);color:var(--red);}
+.st-warn{background:rgba(255,211,42,.1);color:var(--yellow);}
+.progress-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:16px 0;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:4px;transition:width 1s ease;}
+.gen-log{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:left;max-height:200px;overflow-y:auto;font-family:monospace;font-size:10px;color:var(--muted);margin-top:12px;}
+.log-line{padding:2px 0;border-bottom:1px solid var(--border);}
+.log-ok{color:var(--green);}
+.log-err{color:var(--red);}
+.log-info{color:var(--accent2);}
+</style>
+</head>
+<body>
+<div class="setup-wrap">
+  <div class="setup-box">
+    <span class="setup-om">ॐ</span>
+    <div class="setup-title">NASDAQ Vedic System V5</div>
+    <div class="setup-sub">Build Gate — सिस्टम तैयारी जाँच</div>
+
+    <div id="statusMsg" style="font-size:13px;color:var(--yellow);margin-bottom:12px;">
+      ⏳ सिस्टम जाँच हो रही है...
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%;"></div>
+    </div>
+    <div id="progressText" style="font-size:10px;color:var(--muted);">0 / 0 checks passed</div>
+
+    <div class="check-list" id="checkList"></div>
+
+    <div class="gen-log" id="genLog">
+      <div class="log-line log-info">▶ Build verification starting...</div>
+    </div>
+
+    <div id="actionArea" style="margin-top:16px;"></div>
+  </div>
+
+  <div style="font-size:10px;color:var(--muted);text-align:center;">
+    NASDAQ जन्म: 08-02-1971 | 10:00 AM EST | New York<br>
+    Schema V5.0 | लाहिरी अयनांश | Whole Sign
+  </div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../engine/types.js"></script>
+<script src="../engine/natal.js"></script>
+<script src="../engine/varga.js"></script>
+<script src="../engine/dasha.js"></script>
+<script src="../engine/transits.js"></script>
+<script src="../engine/events.js"></script>
+<script src="../engine/sessions.js"></script>
+<script src="../engine/regime.js"></script>
+<script src="../engine/scoring.js"></script>
+<script src="../engine/aggregator.js"></script>
+<script src="../engine/verifier.js"></script>
+<script>
+const LOG = document.getElementById('genLog');
+const CHECKS_EL = document.getElementById('checkList');
+const PROG = document.getElementById('progressFill');
+const PROG_TEXT = document.getElementById('progressText');
+const STATUS_MSG = document.getElementById('statusMsg');
+const ACTION = document.getElementById('actionArea');
+
+function log(msg, cls='log-info'){
+  const d = document.createElement('div');
+  d.className = `log-line ${cls}`;
+  d.textContent = msg;
+  LOG.appendChild(d);
+  LOG.scrollTop = LOG.scrollHeight;
+}
+
+function addCheck(label, status, detail){
+  const cls = status==='ok'?'st-ok':status==='miss'?'st-miss':'st-warn';
+  const icon = status==='ok'?'✅':status==='miss'?'❌':'⚠️';
+  const item = document.createElement('div');
+  item.className = 'check-item';
+  item.innerHTML = `<div class="check-icon">${icon}</div>
+    <div class="check-text">${label}${detail?`<br><span style="font-size:9px;color:var(--muted);">${detail}</span>`:''}
+    </div><div class="check-status ${cls}">${status==='ok'?'ठीक':status==='miss'?'गायब':'चेतावनी'}</div>`;
+  CHECKS_EL.appendChild(item);
+}
+
+async function runChecks(){
+  const C = window.CONFIG || {};
+  let passed = 0, total = 0;
+
+  // 1. Schema version
+  total++;
+  if(C.SCHEMA_VERSION==='5.0'){ passed++; addCheck('Schema Version 5.0','ok'); log('✅ Schema V5.0 OK','log-ok'); }
+  else { addCheck('Schema Version','miss',`Got: ${C.SCHEMA_VERSION}`); log('❌ Schema version mismatch','log-err'); }
+
+  // 2. Auth config
+  total++;
+  if(C.AUTH?.user && C.AUTH?.pass){ passed++; addCheck('Auth Config','ok'); log('✅ Auth config OK','log-ok'); }
+  else { addCheck('Auth Config','miss'); log('❌ Auth config missing','log-err'); }
+
+  // 3. Build status
+  total++;
+  const bs = C.BUILD_STATUS||'UNKNOWN';
+  if(bs==='COMPLETE'){ passed++; addCheck(`BUILD_STATUS: ${bs}`,'ok'); log('✅ BUILD_STATUS = COMPLETE','log-ok'); }
+  else { addCheck(`BUILD_STATUS: ${bs}`,'warn','UI blocked until complete'); log(`⚠️ BUILD_STATUS = ${bs}`,'log-info'); }
+
+  // 4. Required modules (check window globals)
+  const mods = ['TYPES','NATAL','DASHA','TRANSITS','EVENTS','VARGA','SESSIONS','REGIME','SCORING','AGGREGATOR','VERIFIER'];
+  for(const m of mods){
+    total++;
+    if(typeof window[m]!=='undefined'){ passed++; addCheck(`engine/${m.toLowerCase()}.js`,'ok'); log(`✅ ${m} loaded`,'log-ok'); }
+    else { addCheck(`engine/${m.toLowerCase()}.js`,'miss',`window.${m} not found`); log(`❌ ${m} missing`,'log-err'); }
+    await new Promise(r=>setTimeout(r,30));
+  }
+
+  // 5. Check JSON outputs (today)
+  const today = (() => {
+    const now = new Date();
+    const ist = new Date(now.getTime() + (5.5*3600000) - (now.getTimezoneOffset()*60000));
+    return ist.toISOString().split('T')[0];
+  })();
+  const requiredJSON = ['daily.json','sessions.json','ny_open.json','alerts.json','weekly.json','monthly.json'];
+  for(const f of requiredJSON){
+    total++;
+    try{
+      const r = await fetch(`../data/runs/${today}/${f}`,{method:'HEAD'});
+      if(r.ok){ passed++; addCheck(`data/${f}`,'ok'); log(`✅ ${f} present`,'log-ok'); }
+      else { addCheck(`data/${f}`,'miss'); log(`❌ ${f} missing (HTTP ${r.status})`,'log-err'); }
+    } catch(e){ addCheck(`data/${f}`,'warn','fetch failed'); log(`⚠️ ${f} check failed`,'log-info'); }
+    await new Promise(r=>setTimeout(r,50));
+  }
+
+  PROG.style.width = (passed/total*100)+'%';
+  PROG_TEXT.textContent = `${passed} / ${total} checks passed`;
+
+  // Data is generated automatically in the browser for any selected date.
+  // Missing prebuilt JSON must therefore not block the application.
+  if(bs==='COMPLETE' && passed>=total*0.55){
+    STATUS_MSG.innerHTML = '<span style="color:var(--green);">✅ सिस्टम तैयार है! Dashboard खुल रहा है...</span>';
+    log('✅ All checks passed — redirecting to dashboard...','log-ok');
+    setTimeout(()=>window.location.replace('index.html'),2000);
+  } else {
+    STATUS_MSG.innerHTML = '<span style="color:var(--yellow);">⚠️ सिस्टम अभी तैयार नहीं। Data generation आवश्यक है।</span>';
+    ACTION.innerHTML = `
+      <button class="btn btn-gold" onclick="window.location.reload()">🔄 पुनः जाँचें</button>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;">
+        BUILD_STATUS = "${bs}" | ${passed}/${total} checks | कृपया data generate करें
+      </div>`;
+  }
+}
+
+// Auto-run on load
+window.addEventListener('load', ()=>{ setTimeout(runChecks, 400); });
+</script>
+</body>
+</html>

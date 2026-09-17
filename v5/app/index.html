@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-box">
+    <span class="login-om">ॐ</span>
+    <div class="login-title">NASDAQ Vedic V5</div>
+    <div class="login-ver">विश्व का सर्वश्रेष्ठ सिस्टम</div>
+    <input type="text" class="login-field" id="lUser" placeholder="👤 उपयोगकर्ता नाम" autocomplete="off">
+    <input type="password" class="login-field" id="lPass" placeholder="🔐 पासवर्ड" autocomplete="off">
+    <button class="btn" style="width:100%;padding:13px;font-size:14px;" onclick="doLogin()">🚀 प्रवेश करें</button>
+    <div class="login-err" id="lErr">⚠️ गलत उपयोगकर्ता नाम या पासवर्ड!</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appWrap" style="display:none;">
+<div class="app">
+  <div id="headerWrap"></div>
+
+  <div id="tickerWrap"></div>
+
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">🪐 Kundli Basis — D1 के 9 ग्रह + 12 भाव + D1–D60 Research</div>
+    <div id="kundaliBasis" style="font-size:10px;color:var(--muted);">कुंडली डेटा लोड हो रहा है...</div>
+  </div>
+
+  <div class="panel" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="fs-10 text-muted">📅 तिथि:</span>
+    <input type="date" id="dateInput" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;outline:none;">
+    <button class="btn" onclick="changeDashboardDate()">▶ विश्लेषण</button>
+    <button class="btn-outline" onclick="setDashboardToday()">📆 आज</button>
+    <button class="btn-outline" onclick="shiftDashboardDay(-1)">⏪ पिछला</button>
+    <button class="btn-outline" onclick="shiftDashboardDay(1)">⏩ अगला</button>
+  </div>
+
+  <!-- CRASH ALERT -->
+  <div id="crashWrap"></div>
+
+  <!-- ONE-CLICK VERDICT + CROSS-VERIFY -->
+  <div class="grid-3" style="margin-bottom:10px;">
+    <div>
+      <div class="panel">
+        <div class="panel-title">🎯 आज का फैसला (ONE CLICK)</div>
+        <div id="signalHero"></div>
+        <div id="scoreBars" style="margin-top:10px;"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title">🔍 Cross-Verification</div>
+        <div id="cvPanel"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">📿 पंचांग</div>
+        <div id="panchangEl"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title">⏳ विंशोत्तरी दशा</div>
+        <div id="dashaEl"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;">
+        <div class="panel-title">⏰ समय विंडो</div>
+        <div id="timeWindows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSIONS OVERVIEW -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">🌍 तीन वैश्विक सत्र — NASDAQ Futures</div>
+    <div class="grid-3">
+      <div id="sessAsian"></div>
+      <div id="sessLondon"></div>
+      <div id="sessNY"></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY + TOP REASONS -->
+  <div class="grid-2" style="margin-bottom:10px;">
+    <div class="panel">
+      <div class="panel-title">📅 इस सप्ताह</div>
+      <div id="weekGrid"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🔑 मुख्य कारण + जोखिम</div>
+      <div id="topReasons"></div>
+      <hr class="sep">
+      <div class="panel-title" style="margin-top:8px;">⚡ Invalidation Rules</div>
+      <div id="invalRules"></div>
+    </div>
+  </div>
+
+  <!-- NY OPEN PLAYBOOK PREVIEW -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">🗽 NY Open Playbook (7:00 PM IST) <span class="panel-badge">NASDAQ Futures Open</span></div>
+    <div id="nyPlaybook"></div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ यह प्रणाली केवल शैक्षिक एवं शोध उद्देश्य के लिए है। NASDAQ Futures में निवेश अत्यंत जोखिमपूर्ण है।
+    कोई भी निर्णय लेने से पहले US market के लिए CFTC/NFA/SEC नियमों और अधिकृत वित्तीय सलाहकार से परामर्श करें। ज्योतिषीय संभावना गारंटी नहीं है।
+  </div>
+  <div class="footer">
+    ज्ञान सबका है | NASDAQ Vedic V5 | Kundali-First | लाहिरी अयनांश | Jai Hind 🇮🇳
+  </div>
+</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../engine/types.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+// AUTH
+function doLogin(){
+  const u=document.getElementById('lUser').value.trim();
+  const p=document.getElementById('lPass').value;
+  const e=document.getElementById('lErr');
+  if(u===CONFIG.AUTH.user&&p===CONFIG.AUTH.pass){
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('appWrap').style.display='block';
+    document.getElementById('lPass').value='';
+    if(!ROUTER.gate()) return;
+    loadDashboard();
+  } else {
+    e.style.display='block';
+    e.style.animation='none';
+    requestAnimationFrame(()=>e.style.animation='shake .3s');
+    document.getElementById('lPass').value='';
+  }
+}
+function doLogout(){
+  if(confirm('लॉगआउट करें?')){
+    document.getElementById('loginWrap').style.display='flex';
+    document.getElementById('appWrap').style.display='none';
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('loginWrap').style.display!=='none') doLogin();
+});
+
+async function loadDashboard(dateOverride){
+  const date = dateOverride || ROUTER.getDateParam();
+  document.getElementById('dateInput').value=date;
+  UI.renderHeader('headerWrap','index',date);
+
+  // Load JSONs
+  UI.showLoading('signalHero','Daily data लोड हो रही है...');
+  const data = await ROUTER.loadMany(date,['daily.json','sessions.json','alerts.json','weekly.json']);
+  const daily = data['daily.json'];
+  const sessions = data['sessions.json'];
+  const alerts = data['alerts.json'];
+  const weekly = data['weekly.json'];
+
+  if(!daily){ UI.showError('signalHero','daily.json लोड नहीं हुई'); return; }
+
+  const kp=daily.kundali||{};
+  document.getElementById('kundaliBasis').innerHTML=
+    `<strong style="color:var(--accent2);">${kp.primaryBasis||'D1 Kundli'}</strong><br>`+
+    `ग्रह: ${kp.planetCount||0} | भाव: ${(kp.houses||[]).length} | `+
+    `${(kp.planets||[]).map(p=>p.hi||p.eng).join(' · ')}`;
+
+  // Signal
+  const lbl = daily.finalCall==='BULL'?'तेज़ी (BULL)':daily.finalCall==='BEAR'?'मंदी (BEAR)':'तटस्थ (NEUT)';
+  UI.renderSignalHero('signalHero',daily.finalCall,daily.finalConfidence,daily.rawScore,lbl);
+  UI.renderScoreBars('scoreBars',daily.componentScores);
+
+  // CV Panel
+  const cv = daily.conflict||{};
+  document.getElementById('cvPanel').innerHTML = `
+    <div style="font-size:11px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${cv.hasConflict?'var(--yellow)':'var(--green)'};"></div>
+        <span style="color:${cv.hasConflict?'var(--yellow)':'var(--green)'};">${cv.desc||'जाँच जारी...'}</span>
+      </div>
+    </div>
+    ${(daily.topReasons||[]).slice(0,3).map(r=>`<div style="font-size:10px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--border);">✅ ${r}</div>`).join('')}
+    <div style="margin-top:8px;font-size:10px;color:var(--muted);">
+      Varga Consensus: <strong style="color:${daily.vargaConsensus?.dir==='BULL'?'var(--green)':daily.vargaConsensus?.dir==='BEAR'?'var(--red)':'var(--yellow)'};">${daily.vargaConsensus?.dir||'--'}</strong>
+      (${daily.vargaConsensus?.conf||0}% conf)
+    </div>`;
+
+  // Panchang
+  UI.renderPanchang('panchangEl', daily.panchang);
+
+  // Dasha
+  UI.renderDasha('dashaEl', daily.dasha);
+
+  // Time Windows
+  const allWins = [...(daily.bestWindows||[]),...(daily.avoidWindows||[])];
+  UI.renderTimeWindows('timeWindows', allWins.slice(0,3));
+
+  // Sessions
+  if(sessions){
+    UI.renderSessionCard('sessAsian',  {signal:sessions.asian?.signal,  confidence:sessions.asian?.confidence||0,  hora:sessions.asian?.hora,  trap:sessions.asian?.trap},  'asian');
+    UI.renderSessionCard('sessLondon', {signal:sessions.london?.signal, confidence:sessions.london?.confidence||0, hora:sessions.london?.hora, trap:sessions.london?.trap}, 'london');
+    UI.renderSessionCard('sessNY',     {signal:sessions.newyork?.signal,confidence:sessions.newyork?.confidence||0,hora:sessions.newyork?.hora,trap:sessions.newyork?.trap},'newyork');
+  }
+
+  // Weekly
+  if(weekly) UI.renderWeekGrid('weekGrid', weekly.days||[], date);
+
+  // Top reasons
+  document.getElementById('topReasons').innerHTML =
+    `<div style="font-size:10px;color:var(--gold);margin-bottom:6px;">✅ मुख्य कारण:</div>`+
+    (daily.topReasons||[]).map(r=>`<div style="font-size:10px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--border);">${r}</div>`).join('')+
+    `<div style="font-size:10px;color:var(--red);margin-top:8px;margin-bottom:4px;">⚠️ जोखिम:</div>`+
+    (daily.topRisks||[]).map(r=>`<div style="font-size:10px;color:var(--muted);padding:3px 0;">${r}</div>`).join('');
+
+  // Invalidation rules
+  document.getElementById('invalRules').innerHTML =
+    (daily.invalidationRules||[]).map(r=>`<div style="font-size:10px;color:var(--muted);padding:3px 0;border-bottom:1px solid var(--border);">🔸 ${r}</div>`).join('');
+
+  // Crash alert
+  UI.renderCrashAlert('crashWrap', daily.crashRegimeWindows);
+
+  // NY Playbook preview
+  if(sessions?.nyPlaybook){
+    const pb = sessions.nyPlaybook;
+    const dir = pb.playbookDirection||'NEUT';
+    const col = dir==='BULL'?'var(--green)':dir==='BEAR'?'var(--red)':'var(--yellow)';
+    document.getElementById('nyPlaybook').innerHTML = `
+    <div class="grid-3">
+      <div class="card"><div style="font-size:9px;color:var(--muted);">Sweep Risk</div>
+        <div style="font-size:14px;font-weight:800;color:${pb.sweepRisk?.level==='HIGH'?'var(--red)':'var(--green)'};">${pb.sweepRisk?.level||'--'}</div>
+        <div style="font-size:9px;color:var(--muted);">${pb.sweepRisk?.desc||''}</div></div>
+      <div class="card"><div style="font-size:9px;color:var(--muted);">Direction Attempt</div>
+        <div style="font-size:14px;font-weight:800;color:${col};">${pb.directionAttempt?.direction||'--'}</div>
+        <div style="font-size:9px;color:var(--muted);">${pb.directionAttempt?.desc||''}</div></div>
+      <div class="card"><div style="font-size:9px;color:var(--muted);">Decision Zone</div>
+        <div style="font-size:14px;font-weight:800;color:${col};">${pb.decisionZone?.trapType?.toUpperCase()||'--'}</div>
+        <div style="font-size:9px;color:var(--muted);">${pb.decisionZone?.desc||''}</div></div>
+    </div>
+    <div style="margin-top:8px;text-align:center;">
+      <a href="session_ny.html?date=${date}" class="btn" style="font-size:11px;">🗽 NY Session Deep Dive →</a>
+    </div>`;
+  }
+
+  // Ticker
+  UI.renderTicker('tickerWrap',[
+    `📊 ${daily.finalCall} | स्कोर: ${(daily.rawScore||0).toFixed(0)} | विश्वास: ${daily.finalConfidence}%`,
+    `🌙 ${daily.panchang?.nakshatra||''} नक्षत्र | ${daily.panchang?.yoga||''}`,
+    `⏳ दशा: ${daily.dasha?.mahaHi||''}–${daily.dasha?.antarHi||''}`,
+    `🌍 Asian: ${sessions?.asian?.signal||'--'} | London: ${sessions?.london?.signal||'--'} | NY: ${sessions?.newyork?.signal||'--'}`,
+    daily.crashRegimeWindows?.length?`🚨 Crash Regime Active!`:'✅ No Crash Regime',
+  ]);
+}
+function changeDashboardDate(){ loadDashboard(document.getElementById('dateInput').value||ROUTER.todayIST()); }
+function setDashboardToday(){ loadDashboard(ROUTER.todayIST()); }
+function shiftDashboardDay(n){
+  const[y,m,d]=document.getElementById('dateInput').value.split('-').map(Number);
+  const next=new Date(y,m-1,d+n).toISOString().split('T')[0];
+  loadDashboard(next);
+}
+</script>
+</body>
+</html>

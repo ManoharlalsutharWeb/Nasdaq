@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Monthly — NASDAQ Vedic V5</title>
+<link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div id="headerWrap"></div>
+  <div id="tickerWrap"></div>
+
+  <div class="panel" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="fs-10 text-muted">📆 माह:</span>
+    <input type="month" id="monthInput" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;outline:none;">
+    <button class="btn" onclick="loadPage()">▶ लोड</button>
+    <button class="btn-outline" onclick="setThisMonth()">📆 इस माह</button>
+    <button class="btn-outline" onclick="shiftMonth(-1)">⏪ पिछला</button>
+    <button class="btn-outline" onclick="shiftMonth(1)">⏩ अगला</button>
+    <button class="btn-outline" onclick="window.print()">🖨️ Print</button>
+    <div id="monthStats" style="margin-left:auto;font-size:10px;color:var(--muted);"></div>
+  </div>
+
+  <!-- MONTH CALENDAR -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">📆 मासिक पूर्वानुमान कैलेंडर — NASDAQ Futures</div>
+    <div id="monthGrid"></div>
+  </div>
+
+  <!-- MONTH ANALYSIS -->
+  <div class="grid-3" style="margin-bottom:10px;">
+    <div class="panel">
+      <div class="panel-title">📊 माह सारांश</div>
+      <div id="monthSummary"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🏆 Top 5 Bullish दिन</div>
+      <div id="topBull"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">⚠️ Top 5 Bearish दिन</div>
+      <div id="topBear"></div>
+    </div>
+  </div>
+
+  <!-- CRASH WINDOWS THIS MONTH -->
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">🚨 इस माह Crash Risk Windows</div>
+    <div id="crashWindows"></div>
+  </div>
+
+  <div class="disclaimer">⚠️ मासिक पूर्वानुमान ज्योतिषीय संभावना है। गारंटी नहीं। US market regulators सलाहकार से परामर्श करें।</div>
+  <div class="footer">NASDAQ Vedic V5 | Monthly | Jai Hind 🇮🇳</div>
+</div>
+
+<script src="../engine/config.js"></script>
+<script src="../assets/js/router.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+if(!ROUTER.gate()) throw new Error('Build incomplete');
+const today = ROUTER.todayIST();
+const initialDate = ROUTER.getDateParam();
+let currentMonth = initialDate.substring(0,7);
+
+function setThisMonth(){ currentMonth=today.substring(0,7); document.getElementById('monthInput').value=currentMonth; loadPage(); }
+function shiftMonth(n){
+  const[y,m]=currentMonth.split('-').map(Number);
+  const d2=new Date(y,m-1+n,1);
+  currentMonth=`${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('monthInput').value=currentMonth;
+  loadPage();
+}
+function loadPage(){
+  currentMonth = document.getElementById('monthInput').value || currentMonth;
+  doLoad();
+}
+
+const SIG_COLOR = s => s==='BULL'?'var(--green)':s==='BEAR'?'var(--red)':'var(--yellow)';
+
+async function doLoad(){
+  UI.renderHeader('headerWrap','monthly',currentMonth);
+  document.getElementById('monthInput').value = currentMonth;
+  const dateIST = currentMonth+'-01';
+  UI.showLoading('monthGrid','मासिक डेटा लोड हो रहा है...');
+
+  const data = await ROUTER.loadJSON(dateIST,'monthly.json');
+  if(!data){ UI.showError('monthGrid','monthly.json उपलब्ध नहीं'); return; }
+
+  const days = data.days||[];
+  UI.renderMonthGrid('monthGrid', days, currentMonth+'-'+String(new Date().getDate()).padStart(2,'0'));
+
+  // Stats
+  const mkt = days.filter(d=>!d.isHoliday&&d.isMarketDay!==false);
+  const bulls = mkt.filter(d=>d.finalCall==='BULL').length;
+  const bears = mkt.filter(d=>d.finalCall==='BEAR').length;
+  const neuts = mkt.filter(d=>d.finalCall==='NEUT').length;
+  const avg = mkt.reduce((s,d)=>s+(d.score||0),0)/(mkt.length||1);
+  const dir = bulls>bears?'BULL':bears>bulls?'BEAR':'NEUT';
+  const col = SIG_COLOR(dir);
+
+  document.getElementById('monthStats').textContent = `🐂${bulls} 🐻${bears} ⚖️${neuts} | Avg: ${avg.toFixed(1)}`;
+
+  document.getElementById('monthSummary').innerHTML=`
+    <div style="text-align:center;margin-bottom:12px;">
+      <div style="font-size:28px;font-weight:900;color:${col};">${dir}</div>
+      <div style="font-size:10px;color:var(--muted);">माह की दिशा</div>
+    </div>
+    <div class="grid-2" style="gap:6px;">
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">🐂 Bull दिन</div><div style="font-size:20px;font-weight:700;color:var(--green);">${bulls}</div></div>
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">🐻 Bear दिन</div><div style="font-size:20px;font-weight:700;color:var(--red);">${bears}</div></div>
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">⚖️ Neut दिन</div><div style="font-size:20px;font-weight:700;color:var(--yellow);">${neuts}</div></div>
+      <div class="card" style="text-align:center;"><div class="fs-9 text-muted">📊 Avg Score</div><div style="font-size:20px;font-weight:700;color:${col};">${avg.toFixed(1)}</div></div>
+    </div>
+    <div class="str-bar" style="margin-top:10px;"><div class="str-fill" style="width:${Math.min(100,bulls/mkt.length*100)}%;background:var(--green);"></div></div>
+    <div style="font-size:9px;color:var(--muted);text-align:center;">${(bulls/mkt.length*100).toFixed(0)}% Bullish bias</div>`;
+
+  // Top bull/bear
+  const sorted = [...mkt].sort((a,b)=>(b.score||0)-(a.score||0));
+  const top5Bull = sorted.slice(0,5);
+  const top5Bear = sorted.slice(-5).reverse();
+
+  function topList(arr,isGood){
+    return arr.map(d=>{
+      const col=SIG_COLOR(d.finalCall||'NEUT');
+      return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;">
+        <div style="color:var(--muted);width:50px;">${d.date?.split('-').slice(1).join('/')||''}</div>
+        <div style="font-weight:700;color:${col};width:40px;">${d.finalCall||''}</div>
+        <div style="flex:1;color:var(--accent2);font-size:9px;">${(d.nakshatra||'').substring(0,8)}</div>
+        <div style="font-weight:700;color:${col};">${(d.score||0).toFixed(0)}</div>
+        <a href="daily.html?date=${d.date}" style="color:var(--muted);font-size:9px;">→</a>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('topBull').innerHTML = topList(top5Bull,true);
+  document.getElementById('topBear').innerHTML = topList(top5Bear,false);
+
+  // Crash windows (days with very negative score)
+  const crashDays = mkt.filter(d=>(d.score||0)<-40);
+  if(crashDays.length){
+    document.getElementById('crashWindows').innerHTML=`
+      <div style="font-size:11px;color:var(--red);margin-bottom:8px;">⚠️ इन तिथियों पर स्कोर -40 से नीचे — उच्च जोखिम:</div>
+      ${crashDays.map(d=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;">
+          <div style="color:var(--red);font-weight:700;width:60px;">${d.date||''}</div>
+          <div style="flex:1;color:var(--text2);">${d.nakshatra||''} नक्षत्र</div>
+          <div style="color:var(--red);font-weight:700;">${(d.score||0).toFixed(0)}</div>
+          <a href="daily.html?date=${d.date}" class="btn-outline" style="font-size:9px;padding:3px 8px;">जाँचें</a>
+        </div>`).join('')}
+      <div style="font-size:9px;color:var(--muted);margin-top:8px;">⚠️ यह ज्योतिषीय जोखिम संकेत है। गारंटी नहीं।</div>`;
+  } else {
+    document.getElementById('crashWindows').innerHTML='<div style="color:var(--green);font-size:11px;">✅ इस माह कोई उच्च Crash Risk Window नहीं।</div>';
+  }
+
+  UI.renderTicker('tickerWrap',[
+    `📆 ${currentMonth}: ${dir} | 🐂${bulls} 🐻${bears} ⚖️${neuts}`,
+    `📊 Avg Score: ${avg.toFixed(1)} | Best: ${top5Bull[0]?.date||''} (${(top5Bull[0]?.score||0).toFixed(0)})`,
+    crashDays.length?`🚨 ${crashDays.length} दिन Crash Risk`:'✅ No Crash Risk',
+  ]);
+}
+window.addEventListener('load',doLoad);
+</script>
+</body>
+</html>
