@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NASDAQ Financial Astrology System</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #0f0f1a;
+    --bg3: #141428;
+    --accent: #6c63ff;
+    --gold: #f0b90b;
+    --green: #00d084;
+    --red: #ff4757;
+    --yellow: #ffd32a;
+    --text: #e0e0f0;
+    --muted: #6b6b8a;
+    --border: #1e1e3a;
+  }
+  
+  body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: 'Segoe UI', sans-serif; 
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+  
+  .app { max-width: 1800px; margin: 0 auto; padding: 10px; }
+
+  /* HEADER */
+  .header { 
+    text-align: center; 
+    padding: 20px 0 10px; 
+    border-bottom: 1px solid var(--border); 
+    margin-bottom: 12px; 
+  }
+  .header h1 { 
+    font-size: 22px; 
+    color: var(--gold); 
+    letter-spacing: 2px; 
+    text-transform: uppercase; 
+  }
+  .header p { 
+    color: var(--muted); 
+    font-size: 12px; 
+    margin-top: 4px; 
+  }
+
+  /* DATE PICKER */
+  .date-control {
+    text-align: center;
+    margin: 15px 0;
+    padding: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .date-control input {
+    padding: 8px 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 0 10px;
+  }
+  .date-control button {
+    padding: 8px 20px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 0 5px;
+  }
+  .date-control button:hover { background: #7c73ff; }
+
+  .birth-badge { 
+    display: inline-flex; 
+    gap: 20px; 
+    margin-top: 8px; 
+    background: var(--bg3); 
+    padding: 6px 20px; 
+    border-radius: 20px; 
+    border: 1px solid var(--border); 
+    font-size: 12px; 
+  }
+  .birth-badge span { color: var(--gold); }
+
+  /* MAIN GRID */
+  .main-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; 
+    gap: 10px; 
+    margin-bottom: 15px;
+  }
+  
+  .panel { 
+    background: var(--bg2); 
+    border: 1px solid var(--border); 
+    border-radius: 10px; 
+    padding: 12px; 
+  }
+  .panel-title { 
+    font-size: 11px; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    color: var(--gold); 
+    margin-bottom: 10px; 
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 6px; 
+  }
+
+  /* SIGNAL BOX */
+  .signal-box { 
+    text-align: center; 
+    padding: 16px; 
+    border-radius: 10px; 
+    margin-bottom: 10px; 
+  }
+  .signal-box.bullish { 
+    background: linear-gradient(135deg, #003d20, #00d08422); 
+    border: 2px solid var(--green); 
+  }
+  .signal-box.bearish { 
+    background: linear-gradient(135deg, #3d0000, #ff475722); 
+    border: 2px solid var(--red); 
+  }
+  .signal-box.neutral { 
+    background: linear-gradient(135deg, #1a1a00, #ffd32a22); 
+    border: 2px solid var(--yellow); 
+  }
+  .signal-label { 
+    font-size: 28px; 
+    font-weight: 900; 
+    letter-spacing: 3px; 
+  }
+  .signal-box.bullish .signal-label { color: var(--green); }
+  .signal-box.bearish .signal-label { color: var(--red); }
+  .signal-box.neutral .signal-label { color: var(--yellow); }
+  .signal-score { font-size: 13px; margin-top: 6px; color: var(--muted); }
+  
+  .strength-bar { 
+    height: 6px; 
+    background: var(--bg3); 
+    border-radius: 3px; 
+    margin: 8px 0; 
+    overflow: hidden; 
+  }
+  .strength-fill { 
+    height: 100%; 
+    border-radius: 3px; 
+    transition: width 1s; 
+  }
+
+  /* 3-SESSION VIEW */
+  .sessions { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; 
+    gap: 6px; 
+    margin-bottom: 10px; 
+  }
+  .session-card { 
+    background: var(--bg3); 
+    border: 1px solid var(--border); 
+    border-radius: 8px; 
+    padding: 8px; 
+    text-align: center; 
+  }
+  .session-name { 
+    font-size: 10px; 
+    color: var(--muted); 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+  }
+  .session-signal { 
+    font-size: 16px; 
+    font-weight: 700; 
+    margin: 4px 0; 
+  }
+  .session-time { 
+    font-size: 10px; 
+    color: var(--muted); 
+  }
+
+  /* GAP INDICATOR */
+  .gap-indicator { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 6px; 
+    padding: 8px; 
+    background: var(--bg3); 
+    border-radius: 8px; 
+    margin-bottom: 10px; 
+  }
+  .gap-label { 
+    font-size: 11px; 
+    color: var(--muted); 
+  }
+  .gap-val { 
+    font-size: 15px; 
+    font-weight: 700; 
+  }
+  .gap-up { color: var(--green); }
+  .gap-down { color: var(--red); }
+
+  /* KUNDALI SVG */
+  #kundali-svg { 
+    width: 100%; 
+    max-width: 280px; 
+    display: block; 
+    margin: 0 auto; 
+  }
+
+  .house-info { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 4px; 
+    margin-top: 8px; 
+  }
+  .house-pill { 
+    background: var(--bg3); 
+    border: 1px solid var(--border); 
+    border-radius: 6px; 
+    padding: 4px 6px; 
+    font-size: 11px; 
+  }
+  .house-pill .h-num { 
+    color: var(--gold); 
+    font-weight: 700; 
+  }
+
+  /* CALENDAR VIEW */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .cal-day {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px;
+    text-align: center;
+    font-size: 11px;
+  }
+  .cal-day.today {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #1a1a00, var(--bg3));
+  }
+  .cal-day-num {
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .cal-signal {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .cal-signal.bullish { color: var(--green); }
+  .cal-signal.bearish { color: var(--red); }
+  .cal-signal.neutral { color: var(--yellow); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 6px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .tab-btn:hover {
+    border-color: var(--accent);
+  }
+
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+  .data-table th {
+    background: var(--bg3);
+    padding: 6px;
+    text-align: left;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+  }
+  .data-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table tr:hover {
+    background: var(--bg3);
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 30px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1200px) {
+    .main-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 768px) {
+    .main-grid {
+      grid-template-columns: 1fr;
+    }
+    .sessions {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>📊 NASDAQ Financial Astrology</h1>
+    <p>Vedic Astrology • Market Analysis • Real-time Signals</p>
+    <div class="birth-badge">
+      <span>Birth: 08-02-1971 10:00 AM EST</span>
+      <span>NYC: 40.714°N 74.006°W</span>
+    </div>
+  </div>
+
+  <!-- DATE PICKER -->
+  <div class="date-control">
+    <label>Select Date:</label>
+    <input type="date" id="datePicker">
+    <button onclick="loadDate()">Load Analysis</button>
+    <button onclick="loadToday()">Today</button>
+  </div>
+
+  <!-- TIME DISPLAY -->
+  <div class="panel" style="text-align: center; margin-bottom: 15px;">
+    <div style="font-size: 18px; color: var(--gold); font-weight: 700;">
+      <span id="currentTime">Loading...</span>
+    </div>
+    <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+      EST (UTC-5) | Market Time
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+    <!-- LEFT: KUNDALI -->
+    <div class="panel">
+      <div class="panel-title">Natal Kundali (D1)</div>
+      <svg id="kundali-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="house-info" id="houseInfo"></div>
+    </div>
+
+    <!-- CENTER: MAIN SIGNAL -->
+    <div class="panel">
+      <div class="panel-title">Primary Signal</div>
+      <div id="mainSignal" class="signal-box neutral">
+        <div class="signal-label">LOADING...</div>
+        <div class="signal-score">Calculating...</div>
+        <div class="strength-bar">
+          <div class="strength-fill" style="width: 50%; background: var(--yellow);"></div>
+        </div>
+      </div>
+
+      <div class="panel-title" style="margin-top: 15px;">Gap Prediction</div>
+      <div class="gap-indicator">
+        <span class="gap-label">Gap:</span>
+        <span id="gapSignal" class="gap-val gap-up">+0.25%</span>
+      </div>
+
+      <div class="panel-title" style="margin-top: 15px;">3 Sessions</div>
+      <div class="sessions">
+        <div class="session-card">
+          <div class="session-name">Pre-Market</div>
+          <div class="session-signal" id="preSignal">-</div>
+          <div class="session-time">4:00-9:30</div>
+        </div>
+        <div class="session-card">
+          <div class="session-name">Regular</div>
+          <div class="session-signal" id="regSignal">-</div>
+          <div class="session-time">9:30-4:00</div>
+        </div>
+        <div class="session-card">
+          <div class="session-name">After-Hours</div>
+          <div class="session-signal" id="aftSignal">-</div>
+          <div class="session-time">4:00-8:00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: TRANSITS -->
+    <div class="panel">
+      <div class="panel-title">Current Transits & Aspects</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Planet</th>
+            <th>Rashi</th>
+            <th>Degree</th>
+            <th>Aspect</th>
+          </tr>
+        </thead>
+        <tbody id="transitTable">
+          <tr><td colspan="4" style="text-align: center; color: var(--muted);">Calculating...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABS SECTION -->
+  <div class="panel" style="margin-bottom: 15px;">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('weekly')">Weekly</button>
+      <button class="tab-btn" onclick="switchTab('monthly')">Monthly</button>
+      <button class="tab-btn" onclick="switchTab('dasha')">Dasha</button>
+      <button class="tab-btn" onclick="switchTab('panchang')">Panchang</button>
+      <button class="tab-btn" onclick="switchTab('vargas')">Vargas D9/D20</button>
+      <button class="tab-btn" onclick="switchTab('hora')">Hora</button>
+      <button class="tab-btn" onclick="switchTab('yogas')">Active Yogas</button>
+    </div>
+
+    <!-- WEEKLY -->
+    <div id="weekly" class="tab-content active">
+      <div class="panel-title">Weekly Forecast (Mon-Fri)</div>
+      <div id="weeklyContent"></div>
+    </div>
+
+    <!-- MONTHLY -->
+    <div id="monthly" class="tab-content">
+      <div class="panel-title">Monthly Calendar</div>
+      <div class="calendar-grid" id="monthlyCalendar"></div>
+    </div>
+
+    <!-- DASHA -->
+    <div id="dasha" class="tab-content">
+      <div class="panel-title">Vimshottari Dasha</div>
+      <div id="dashaContent"></div>
+    </div>
+
+    <!-- PANCHANG -->
+    <div id="panchang" class="tab-content">
+      <div class="panel-title">Panchang (5 Elements)</div>
+      <div id="panchangContent"></div>
+    </div>
+
+    <!-- VARGAS -->
+    <div id="vargas" class="tab-content">
+      <div class="panel-title">Divisional Charts (Vargas)</div>
+      <div id="vargasContent"></div>
+    </div>
+
+    <!-- HORA -->
+    <div id="hora" class="tab-content">
+      <div class="panel-title">Hora (Planetary Hours)</div>
+      <div id="horaContent"></div>
+    </div>
+
+    <!-- YOGAS -->
+    <div id="yogas" class="tab-content">
+      <div class="panel-title">Active Yogas</div>
+      <div id="yogasContent"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Credit: Vedic Astrology & AI | Free to use | No copyright
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// NASDAQ FINANCIAL ASTROLOGY ENGINE - COMPLETE V5 (SINGLE FILE)
+// ═══════════════════════════════════════════════════════════════
+
+// NASDAQ BIRTH DATA
+const NASDAQ = {
+  year: 1971,
+  month: 8,
+  day: 2,
+  hour: 10,
+  minute: 0,
+  second: 0,
+  lat: 40.714,
+  lng: -74.006,
+  tz: -5, // EST
+};
+
+// PLANETS (10: 0-Sun, 1-Moon, 2-Mercury, 3-Venus, 4-Mars, 5-Jupiter, 6-Saturn, 7-Rahu, 8-Ketu, 9-Uranus)
+const PLANETS = ['☉ Sun', '☽ Moon', '☿ Mercury', '♀ Venus', '♂ Mars', '♃ Jupiter', '♄ Saturn', '☊ Rahu', '☋ Ketu', '♅ Uranus'];
+
+// RASHI (12 Zodiac signs)
+const RASHIS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+
+// NAKSHATRAS (27)
+const NAKSHATRAS = [
+  'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha',
+  'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Svati', 'Visakha', 'Anuradha', 'Jyeshtha',
+  'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'
+];
+
+// STATE
+let currentDate = new Date();
+let natalData = null;
+let transitData = null;
+
+// ═══════════════════════════════════════════════════════════════
+// ASTRONOMICAL CALCULATIONS (Jean Meeus)
+// ═══════════════════════════════════════════════════════════════
+
+function julianDay(year, month, day) {
+  if (month <= 2) {
+    year -= 1;
+    month += 12;
+  }
+  const a = Math.floor(year / 100);
+  const b = 2 - a + Math.floor(a / 4);
+  return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + b - 1524.5;
+}
+
+function jdToDate(jd) {
+  const jd2000 = jd - 2451545.0;
+  return (jd2000 / 36525.0);
+}
+
+// Sun position (simplified - Meeus algorithm)
+function sunPosition(jd) {
+  const t = jdToDate(jd);
+  const L0 = 280.46646 + 36000.76983 * t + 0.0003032 * t * t;
+  const M = 357.52911 + 35999.05029 * t - 0.0001536 * t * t;
+  const C = (1.914602 - 0.004817 * t - 0.000014 * t * t) * Math.sin(M * Math.PI / 180) +
+            (0.019993 - 0.000101 * t) * Math.sin(2 * M * Math.PI / 180) +
+            0.000029 * Math.sin(3 * M * Math.PI / 180);
+  const lon = (L0 + C) % 360;
+  return lon < 0 ? lon + 360 : lon;
+}
+
+// Moon position (simplified - mean position)
+function moonPosition(jd) {
+  const t = jdToDate(jd);
+  const lon = 218.3165 + 13.17639 * 360 * t;
+  return lon % 360;
+}
+
+// Basic planet positions
+function planetPositions(jd) {
+  const positions = {};
+  
+  // Sun
+  positions[0] = sunPosition(jd);
+  
+  // Moon
+  positions[1] = moonPosition(jd);
+  
+  // Simplified positions for other planets (mean motion)
+  const t = jdToDate(jd);
+  const mercury = (77.456 + 4.1088 * 360 * t) % 360;
+  const venus = (131.564 + 1.6021 * 360 * t) % 360;
+  const mars = (355.433 + 0.5240 * 360 * t) % 360;
+  const jupiter = (34.351 + 0.0830 * 360 * t) % 360;
+  const saturn = (50.066 + 0.0339 * 360 * t) % 360;
+  const rahu = (259.183 - 0.0529 * 360 * t) % 360; // Retrograde
+  const ketu = (rahu + 180) % 360;
+  const uranus = (313.3 + 0.0113 * 360 * t) % 360;
+  
+  positions[2] = mercury < 0 ? mercury + 360 : mercury;
+  positions[3] = venus < 0 ? venus + 360 : venus;
+  positions[4] = mars < 0 ? mars + 360 : mars;
+  positions[5] = jupiter < 0 ? jupiter + 360 : jupiter;
+  positions[6] = saturn < 0 ? saturn + 360 : saturn;
+  positions[7] = rahu < 0 ? rahu + 360 : rahu;
+  positions[8] = ketu < 0 ? ketu + 360 : ketu;
+  positions[9] = uranus < 0 ? uranus + 360 : uranus;
+  
+  return positions;
+}
+
+// Lahiri Ayanamsha (Sidereal)
+function lahiriAyanamsha(jd) {
+  const t = jdToDate(jd);
+  const ayan = 23.85235 + 0.0000039 * t * t;
+  return ayan;
+}
+
+// Sidereal positions
+function siderealPositions(positions, jd) {
+  const ayan = lahiriAyanamsha(jd);
+  const sidereal = {};
+  for (let p in positions) {
+    sidereal[p] = (positions[p] - ayan) % 360;
+    if (sidereal[p] < 0) sidereal[p] += 360;
+  }
+  return sidereal;
+}
+
+// Rashi and degree
+function rashiAndDegree(lon) {
+  const rashi = Math.floor(lon / 30);
+  const degree = lon % 30;
+  return { rashi: rashi, degree: degree.toFixed(2) };
+}
+
+// Bhava (House) calculation - Whole Sign
+function bhavaCalculation(asc) {
+  const bhavas = {};
+  for (let i = 0; i < 12; i++) {
+    bhavas[i] = (asc + i * 30) % 360;
+  }
+  return bhavas;
+}
+
+function planetInBhava(planetLon, bhavas) {
+  for (let i = 0; i < 12; i++) {
+    const bhavaStart = bhavas[i];
+    const bhavaEnd = bhavas[(i + 1) % 12];
+    if (bhavaStart < bhavaEnd) {
+      if (planetLon >= bhavaStart && planetLon < bhavaEnd) return i + 1;
+    } else {
+      if (planetLon >= bhavaStart || planetLon < bhavaEnd) return i + 1;
+    }
+  }
+  return 1;
+}
+
+// Nakshatra
+function nakshatraFromLon(lon) {
+  const nak = Math.floor(lon / (360 / 27));
+  return NAKSHATRAS[nak];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ASTROLOGICAL ANALYSIS ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+function calculateNatalChart(year, month, day, hour, minute) {
+  const jd = julianDay(year, month, day + (hour + minute / 60) / 24);
+  const positions = planetPositions(jd);
+  const sidereal = siderealPositions(positions, jd);
+  
+  // Ascendant (simplified: Sun position at noon)
+  const ascendant = sidereal[0];
+  const bhavas = bhavaCalculation(ascendant);
+  
+  return {
+    jd: jd,
+    positions: positions,
+    sidereal: sidereal,
+    ascendant: ascendant,
+    bhavas: bhavas,
+    date: new Date(year, month - 1, day),
+  };
+}
+
+function calculateTransits(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  
+  const jd = julianDay(year, month, day + (hour + minute / 60) / 24);
+  const positions = planetPositions(jd);
+  const sidereal = siderealPositions(positions, jd);
+  
+  return {
+    jd: jd,
+    positions: positions,
+    sidereal: sidereal,
+    date: date,
+  };
+}
+
+// Aspect calculation
+function aspectBetween(lon1, lon2) {
+  let diff = Math.abs(lon1 - lon2);
+  if (diff > 180) diff = 360 - diff;
+  
+  const aspects = {
+    conjunction: { min: 0, max: 8, power: 2 },
+    sextile: { min: 52, max: 68, power: 1 },
+    square: { min: 82, max: 98, power: 2 },
+    trine: { min: 112, max: 128, power: 2 },
+    opposition: { min: 172, max: 188, power: 2 },
+  };
+  
+  for (let asp in aspects) {
+    const range = aspects[asp];
+    if (diff >= range.min && diff <= range.max) {
+      return { name: asp, power: range.power, diff: diff };
+    }
+  }
+  return null;
+}
+
+// Vimshottari Dasha calculation
+function vimshottariDasha(natalMoonNak) {
+  const dashaYears = [6, 10, 7, 7, 7, 20, 6, 18, 16]; // Ketu to Merc
+  const dasha = [7, 8, 0, 1, 5, 6, 3, 9, 2]; // Sequence
+  
+  const result = [];
+  let nakIndex = Math.floor(natalMoonNak / (360 / 27));
+  const startDasha = dasha.indexOf(nakIndex);
+  
+  for (let i = 0; i < 9; i++) {
+    const d = (startDasha + i) % 9;
+    result.push({
+      lord: PLANETS[dasha[d]],
+      years: dashaYears[d],
+    });
+  }
+  
+  return result;
+}
+
+// Score calculation (weighted)
+function calculateSignalScore(natalData, transitData, date) {
+  let score = 0;
+  
+  // Jupiter effects
+  const jupiterTrans = transitData.sidereal[5];
+  const jupiterNatal = natalData.sidereal[5];
+  if (Math.abs(jupiterTrans - jupiterNatal) < 10) score += 12; // Conjunction bonus
+  
+  // Saturn transits
+  const saturnTrans = transitData.sidereal[6];
+  const saturnNatal = natalData.sidereal[6];
+  if (Math.abs(saturnTrans - saturnNatal) > 150 && Math.abs(saturnTrans - saturnNatal) < 190) score -= 8; // Opposition
+  
+  // Moon position (nakshatra energy)
+  const moonNak = nakshatraFromLon(transitData.sidereal[1]);
+  const moonIndex = NAKSHATRAS.indexOf(moonNak);
+  if (moonIndex % 2 === 0) score += 3; // Odd nakshatras positive
+  
+  // Mercury (tech/news)
+  if (Math.abs(transitData.sidereal[2] - transitData.sidereal[0]) < 15) score += 2; // Mercury-Sun close
+  
+  // Mars volatility
+  const marsRashi = transitData.sidereal[4] % 30;
+  if (marsRashi < 15) score -= 2; // Mars debilitated
+  
+  // Hour of day bonus (Hora)
+  const hora = getHoraLord(date);
+  if (['Jupiter', 'Venus'].includes(hora)) score += 5;
+  if (['Saturn', 'Mars'].includes(hora)) score -= 5;
+  
+  // Cap score
+  score = Math.max(-100, Math.min(100, score));
+  
+  return score;
+}
+
+// Hora (Planetary hours)
+function getHoraLord(date) {
+  const hours = ['Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars'];
+  const hour = date.getHours();
+  const horaIndex = hour % 7;
+  return hours[horaIndex];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI RENDERING
+// ═══════════════════════════════════════════════════════════════
+
+function renderKundali(data) {
+  const svg = document.getElementById('kundali-svg');
+  svg.innerHTML = '';
+  
+  const cx = 150, cy = 150, r1 = 100, r2 = 80, r3 = 50;
+  
+  // Outer circle
+  svg.appendChild(createCircle(cx, cy, r1, 'none', 'var(--gold)', 2));
+  
+  // Middle circle
+  svg.appendChild(createCircle(cx, cy, r2, 'none', 'var(--border)', 1));
+  
+  // Inner circle
+  svg.appendChild(createCircle(cx, cy, r3, 'none', 'var(--border)', 1));
+  
+  // Houses (12 divisions)
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * 30 - 90) * Math.PI / 180;
+    const x1 = cx + r1 * Math.cos(angle);
+    const y1 = cy + r1 * Math.sin(angle);
+    const x2 = cx + r3 * Math.cos(angle);
+    const y2 = cy + r3 * Math.sin(angle);
+    
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.setAttribute('stroke', 'var(--border)');
+    line.setAttribute('stroke-width', 1);
+    svg.appendChild(line);
+    
+    // House number
+    const houseAngle = (i * 30 - 90 + 15) * Math.PI / 180;
+    const hx = cx + (r1 + r2) / 2 * Math.cos(houseAngle);
+    const hy = cy + (r1 + r2) / 2 * Math.sin(houseAngle);
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', hx);
+    text.setAttribute('y', hy);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', 'var(--gold)');
+    text.setAttribute('font-size', 12);
+    text.setAttribute('font-weight', 700);
+    text.textContent = (i + 1);
+    svg.appendChild(text);
+  }
+  
+  // Planets in houses
+  for (let p = 0; p < 10; p++) {
+    const lon = data.sidereal[p];
+    const angle = (lon - 90) * Math.PI / 180;
+    const x = cx + r2 * Math.cos(angle);
+    const y = cy + r2 * Math.sin(angle);
+    
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y);
+    circle.setAttribute('r', 8);
+    circle.setAttribute('fill', 'var(--accent)');
+    circle.setAttribute('stroke', 'var(--gold)');
+    circle.setAttribute('stroke-width', 2);
+    svg.appendChild(circle);
+    
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', y);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('fill', 'white');
+    text.setAttribute('font-size', 10);
+    text.setAttribute('font-weight', 700);
+    text.textContent = String.fromCharCode(0x2600 + p);
+    svg.appendChild(text);
+  }
+}
+
+function createCircle(cx, cy, r, fill, stroke, strokeWidth) {
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', cx);
+  circle.setAttribute('cy', cy);
+  circle.setAttribute('r', r);
+  circle.setAttribute('fill', fill);
+  circle.setAttribute('stroke', stroke);
+  circle.setAttribute('stroke-width', strokeWidth);
+  return circle;
+}
+
+function renderTransits(data) {
+  const table = document.getElementById('transitTable');
+  table.innerHTML = '';
+  
+  for (let p = 0; p < 10; p++) {
+    const lon = data.sidereal[p];
+    const rashiInfo = rashiAndDegree(lon);
+    const rashi = RASHIS[rashiInfo.rashi];
+    const degree = rashiInfo.degree;
+    
+    const row = table.insertRow();
+    row.innerHTML = `
+      <td>${PLANETS[p]}</td>
+      <td>${rashi}</td>
+      <td>${degree}°</td>
+      <td>${nakshatraFromLon(lon)}</td>
+    `;
+  }
+}
+
+function renderSignalBox(score, signals) {
+  const box = document.getElementById('mainSignal');
+  const isPositive = score > 20;
+  const isBullish = score > 40;
+  const isBearish = score < -40;
+  
+  box.className = 'signal-box ' + (isBullish ? 'bullish' : (isBearish ? 'bearish' : 'neutral'));
+  
+  const label = isBullish ? '📈 BULLISH' : (isBearish ? '📉 BEARISH' : '➡️ NEUTRAL');
+  const color = box.className.includes('bullish') ? 'var(--green)' : (box.className.includes('bearish') ? 'var(--red)' : 'var(--yellow)');
+  
+  box.innerHTML = `
+    <div class="signal-label">${label}</div>
+    <div class="signal-score">Score: <strong>${score > 0 ? '+' : ''}${score}</strong>/100</div>
+    <div class="strength-bar">
+      <div class="strength-fill" style="width: ${Math.abs(score)}%; background: ${color};"></div>
+    </div>
+    <div style="font-size: 11px; color: var(--muted); margin-top: 8px;">
+      ${signals.join(' • ')}
+    </div>
+  `;
+}
+
+function renderGapPrediction(score) {
+  const gapSignal = document.getElementById('gapSignal');
+  if (score > 40) {
+    gapSignal.className = 'gap-val gap-up';
+    gapSignal.textContent = 'GAP UP +0.35%';
+  } else if (score < -40) {
+    gapSignal.className = 'gap-val gap-down';
+    gapSignal.textContent = 'GAP DOWN -0.35%';
+  } else {
+    gapSignal.className = 'gap-val';
+    gapSignal.textContent = 'FLAT ±0.1%';
+  }
+}
+
+function renderSessions(natalData, transitData, date) {
+  const scores = {
+    pre: calculateSessionScore(natalData, transitData, date, 'pre'),
+    regular: calculateSessionScore(natalData, transitData, date, 'regular'),
+    after: calculateSessionScore(natalData, transitData, date, 'after'),
+  };
+  
+  document.getElementById('preSignal').textContent = scores.pre > 0 ? '📈' : '📉';
+  document.getElementById('regSignal').textContent = scores.regular > 0 ? '📈' : '📉';
+  document.getElementById('aftSignal').textContent = scores.after > 0 ? '📈' : '📉';
+}
+
+function calculateSessionScore(natalData, transitData, date, session) {
+  let score = calculateSignalScore(natalData, transitData, date);
+  
+  const hour = date.getHours();
+  if (session === 'pre' && hour < 9) score += 5;
+  if (session === 'regular' && hour >= 9 && hour < 16) score += 3;
+  if (session === 'after' && hour >= 16) score -= 2;
+  
+  return score;
+}
+
+function renderWeekly() {
+  const content = document.getElementById('weeklyContent');
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const signals = ['📈', '📉', '📈', '➡️', '📉'];
+  const naks = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira'];
+  
+  let html = '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">';
+  
+  for (let i = 0; i < 5; i++) {
+    html += `
+      <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--gold);">${days[i]}</div>
+        <div style="font-size: 20px; margin: 6px 0;">${signals[i]}</div>
+        <div style="font-size: 10px; color: var(--muted);">${naks[i]}</div>
+      </div>
+    `;
+  }
+  
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+function renderMonthly() {
+  const content = document.getElementById('monthlyContent');
+  const calendar = document.createElement('div');
+  calendar.className = 'calendar-grid';
+  
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = new Date();
+  
+  for (let i = 0; i < 7; i++) {
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.fontWeight = '700';
+    header.style.color = 'var(--gold)';
+    header.textContent = days[i];
+    calendar.appendChild(header);
+  }
+  
+  for (let d = 1; d <= 31; d++) {
+    const day = document.createElement('div');
+    day.className = 'cal-day';
+    if (d === today.getDate()) day.classList.add('today');
+    
+    day.innerHTML = `
+      <div class="cal-day-num">${d}</div>
+      <div class="cal-signal ${['bullish', 'bearish', 'neutral'][d % 3]}">${['📈', '📉', '➡️'][d % 3]}</div>
+    `;
+    
+    calendar.appendChild(day);
+  }
+  
+  content.appendChild(calendar);
+}
+
+function renderDasha(natalData) {
+  const content = document.getElementById('dashaContent');
+  const moonNak = nakshatraFromLon(natalData.sidereal[1]);
+  const dasha = vimshottariDasha(natalData.sidereal[1]);
+  
+  let html = '<table class="data-table"><thead><tr><th>Mahadasha Lord</th><th>Years</th></tr></thead><tbody>';
+  
+  for (let d of dasha) {
+    html += `<tr><td>${d.lord}</td><td>${d.years}</td></tr>`;
+  }
+  
+  html += '</tbody></table>';
+  html += `<p style="margin-top: 10px; font-size: 11px; color: var(--muted);">Natal Moon Nakshatra: <strong>${moonNak}</strong></p>`;
+  
+  content.innerHTML = html;
+}
+
+function renderPanchang(transitData) {
+  const content = document.getElementById('panchangContent');
+  const moonLon = transitData.sidereal[1];
+  const moonNak = nakshatraFromLon(moonLon);
+  const sunRashi = rashiAndDegree(transitData.sidereal[0]).rashi;
+  
+  const tithi = Math.floor((moonLon - transitData.sidereal[0]) / 12);
+  
+  content.innerHTML = `
+    <table class="data-table">
+      <tr>
+        <td><strong>Tithi:</strong></td>
+        <td>Tithi ${tithi}</td>
+      </tr>
+      <tr>
+        <td><strong>Nakshatra:</strong></td>
+        <td>${moonNak}</td>
+      </tr>
+      <tr>
+        <td><strong>Yoga:</strong></td>
+        <td>Yoga ${Math.floor((transitData.sidereal[0] + moonLon) / 13.33) % 27}</td>
+      </tr>
+      <tr>
+        <td><strong>Karana:</strong></td>
+        <td>Karana ${tithi % 2}</td>
+      </tr>
+      <tr>
+        <td><strong>Vaara:</strong></td>
+        <td>${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][transitData.date.getDay()]}</td>
+      </tr>
+    </table>
+  `;
+}
+
+function renderVargas() {
+  const content = document.getElementById('vargasContent');
+  content.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+        <div style="color: var(--gold); font-weight: 700;">D9 (Navamsa)</div>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">Relationship & Marriage Chart</div>
+      </div>
+      <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+        <div style="color: var(--gold); font-weight: 700;">D20 (Vimshamsa)</div>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">Spiritual Strength Chart</div>
+      </div>
+      <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+        <div style="color: var(--gold); font-weight: 700;">D24 (Chaturvimshamsa)</div>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">Education & Learning Chart</div>
+      </div>
+      <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+        <div style="color: var(--gold); font-weight: 700;">D40 (Khavedamsa)</div>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">Longevity & Suffering Chart</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHora(date) {
+  const content = document.getElementById('horaContent');
+  const hora = getHoraLord(date);
+  const hours = ['Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars'];
+  
+  let html = '<table class="data-table"><thead><tr><th>Hour</th><th>Lord</th><th>Quality</th></tr></thead><tbody>';
+  
+  for (let i = 0; i < 7; i++) {
+    const lord = hours[i];
+    const isPositive = ['Jupiter', 'Venus', 'Sun'].includes(lord);
+    html += `<tr>
+      <td>${i}:00-${i+1}:00</td>
+      <td><strong>${lord}</strong></td>
+      <td>${isPositive ? '📈 Positive' : '📉 Challenging'}</td>
+    </tr>`;
+  }
+  
+  html += '</tbody></table>';
+  content.innerHTML = html;
+}
+
+function renderYogas() {
+  const content = document.getElementById('yogasContent');
+  const yogas = [
+    'Raj Yoga: Jupiter in Libra in 11th house',
+    'Dhana Yoga: Jupiter conjunct Venus',
+    'Parivartana Yoga: Mercury-Venus exchange',
+    'Vargottama: Planets in same sign in D1 & D9',
+  ];
+  
+  let html = '<div>';
+  for (let yoga of yogas) {
+    html += `<div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin-bottom: 6px; font-size: 12px;">🌟 ${yoga}</div>`;
+  }
+  html += '</div>';
+  
+  content.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TIME DISPLAY (FIXED TIMEZONE)
+// ═══════════════════════════════════════════════════════════════
+
+function updateTime() {
+  const now = new Date();
+  
+  // EST time (UTC-5, no DST for consistency)
+  const estTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  
+  const hours = String(estTime.getHours()).padStart(2, '0');
+  const minutes = String(estTime.getMinutes()).padStart(2, '0');
+  const seconds = String(estTime.getSeconds()).padStart(2, '0');
+  
+  document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds} EST`;
+}
+
+setInterval(updateTime, 1000);
+updateTime();
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN ANALYSIS FUNCTION
+// ═══════════════════════════════════════════════════════════════
+
+function runAnalysis() {
+  // Calculate natal
+  natalData = calculateNatalChart(NASDAQ.year, NASDAQ.month, NASDAQ.day, NASDAQ.hour, NASDAQ.minute);
+  
+  // Calculate transits for current date
+  transitData = calculateTransits(currentDate);
+  
+  // Render all elements
+  renderKundali(natalData);
+  renderTransits(transitData);
+  
+  // Calculate and render score
+  const score = calculateSignalScore(natalData, transitData, currentDate);
+  const signals = [];
+  
+  if (score > 40) signals.push('Jupiter Strong');
+  if (score < -40) signals.push('Saturn Opposition');
+  if (Math.abs(score) < 20) signals.push('Mixed Signals');
+  
+  renderSignalBox(score, signals.length > 0 ? signals : ['Analyzing...']);
+  renderGapPrediction(score);
+  renderSessions(natalData, transitData, currentDate);
+  
+  // Render tabs
+  renderWeekly();
+  renderMonthly();
+  renderDasha(natalData);
+  renderPanchang(transitData);
+  renderVargas();
+  renderHora(currentDate);
+  renderYogas();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI CONTROLS
+// ═══════════════════════════════════════════════════════════════
+
+function loadDate() {
+  const datePicker = document.getElementById('datePicker');
+  if (datePicker.value) {
+    currentDate = new Date(datePicker.value + 'T10:00:00Z');
+    runAnalysis();
+  }
+}
+
+function loadToday() {
+  currentDate = new Date();
+  document.getElementById('datePicker').valueAsDate = currentDate;
+  runAnalysis();
+}
+
+function switchTab(tabName) {
+  // Hide all
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  
+  // Show selected
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', function() {
+  // Set today's date
+  const today = new Date();
+  document.getElementById('datePicker').valueAsDate = today;
+  
+  // Run initial analysis
+  currentDate = today;
+  runAnalysis();
+});
+</script>
+
+</body>
+</html>
