@@ -11,11 +11,9 @@ const UI = (function(){
     function tick(){
       const el = document.getElementById(elId);
       if(!el) return;
-      const now = new Date();
-      const ist = new Date(now.getTime() + (5.5*3600000) - (now.getTimezoneOffset()*60000));
-      const h=String(ist.getHours()).padStart(2,'0');
-      const m=String(ist.getMinutes()).padStart(2,'0');
-      const s=String(ist.getSeconds()).padStart(2,'0');
+      const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date());
+      const get=k=>parts.find(p=>p.type===k)?.value||'00';
+      const h=get('hour'),m=get('minute'),s=get('second');
       el.textContent = `${h}:${m}:${s} IST`;
     }
     tick(); setInterval(tick, 1000);
