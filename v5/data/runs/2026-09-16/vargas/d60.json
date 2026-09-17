@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D60",
+  "dateIST": "2026-09-16",
+  "div": 60,
+  "key": "D60",
+  "meta": {
+    "name": "षष्टयांश",
+    "hi": "D60 कर्म",
+    "mkt": "दीर्घकालिक",
+    "relevance": 75
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 75,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": true,
+  "explanations": [
+    "D60 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3",
+    "⚠️ Accuracy Gated"
+  ],
+  "evidence": [
+    "div=60 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

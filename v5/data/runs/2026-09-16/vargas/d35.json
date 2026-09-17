@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D35",
+  "dateIST": "2026-09-16",
+  "div": 35,
+  "key": "D35",
+  "meta": {
+    "name": "वर्ग35",
+    "hi": "D35",
+    "mkt": "विश्लेषण",
+    "relevance": 20
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 20,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D35 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=35 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

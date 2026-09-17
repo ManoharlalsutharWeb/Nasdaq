@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D9",
+  "dateIST": "2026-09-16",
+  "div": 9,
+  "key": "D9",
+  "meta": {
+    "name": "नवांश",
+    "hi": "D9 भाग्य",
+    "mkt": "दीर्घकालिक",
+    "relevance": 90
+  },
+  "directionHint": "BULL",
+  "relevanceScore": 90,
+  "confidenceImpact": 13.0,
+  "planetScore": 2.6,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D9 BULL",
+    "स्कोर:2.60",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=9 psc=2.60 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D19",
+  "dateIST": "2026-09-16",
+  "div": 19,
+  "key": "D19",
+  "meta": {
+    "name": "वर्ग19",
+    "hi": "D19",
+    "mkt": "विश्लेषण",
+    "relevance": 31
+  },
+  "directionHint": "NEUT",
+  "relevanceScore": 31,
+  "confidenceImpact": 7.0,
+  "planetScore": 1.4,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D19 NEUT",
+    "स्कोर:1.40",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=19 psc=1.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}

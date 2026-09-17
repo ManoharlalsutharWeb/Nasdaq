@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "5.0",
+  "moduleId": "varga_D10",
+  "dateIST": "2026-09-16",
+  "div": 10,
+  "key": "D10",
+  "meta": {
+    "name": "दशमांश",
+    "hi": "D10 व्यवसाय",
+    "mkt": "NASDAQ दिशा",
+    "relevance": 95
+  },
+  "directionHint": "BULL",
+  "relevanceScore": 95,
+  "confidenceImpact": 17.0,
+  "planetScore": 3.4,
+  "riskTags": [],
+  "accuracyWarning": false,
+  "explanations": [
+    "D10 BULL",
+    "स्कोर:3.40",
+    "पंचांग:3"
+  ],
+  "evidence": [
+    "div=10 psc=3.40 ayan=23.8621"
+  ],
+  "generatedAt": "2026-09-16T07:33:15.745549Z"
+}
