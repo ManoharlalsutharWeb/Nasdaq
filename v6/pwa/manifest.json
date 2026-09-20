@@ -1,0 +1,16 @@
+{
+  "name": "VedicAladdin V6 — NASDAQ Vedic Intelligence",
+  "short_name": "VedicAladdin",
+  "description": "Duniya Ka Pehla Vedic Astrology NASDAQ Intelligence System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#FF6B00",
+  "orientation": "any",
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "categories": ["finance", "utilities"],
+  "lang": "hi"
+}
