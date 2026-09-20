@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VedicAladdin V6 — NASDAQ Vedic Intelligence</title>
+<link rel="manifest" href="/pwa/manifest.json">
+<meta name="theme-color" content="#FF6B00">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-primary:#1a1a2e; --bg-secondary:#16213e; --bg-card:#0f3460;
+  --accent:#FF6B00; --accent-light:#FF8C42;
+  --text-primary:#e0e0e0; --text-dim:#9e9e9e;
+  --bull:#00e676; --bear:#ff1744; --warn:#ffd740; --neutral:#90caf9;
+  --border:rgba(255,255,255,0.1); --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg-primary);color:var(--text-primary);font-family:'Segoe UI',sans-serif;min-height:100vh}
+.header{background:linear-gradient(135deg,var(--bg-secondary),var(--bg-card));padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:28px}
+.logo-text{font-size:18px;font-weight:700;color:var(--accent)}
+.logo-sub{font-size:11px;color:var(--text-dim);margin-top:2px}
+/* Date bar */
+.datebar{background:var(--bg-secondary);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.datebar input[type=date]{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border);padding:8px 12px;border-radius:8px;font-size:15px;cursor:pointer}
+.datebar input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:0.6}
+.nav-btn{background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:18px;transition:.2s}
+.nav-btn:hover{background:var(--accent);border-color:var(--accent)}
+.date-display{font-size:15px;font-weight:600;color:var(--accent-light)}
+.mode-badges{display:flex;gap:8px;margin-left:auto}
+.mode-badge{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);transition:.2s}
+.mode-badge.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+/* Main grid */
+.main{padding:20px;max-width:1400px;margin:0 auto;display:grid;gap:16px}
+/* Signal card */
+.signal-card{background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center;position:relative;overflow:hidden}
+.signal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,var(--accent-light)20%,transparent70%);opacity:0.15;border-radius:50%}
+.signal-label{font-size:36px;font-weight:800;letter-spacing:1px;transition:.3s}
+.signal-conf{font-size:16px;color:var(--text-dim);margin-top:8px}
+.signal-reasons{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.reason-tag{background:rgba(255,255,255,0.07);border-radius:6px;padding:5px 10px;font-size:12px}
+/* Session cards */
+.sessions-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.sess-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative}
+.sess-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sess-flag{font-size:20px}
+.sess-name{font-size:15px;font-weight:700}
+.sess-time{font-size:11px;color:var(--text-dim);margin-left:auto}
+.sess-dir{font-size:22px;font-weight:800;margin:6px 0}
+.sess-score{font-size:13px;color:var(--text-dim)}
+.sess-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;margin-top:8px}
+.event-badge{background:rgba(255,107,0,0.15);border:1px solid var(--accent);color:var(--accent);padding:4px 10px;border-radius:8px;font-size:11px;margin-top:6px}
+.deep-dive-btn{width:100%;margin-top:12px;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+.deep-dive-btn:hover{background:var(--accent-light)}
+/* Bottom row */
+.bottom-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.info-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.info-card h3{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.info-card .value{font-size:22px;font-weight:700}
+.info-card .sub{font-size:12px;color:var(--text-dim);margin-top:4px}
+/* Crash meter */
+.crash-meter{position:relative;text-align:center}
+.crash-bar{height:10px;border-radius:5px;background:linear-gradient(90deg,#00e676,#ffd740,#ff1744);margin:8px 0;position:relative}
+.crash-needle{position:absolute;top:-4px;width:4px;height:18px;background:#fff;border-radius:2px;transform:translateX(-50%);transition:left .5s}
+/* Action buttons */
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.act-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-primary);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;transition:.2s}
+.act-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* Loading */
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--text-dim);font-size:15px}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Responsive */
+@media(max-width:600px){.signal-label{font-size:26px}.main{padding:12px}.logo-text{font-size:15px}}
+/* Colors */
+.bull-color{color:var(--bull)}.bear-color{color:var(--bear)}.warn-color{color:var(--warn)}.accent-color{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <span class="logo-icon">🔱</span>
+    <div>
+      <div class="logo-text">VedicAladdin V6</div>
+      <div class="logo-sub">NASDAQ Vedic Intelligence — दुनिया का पहला</div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="act-btn" onclick="speakCurrentSignal()">🔊 बोलो</button>
+    <button class="act-btn" onclick="shareSignal()">📤 शेयर</button>
+    <button class="act-btn" id="refreshBtn" onclick="loadDate(currentDate)">🔄 रीफ्रेश</button>
+  </div>
+</header>
+
+<div class="datebar">
+  <button class="nav-btn" onclick="navDate(-1)">◀</button>
+  <input type="date" id="datePicker" min="1971-01-01" max="2035-12-31" onchange="loadDate(this.value)">
+  <button class="nav-btn" onclick="navDate(1)">▶</button>
+  <span class="date-display" id="dateDisplay">—</span>
+  <div class="mode-badges">
+    <span class="mode-badge" id="modeHist" onclick="setMode('HISTORICAL')">📚 इतिहास</span>
+    <span class="mode-badge active" id="modeLive" onclick="setMode('LIVE')">🔴 लाइव</span>
+    <span class="mode-badge" id="modeFore" onclick="setMode('FORECAST')">🔭 भविष्यवाणी</span>
+  </div>
+</div>
+
+<div class="main">
+  <div id="loadingDiv" class="loading"><div class="spinner"></div> विश्लेषण लोड हो रहा है...</div>
+  <div id="mainContent" style="display:none">
+
+    <!-- Signal Card -->
+    <div class="signal-card" id="signalCard">
+      <div class="signal-label" id="signalLabel">—</div>
+      <div class="signal-conf" id="signalConf">विश्वास: —%</div>
+      <div class="signal-reasons" id="signalReasons"></div>
+    </div>
+
+    <!-- Session Cards -->
+    <div class="sessions-row">
+      <div class="sess-card" id="asianCard">
+        <div class="sess-header">
+          <span class="sess-flag">🌏</span>
+          <span class="sess-name">एशियन सत्र</span>
+          <span class="sess-time">05:30–14:00 IST</span>
+        </div>
+        <div class="sess-dir" id="asianDir">—</div>
+        <div class="sess-score" id="asianScore">—</div>
+        <div id="asianBadge"></div>
+      </div>
+
+      <div class="sess-card" id="londonCard">
+        <div class="sess-header">
+          <span class="sess-flag">🇬🇧</span>
+          <span class="sess-name">लंदन सत्र</span>
+          <span class="sess-time">13:30–22:00 IST</span>
+        </div>
+        <div class="sess-dir" id="londonDir">—</div>
+        <div class="sess-score" id="londonScore">—</div>
+        <div id="londonBadge"></div>
+      </div>
+
+      <div class="sess-card" id="nyCard">
+        <div class="sess-header">
+          <span class="sess-flag">🗽</span>
+          <span class="sess-name">न्यूयॉर्क सत्र</span>
+          <span class="sess-time">19:00–01:30 IST</span>
+        </div>
+        <div class="sess-dir" id="nyDir">—</div>
+        <div class="sess-score" id="nyScore">—</div>
+        <button class="deep-dive-btn" onclick="openDeepDive()">🔍 NY DEEP DIVE (6 ब्लॉक)</button>
+      </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="bottom-row">
+      <!-- Crash Meter -->
+      <div class="info-card">
+        <h3>⚡ क्रैश जोखिम</h3>
+        <div class="crash-meter">
+          <div class="value" id="crashScore" style="color:#ffd740">—/100</div>
+          <div class="crash-bar"><div class="crash-needle" id="crashNeedle" style="left:0%"></div></div>
+          <div class="sub" id="crashCat">न्यूनतम जोखिम</div>
+        </div>
+      </div>
+
+      <!-- Dasha -->
+      <div class="info-card">
+        <h3>🪐 दशा काल</h3>
+        <div class="value accent-color" id="dashaMain">—</div>
+        <div class="sub" id="dashaSub">—</div>
+      </div>
+
+      <!-- Nakshatra -->
+      <div class="info-card">
+        <h3>⭐ नक्षत्र</h3>
+        <div class="value" id="nakMain">—</div>
+        <div class="sub" id="nakSub">—</div>
+      </div>
+
+      <!-- Top Yoga -->
+      <div class="info-card">
+        <h3>🕉 सक्रिय योग</h3>
+        <div class="value accent-color" id="yogaMain">—</div>
+        <div class="sub" id="yogaSub">—</div>
+      </div>
+    </div>
+
+  </div><!-- end mainContent -->
+</div>
+
+<!-- Engine Scripts -->
+<script src="/core/config.js"></script>
+<script src="/core/types.js"></script>
+<script src="/core/natal.js"></script>
+<script src="/core/time.js"></script>
+<script src="/core/varga.js"></script>
+<script src="/core/dasha.js"></script>
+<script src="/core/transits.js"></script>
+<script src="/core/events.js"></script>
+<script src="/core/sessions.js"></script>
+<script src="/core/regime.js"></script>
+<script src="/core/scoring.js"></script>
+<script src="/core/aggregator.js"></script>
+<script src="/core/instant_engine.js"></script>
+<script src="/core/date_navigator.js"></script>
+<script src="/advanced/ashtakavarga.js"></script>
+<script src="/advanced/yoga_engine.js"></script>
+<script src="/advanced/muhurta_engine.js"></script>
+<script src="/advanced/nakshatra_engine.js"></script>
+<script src="/advanced/eclipse_engine.js"></script>
+<script src="/advanced/smart_alert.js"></script>
+<script src="/assets/js/voice.js"></script>
+<script src="/assets/js/charts.js"></script>
+
+<script>
+// ── App State ──────────────────────────────────────────────
+let currentDate = new Date(new Date().getTime() + 5.5*3600000).toISOString().split('T')[0];
+let currentResult = null;
+let liveInterval = null;
+
+const SIGNAL_COLORS = {
+  STRONG_BULL:'#00e676', BULL:'#69f0ae', NEUTRAL:'#ffd740',
+  BEAR:'#ff6d00', STRONG_BEAR:'#ff1744',
+};
+const DIR_LABELS = { BULL:'📈 तेजी', BEAR:'📉 मंदी', NEUT:'↔ सपाट', NEUTRAL:'↔ सपाट' };
+
+// ── Date navigation ────────────────────────────────────────
+function navDate(dir) {
+  if (typeof DATE_NAVIGATOR === 'undefined') return;
+  const adj = DATE_NAVIGATOR.getAdjacentDates(currentDate);
+  const nd  = dir < 0 ? adj.prev : adj.next;
+  if (nd) loadDate(nd);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowLeft')  navDate(-1);
+  if (e.key === 'ArrowRight') navDate(1);
+});
+
+// ── Load date ──────────────────────────────────────────────
+async function loadDate(dateStr) {
+  if (!dateStr) return;
+  currentDate = dateStr;
+  document.getElementById('datePicker').value = dateStr;
+
+  // Mode display
+  const today = new Date(new Date().getTime()+5.5*3600000).toISOString().split('T')[0];
+  const mode  = dateStr < today ? 'HISTORICAL' : dateStr === today ? 'LIVE' : 'FORECAST';
+  updateModeUI(mode);
+
+  const displayDate = typeof DATE_NAVIGATOR !== 'undefined'
+    ? DATE_NAVIGATOR.formatForDisplay(dateStr) : dateStr;
+  document.getElementById('dateDisplay').textContent = displayDate;
+
+  // Show loading
+  document.getElementById('loadingDiv').style.display = 'flex';
+  document.getElementById('mainContent').style.display = 'none';
+
+  try {
+    // Run instant engine
+    const result = typeof INSTANT_ENGINE !== 'undefined'
+      ? INSTANT_ENGINE.analyze(dateStr, { crashRules: true, fullSessions: true })
+      : null;
+
+    if (!result) throw new Error('Engine not loaded');
+    currentResult = result;
+    renderResult(result);
+
+    // Auto-refresh for live mode
+    clearInterval(liveInterval);
+    if (mode === 'LIVE') {
+      liveInterval = setInterval(() => loadDate(dateStr), 30000);
+    }
+
+  } catch (e) {
+    console.error('loadDate error:', e);
+    document.getElementById('signalLabel').textContent = 'त्रुटि';
+    document.getElementById('loadingDiv').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  }
+}
+
+function renderResult(r) {
+  // Signal
+  const sigEl   = document.getElementById('signalLabel');
+  const sigColor = SIGNAL_COLORS[r.signal] || '#ffd740';
+  sigEl.textContent = r.signalHi || r.signal;
+  sigEl.style.color = sigColor;
+  document.getElementById('signalCard').style.borderColor = sigColor + '44';
+  document.getElementById('signalConf').textContent = `विश्वास: ${r.confidence}% | एल्पस: ${r.elapsedMs}ms`;
+
+  // Key factors
+  const reasons = document.getElementById('signalReasons');
+  reasons.innerHTML = (r.keyFactors || []).map(f => `<span class="reason-tag">${f}</span>`).join('');
+
+  // Sessions
+  const setSession = (id, sessData, label) => {
+    if (!sessData) return;
+    const dir = sessData.direction || 'NEUTRAL';
+    document.getElementById(id+'Dir').textContent = DIR_LABELS[dir] || '↔ तटस्थ';
+    document.getElementById(id+'Dir').style.color = dir==='BULL'?'var(--bull)':dir==='BEAR'?'var(--bear)':'var(--warn)';
+    document.getElementById(id+'Score').textContent = `स्कोर: ${sessData.score?.toFixed(1)||0} | विश्वास: ${sessData.conf||0}%`;
+  };
+  setSession('asian',  r.sessions?.asian,   'एशियन');
+  setSession('london', r.sessions?.london,  'लंदन');
+  setSession('ny',     r.sessions?.ny,      'NY');
+
+  // Crash meter
+  const crash = r.crashRisk || 0;
+  document.getElementById('crashScore').textContent = crash + '/100';
+  document.getElementById('crashScore').style.color = crash>=60?'var(--bear)':crash>=40?'var(--warn)':'var(--bull)';
+  document.getElementById('crashNeedle').style.left = crash + '%';
+  document.getElementById('crashCat').textContent = crash>=80?'अत्यंत खतरनाक':crash>=60?'उच्च जोखिम':crash>=40?'मध्यम जोखिम':crash>=20?'कम जोखिम':'न्यूनतम जोखिम';
+
+  // Dasha
+  document.getElementById('dashaMain').textContent = r.dashaLord || '—';
+  document.getElementById('dashaSub').textContent = `${r.mode}`;
+
+  // Nakshatra
+  document.getElementById('nakMain').textContent = r.nakshatra || '—';
+  document.getElementById('nakSub').textContent = 'चंद्र नक्षत्र';
+
+  // Yoga
+  document.getElementById('yogaMain').textContent = r.topYoga || '—';
+  document.getElementById('yogaSub').textContent = 'सक्रिय योग';
+
+  document.getElementById('loadingDiv').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
+}
+
+function updateModeUI(mode) {
+  ['modeHist','modeLive','modeFore'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  const map = { HISTORICAL:'modeHist', LIVE:'modeLive', FORECAST:'modeFore' };
+  document.getElementById(map[mode])?.classList.add('active');
+}
+
+function setMode(mode) {
+  const today = new Date(new Date().getTime()+5.5*3600000).toISOString().split('T')[0];
+  if (mode==='LIVE') loadDate(today);
+  else if (mode==='FORECAST') {
+    const fut = new Date(new Date().getTime()+5.5*3600000+7*86400000).toISOString().split('T')[0];
+    loadDate(fut);
+  } else if (mode==='HISTORICAL') {
+    loadDate('2000-03-10');
+  }
+}
+
+function openDeepDive() {
+  window.location.href = '/app/ny_deep_dive.html?date=' + currentDate;
+}
+
+function speakCurrentSignal() {
+  if (typeof VOICE !== 'undefined' && currentResult) VOICE.speakSignal(currentResult.signal);
+}
+
+function shareSignal() {
+  if (!currentResult) return;
+  const text = `VedicAladdin V6 — ${currentDate}\n${currentResult.signalHi} | विश्वास: ${currentResult.confidence}%\nCrash Risk: ${currentResult.crashRisk}/100`;
+  if (navigator.share) navigator.share({ title:'VedicAladdin', text });
+  else { navigator.clipboard.writeText(text); alert('कॉपी हो गया!'); }
+}
+
+// ── Init ──────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (typeof CHARTS !== 'undefined') CHARTS.applyDarkDefaults();
+  // Check URL params
+  const urlDate = new URLSearchParams(window.location.search).get('date');
+  loadDate(urlDate || currentDate);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NY Deep Dive — VedicAladdin V6</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#1a1a2e;--bg2:#16213e;--card:#0f3460;--accent:#FF6B00;
+  --bull:#00e676;--bear:#ff1744;--warn:#ffd740;--text:#e0e0e0;--dim:#9e9e9e;
+  --border:rgba(255,255,255,0.1);--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
+.topbar{background:linear-gradient(135deg,var(--bg2),var(--card));padding:14px 20px;
+  display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.back-btn{background:var(--card);border:1px solid var(--border);color:var(--text);
+  padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px}
+.back-btn:hover{border-color:var(--accent)}
+.title{font-size:17px;font-weight:700;color:var(--accent)}
+.date-nav{display:flex;gap:8px;align-items:center;margin-left:auto}
+.dnav-btn{background:var(--card);border:1px solid var(--border);color:var(--text);
+  width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.dnav-btn:hover{background:var(--accent);border-color:var(--accent)}
+.date-inp{background:var(--card);color:var(--text);border:1px solid var(--border);
+  padding:7px 10px;border-radius:8px;font-size:13px}
+/* Overall signal bar */
+.signal-bar{background:linear-gradient(135deg,var(--card),var(--bg2));padding:18px 20px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.sig-label{font-size:28px;font-weight:800}
+.sig-meta{font-size:13px;color:var(--dim);line-height:1.8}
+.crash-badge{background:rgba(255,23,68,0.15);border:1px solid var(--bear);color:var(--bear);
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.actions{margin-left:auto;display:flex;gap:8px}
+.act-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);
+  color:var(--text);cursor:pointer;font-size:12px}
+.act-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* Blocks */
+.blocks{padding:16px 20px;max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.block{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.block-header{padding:13px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;
+  background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border)}
+.block-icon{font-size:20px}
+.block-title{font-size:15px;font-weight:700;flex:1}
+.block-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.block-toggle{color:var(--dim);font-size:18px;transition:.2s}
+.block-body{padding:16px 18px}
+.block.collapsed .block-body{display:none}
+.block.collapsed .block-toggle{transform:rotate(-90deg)}
+/* Layer list (Block A) */
+.layers{display:flex;flex-direction:column;gap:8px}
+.layer{background:rgba(255,255,255,0.03);border-radius:8px;padding:12px 14px;
+  border-left:3px solid var(--accent)}
+.layer-num{font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.layer-text{font-size:13px;margin-top:4px;line-height:1.5}
+.layer-score{float:right;font-weight:700;font-size:14px}
+/* Probability bars (Block B) */
+.prob-bars{display:flex;flex-direction:column;gap:8px}
+.prob-row{display:flex;align-items:center;gap:10px}
+.prob-label{width:150px;font-size:13px;flex-shrink:0}
+.prob-bar-wrap{flex:1;background:rgba(255,255,255,0.05);border-radius:4px;height:22px;overflow:hidden}
+.prob-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;
+  font-size:12px;font-weight:700;color:#fff;min-width:30px;transition:width 0.8s ease}
+.prob-pct{width:44px;text-align:right;font-size:13px;font-weight:700}
+/* Timeline (Block C) */
+.timeline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.time-slot{border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.08)}
+.time-slot.best{border-color:var(--bull);box-shadow:0 0 12px rgba(0,230,118,0.2)}
+.time-slot.avoid{border-color:var(--bear);opacity:0.7}
+.ts-time{font-size:12px;color:var(--dim)}
+.ts-qual{font-size:18px;font-weight:800;margin:3px 0}
+.ts-hora{font-size:11px}
+/* Moments (Block D) */
+.moments-list{display:flex;flex-direction:column;gap:8px}
+.moment-item{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;
+  background:rgba(255,255,255,0.03);border-radius:8px}
+.moment-time{font-size:12px;color:var(--accent);font-weight:700;min-width:50px}
+.moment-text{font-size:13px;line-height:1.5}
+.moment-high{border-left:3px solid var(--warn)}
+/* Crash rules (Block E) */
+.crash-meter-wrap{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.crash-score-big{font-size:48px;font-weight:800}
+.crash-cat{font-size:16px;font-weight:600}
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+.rule-item{padding:8px 12px;border-radius:7px;font-size:12px;display:flex;gap:8px;align-items:flex-start}
+.rule-item.triggered{background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.3)}
+.rule-item.not-trig{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);color:var(--dim)}
+.rule-icon{flex-shrink:0;font-size:14px}
+/* ML Block F */
+.ml-matches{display:flex;flex-direction:column;gap:10px}
+.ml-match{background:rgba(255,255,255,0.04);border-radius:8px;padding:12px 14px;
+  border-left:3px solid var(--accent)}
+.ml-match-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ml-date{font-size:13px;font-weight:700}
+.ml-sim{font-size:12px;color:var(--dim)}
+.ml-desc{font-size:12px;line-height:1.5;color:var(--text)}
+.ml-outcome{font-size:16px;font-weight:700;margin-top:6px}
+.ml-verdict{background:rgba(255,107,0,0.1);border:1px solid var(--accent);
+  border-radius:8px;padding:12px 14px;margin-top:12px;font-size:14px;line-height:1.6}
+/* Loading */
+.loading{text-align:center;padding:60px 20px;color:var(--dim);font-size:16px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Responsive */
+@media(max-width:600px){.signal-bar{flex-direction:column;align-items:flex-start}.blocks{padding:10px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='/app/index.html'">← वापस</button>
+  <span class="title">🗽 NY DEEP DIVE — 6 ब्लॉक विश्लेषण</span>
+  <div class="date-nav">
+    <button class="dnav-btn" onclick="navDate(-1)">◀</button>
+    <input class="date-inp" type="date" id="datePicker" min="1971-01-01" max="2035-12-31" onchange="loadDate(this.value)">
+    <button class="dnav-btn" onclick="navDate(1)">▶</button>
+  </div>
+</div>
+
+<div id="loadingDiv" class="loading">
+  <div class="spinner"></div>
+  NY Deep Dive लोड हो रहा है...
+</div>
+
+<div id="appDiv" style="display:none">
+  <div class="signal-bar">
+    <div class="sig-label" id="sigLabel">—</div>
+    <div class="sig-meta" id="sigMeta">—</div>
+    <div class="crash-badge" id="crashBadge" style="display:none">—</div>
+    <div class="actions">
+      <button class="act-btn" onclick="copyReport()">📋 कॉपी</button>
+      <button class="act-btn" onclick="window.print()">🖨️ प्रिंट</button>
+    </div>
+  </div>
+
+  <div class="blocks">
+
+    <!-- Block A: Vedic Core -->
+    <div class="block" id="blockA">
+      <div class="block-header" onclick="toggleBlock('blockA')">
+        <span class="block-icon">🕉</span>
+        <span class="block-title">ब्लॉक A — वैदिक कोर (7 लेयर)</span>
+        <span class="block-badge" id="blockABadge" style="background:rgba(255,107,0,.2);color:#FF6B00">—</span>
+        <span class="block-toggle">▼</span>
+      </div>
+      <div class="block-body">
+        <div class="layers" id="blockALayers">
+          <div class="loading" style="padding:20px"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block B: Possibility Map -->
+    <div class="block" id="blockB">
+      <div class="block-header" onclick="toggleBlock('blockB')">
+        <span class="block-icon">📊</span>
+        <span class="block-title">ब्लॉक B — संभावना मानचित्र</span>
+        <span class="block-badge" id="blockBBadge" style="background:rgba(255,215,64,.15);color:#ffd740">—% विश्वास</span>
+        <span class="block-toggle">▼</span>
+      </div>
+      <div class="block-body">
+        <div class="prob-bars" id="blockBBars"></div>
+        <canvas id="probChart" height="140" style="margin-top:14px"></canvas>
+      </div>
+    </div>
+
+    <!-- Block C: Timing -->
+    <div class="block" id="blockC">
+      <div class="block-header" onclick="toggleBlock('blockC')">
+        <span class="block-icon">⏰</span>
+        <span class="block-title">ब्लॉक C — इंट्राडे टाइमिंग (19:00–01:30 IST)</span>
+        <span class="block-badge" id="blockCBadge" style="background:rgba(0,230,118,.15);color:#00e676">NY ओपन</span>
+        <span class="block-toggle">▼</span>
+      </div>
+      <div class="block-body">
+        <div class="timeline-grid" id="blockCGrid"></div>
+      </div>
+    </div>
+
+    <!-- Block D: Key Moments -->
+    <div class="block" id="blockD">
+      <div class="block-header" onclick="toggleBlock('blockD')">
+        <span class="block-icon">🎯</span>
+        <span class="block-title">ब्लॉक D — मुख्य क्षण (आज रात)</span>
+        <span class="block-badge" id="blockDBadge" style="background:rgba(144,202,249,.15);color:#90caf9">— घटनाएं</span>
+        <span class="block-toggle">▼</span>
+      </div>
+      <div class="block-body">
+        <div class="moments-list" id="blockDList"></div>
+      </div>
+    </div>
+
+    <!-- Block E: Crash Intelligence -->
+    <div class="block" id="blockE">
+      <div class="block-header" onclick="toggleBlock('blockE')">
+        <span class="block-icon">⚡</span>
+        <span class="block-title">ब्लॉक E — क्रैश इंटेलिजेंस (21 नियम)</span>
+        <span class="block-badge" id="blockEBadge" style="background:rgba(255,23,68,.15);color:#ff1744">—/100</span>
+        <span class="block-toggle">▼</span>
+      </div>
+      <div class="block-body">
+        <div class="crash-meter-wrap">
+          <div class="crash-score-big" id="crashScoreBig">—</div>
+          <div>
+            <div class="crash-cat" id="crashCatText">—</div>
+            <div style="font-size:12px;color:var(--dim);margin-top:4px" id="crashTriggCount">— नियम ट्रिगर</div>
+          </div>
+        </div>
+        <div class="rules-grid" id="blockERules"></div>
+      </div>
+    </div>
+
+    <!-- Block F: ML Pattern -->
+    <div class="block" id="blockF">
+      <div class="block-header" onclick="toggleBlock('blockF')">
+        <span class="block-icon">🤖</span>
+        <span class="block-title">ब्लॉक F — ML पैटर्न मिलान</span>
+        <span class="block-badge" id="blockFBadge" style="background:rgba(144,202,249,.15);color:#90caf9">—% औसत मिलान</span>
+        <span class="block-toggle">▼</span>
+      </div>
+      <div class="block-body">
+        <div class="ml-matches" id="blockFMatches"></div>
+        <div class="ml-verdict" id="blockFVerdict" style="display:none">—</div>
+      </div>
+    </div>
+
+  </div><!-- .blocks -->
+</div><!-- #appDiv -->
+
+<!-- Engine scripts -->
+<script src="/core/config.js"></script>
+<script src="/core/natal.js"></script>
+<script src="/core/time.js"></script>
+<script src="/core/varga.js"></script>
+<script src="/core/dasha.js"></script>
+<script src="/core/transits.js"></script>
+<script src="/core/events.js"></script>
+<script src="/core/sessions.js"></script>
+<script src="/core/regime.js"></script>
+<script src="/core/scoring.js"></script>
+<script src="/core/instant_engine.js"></script>
+<script src="/core/date_navigator.js"></script>
+<script src="/advanced/ashtakavarga.js"></script>
+<script src="/advanced/yoga_engine.js"></script>
+<script src="/advanced/muhurta_engine.js"></script>
+<script src="/advanced/eclipse_engine.js"></script>
+<script src="/advanced/pattern_matcher.js"></script>
+<script src="/advanced/ml_engine.js"></script>
+<script src="/ny_engine/block_a_vedic.js"></script>
+<script src="/ny_engine/block_b_probability.js"></script>
+<script src="/ny_engine/block_c_timing.js"></script>
+<script src="/ny_engine/block_d_moments.js"></script>
+<script src="/ny_engine/block_e_crash.js"></script>
+<script src="/ny_engine/block_f_ml.js"></script>
+<script src="/ny_engine/ny_orchestrator.js"></script>
+
+<script>
+let currentDate = new Date(new Date().getTime()+5.5*3600000).toISOString().split('T')[0];
+let lastResult  = null;
+
+const SIG_COLORS = {STRONG_BULL:'#00e676',BULL:'#69f0ae',NEUTRAL:'#ffd740',BEAR:'#ff6d00',STRONG_BEAR:'#ff1744'};
+const TIER_COLORS = ['#00e676','#69f0ae','#ffd740','#ff6d00','#ff1744'];
+const TIER_LABELS = ['तेज़ तेजी (>+1.5%)','तेजी (+0.5 से +1.5%)','सपाट (±0.5%)','मंदी (-0.5 से -1.5%)','क्रैश (<-1.5%)'];
+const Q_BG = {'A+':'#00e676','A':'#69f0ae','B':'#b2ff59','C':'#ffd740','D':'#ff6d00','F':'#ff1744'};
+
+function toggleBlock(id){
+  document.getElementById(id)?.classList.toggle('collapsed');
+}
+
+function navDate(dir){
+  const adj = typeof DATE_NAVIGATOR !== 'undefined' ? DATE_NAVIGATOR.getAdjacentDates(currentDate) : {prev:null,next:null};
+  const nd  = dir<0 ? adj.prev : adj.next;
+  if(nd) loadDate(nd);
+}
+
+document.addEventListener('keydown', e => {
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowLeft')  navDate(-1);
+  if(e.key==='ArrowRight') navDate(1);
+});
+
+async function loadDate(dateStr){
+  if(!dateStr) return;
+  currentDate = dateStr;
+  document.getElementById('datePicker').value = dateStr;
+  document.getElementById('loadingDiv').style.display='block';
+  document.getElementById('appDiv').style.display='none';
+
+  try {
+    // Run NY orchestrator
+    const result = (typeof NY_ORCHESTRATOR !== 'undefined')
+      ? NY_ORCHESTRATOR.runNYDeepDive(dateStr)
+      : null;
+    if(!result) throw new Error('NY_ORCHESTRATOR not loaded');
+    lastResult = result;
+    renderAll(result);
+  } catch(e) {
+    console.error('loadDate error:',e);
+    document.getElementById('loadingDiv').innerHTML = '<p style="color:var(--bear)">त्रुटि: '+e.message+'</p>';
+  }
+}
+
+function renderAll(r){
+  // Signal bar
+  const sig = r.overallSignal || 'NEUTRAL';
+  const sigEl = document.getElementById('sigLabel');
+  sigEl.textContent = r.overallSignalHi || sig;
+  sigEl.style.color = SIG_COLORS[sig]||'var(--warn)';
+  document.getElementById('sigMeta').textContent =
+    `${currentDate} | विश्वास: ${r.overallConfidence}% | Crash: ${r.crashRisk}/100 | ${r.elapsedMs}ms`;
+
+  if(r.crashRisk >= 40){
+    const cb = document.getElementById('crashBadge');
+    cb.style.display='inline-block';
+    cb.textContent = '⚡ Crash Risk: '+r.crashRisk+'/100';
+  }
+
+  renderBlockA(r.blockA);
+  renderBlockB(r.blockB);
+  renderBlockC(r.blockC);
+  renderBlockD(r.blockD);
+  renderBlockE(r.blockE);
+  renderBlockF(r.blockF);
+
+  document.getElementById('loadingDiv').style.display='none';
+  document.getElementById('appDiv').style.display='block';
+}
+
+// ── Block A ─────────────────────────────────────────────────
+function renderBlockA(bA){
+  if(!bA) return;
+  const score = bA.normScore || 0;
+  document.getElementById('blockABadge').textContent = `स्कोर: ${score}`;
+  document.getElementById('blockABadge').style.color = score>10?'var(--bull)':score<-10?'var(--bear)':'var(--warn)';
+
+  const LAYER_LABELS = ['नाटल मिलान','दशा बुद्धिमत्ता','ट्रांज़िट मैट्रिक्स',
+    'अष्टकवर्ग लाइव','योग पहचान','ग्रहण क्षेत्र','जैमिनी लेयर'];
+
+  const html = (bA.layers||[]).map((l,i) => {
+    const sc = l.score || 0;
+    const col = sc>0?'var(--bull)':sc<0?'var(--bear)':'var(--warn)';
+    return `<div class="layer">
+      <div class="layer-num">लेयर ${i+1}: ${l.label||LAYER_LABELS[i]||''}
+        <span class="layer-score" style="color:${col}">${sc>0?'+':''}${sc.toFixed?sc.toFixed(1):sc}</span>
+      </div>
+      <div class="layer-text">${l.hindiText||'—'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('blockALayers').innerHTML = html||'<p style="color:var(--dim)">डेटा उपलब्ध नहीं</p>';
+}
+
+// ── Block B ─────────────────────────────────────────────────
+function renderBlockB(bB){
+  if(!bB) return;
+  document.getElementById('blockBBadge').textContent = `${bB.confidence}% विश्वास`;
+
+  const keys   = ['strongRally','bull','flat','bear','crash'];
+  const html   = keys.map((k,i) => {
+    const pct   = bB[k]||0;
+    const color = TIER_COLORS[i];
+    return `<div class="prob-row">
+      <span class="prob-label">${TIER_LABELS[i]}</span>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar-fill" style="width:${pct}%;background:${color}">${pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('blockBBars').innerHTML = html;
+
+  // Chart
+  const ctx = document.getElementById('probChart')?.getContext('2d');
+  if(ctx && typeof Chart !== 'undefined'){
+    if(window._probChart) window._probChart.destroy();
+    window._probChart = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels:TIER_LABELS.map(t=>t.split('(')[0].trim()),
+        datasets:[{data:keys.map(k=>bB[k]||0),backgroundColor:TIER_COLORS,borderRadius:6,barThickness:30}]
+      },
+      options:{
+        indexAxis:'y',responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{x:{max:100,ticks:{callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.06)'}},
+                y:{grid:{display:false}}}
+      }
+    });
+  }
+}
+
+// ── Block C ─────────────────────────────────────────────────
+function renderBlockC(bC){
+  if(!bC||!bC.blocks) return;
+  const bestSet  = new Set((bC.best||[]).map(b=>b.startIST));
+  const avoidSet = new Set((bC.avoid||[]).map(b=>b.startIST));
+
+  const html = bC.blocks.map(b => {
+    const isBest  = bestSet.has(b.startIST);
+    const isAvoid = avoidSet.has(b.startIST) || b.avoid;
+    return `<div class="time-slot ${isBest?'best':isAvoid?'avoid':''}"
+      style="background:${b.color||'rgba(255,215,64,0.1)'}22">
+      <div class="ts-time">${b.startIST}</div>
+      <div class="ts-qual" style="color:${b.color||'#ffd740'}">${b.quality||'C'}</div>
+      <div class="ts-hora" style="color:var(--dim)">${b.horaLord||'—'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('blockCGrid').innerHTML = html;
+
+  const best = bC.best||[];
+  document.getElementById('blockCBadge').textContent = best.length
+    ? `⭐ ${best.map(b=>b.startIST).join(', ')}`
+    : 'NY ओपन';
+}
+
+// ── Block D ─────────────────────────────────────────────────
+function renderBlockD(bD){
+  if(!bD) return;
+  const all = [
+    ...(bD.economic||[]).map(e=>({time:e.timeIST, text:e.hi, type:'eco'})),
+    ...(bD.planetary||[]).map(p=>({time:p.timeIST||'--:--', text:p.hi, type:'planet'})),
+    ...(bD.turning||[]).slice(0,4).map(t=>({time:t.timeIST, text:t.hi, type:'turn'})),
+  ];
+  const total = (bD.totalEvents||0);
+  document.getElementById('blockDBadge').textContent = total + ' घटनाएं';
+
+  if(!all.length){
+    document.getElementById('blockDList').innerHTML = '<p style="color:var(--dim);font-size:13px">आज रात कोई विशेष घटना नहीं।</p>';
+    return;
+  }
+  const html = all.map(e => {
+    const icon = e.type==='eco'?'📢':e.type==='planet'?'🪐':'⏰';
+    return `<div class="moment-item ${e.type==='eco'?'moment-high':''}">
+      <span class="moment-time">${icon} ${e.time}</span>
+      <span class="moment-text">${e.text||'—'}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('blockDList').innerHTML = html;
+}
+
+// ── Block E ─────────────────────────────────────────────────
+function renderBlockE(bE){
+  if(!bE) return;
+  const score = bE.score||0;
+  const cat   = bE.category || {hi:'न्यूनतम जोखिम', color:'#00e676'};
+  const color = cat.color || '#ffd740';
+
+  document.getElementById('crashScoreBig').textContent = score+'/100';
+  document.getElementById('crashScoreBig').style.color = color;
+  document.getElementById('crashCatText').textContent  = cat.hi||'—';
+  document.getElementById('crashCatText').style.color  = color;
+  document.getElementById('blockEBadge').textContent   = score+'/100';
+  document.getElementById('blockEBadge').style.color   = color;
+
+  const triggered    = bE.triggered    || [];
+  const notTriggered = bE.notTriggered || [];
+  document.getElementById('crashTriggCount').textContent = triggered.length + ' नियम ट्रिगर / '+ (triggered.length+notTriggered.length)+' में से';
+
+  const htmlT = triggered.map(r => `<div class="rule-item triggered">
+    <span class="rule-icon">✅</span>
+    <span>[${r.weight}] ${r.desc||r.id}</span>
+  </div>`).join('');
+  const htmlN = notTriggered.map(r => `<div class="rule-item not-trig">
+    <span class="rule-icon">❌</span>
+    <span>${r.desc||r.id}</span>
+  </div>`).join('');
+  document.getElementById('blockERules').innerHTML = htmlT + htmlN;
+}
+
+// ── Block F ─────────────────────────────────────────────────
+function renderBlockF(bF){
+  if(!bF) return;
+  const matches = bF.matches || [];
+  document.getElementById('blockFBadge').textContent = `${bF.avgSimilarity||0}% औसत मिलान`;
+
+  if(!matches.length){
+    document.getElementById('blockFMatches').innerHTML = '<p style="color:var(--dim);font-size:13px">कोई मिलान नहीं मिला।</p>';
+    return;
+  }
+
+  const html = matches.map((m,i) => {
+    const dir   = m.direction==='BULL'?'var(--bull)':m.direction==='BEAR'?'var(--bear)':'var(--warn)';
+    const outc  = (m.nasdaqOutcome1M||0);
+    const outStr= (outc>0?'+':'')+outc.toFixed(1)+'%';
+    return `<div class="ml-match">
+      <div class="ml-match-header">
+        <span class="ml-date">${i+1}. ${m.date}</span>
+        <span class="ml-sim">${m.similarityPct}% मिलान</span>
+      </div>
+      <div class="ml-desc">${m.description||'—'}</div>
+      <div class="ml-outcome" style="color:${dir}">NASDAQ 1 माह: ${outStr}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('blockFMatches').innerHTML = html;
+
+  if(bF.verdict){
+    const vEl = document.getElementById('blockFVerdict');
+    vEl.style.display='block';
+    vEl.textContent = '🔮 ' + bF.verdict.split('\n').pop();
+  }
+}
+
+function copyReport(){
+  if(!lastResult) return;
+  const txt = `VedicAladdin V6 — NY Deep Dive: ${currentDate}
+संकेत: ${lastResult.overallSignalHi||lastResult.overallSignal} | विश्वास: ${lastResult.overallConfidence}%
+Crash Risk: ${lastResult.crashRisk}/100 (${lastResult.crashCategory||''})
+दशा: ${lastResult.dasha?.maha||'—'} > ${lastResult.dasha?.antar||'—'}
+नक्षत्र: ${lastResult.nakshatra||'—'}
+`;
+  navigator.clipboard?.writeText(txt).then(()=>alert('कॉपी हो गया!')).catch(()=>{});
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', ()=>{
+  const urlDate = new URLSearchParams(window.location.search).get('date');
+  loadDate(urlDate || currentDate);
+});
+</script>
+</body>
+</html>
