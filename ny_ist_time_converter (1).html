@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NY ↔ IST Time Converter</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#101a2b;--line:#263650;--muted:#91a3bd;--text:#edf4ff;--blue:#68a7ff;--cyan:#57e3d0;--gold:#f4c66a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 15% 0%,#152849 0,transparent 38%),radial-gradient(ellipse at 100% 80%,#0c3038 0,transparent 32%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);padding:36px 18px}
+.wrap{max-width:1040px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#071322;font-size:22px;font-weight:900;box-shadow:0 8px 30px #57e3d033}.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:800}.brand h1{font-size:clamp(22px,4vw,31px);margin:3px 0 0;letter-spacing:-.04em}.live{border:1px solid #275449;color:#9af4d9;background:#0d2827;border-radius:999px;padding:8px 12px;font-size:12px;white-space:nowrap}.live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#54e2b4;margin-right:7px;box-shadow:0 0 10px #54e2b4}
+.intro{color:var(--muted);font-size:14px;line-height:1.65;max-width:700px;margin:0 0 24px}.card{background:linear-gradient(145deg,#121e31f5,#0d1626f5);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,30px);box-shadow:0 24px 80px #0003}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}.seg{display:flex;gap:4px;padding:4px;border:1px solid var(--line);background:#09111f;border-radius:13px}.seg button{border:0;background:transparent;color:var(--muted);padding:10px 14px;border-radius:9px;font-weight:750;cursor:pointer}.seg button.active{background:#203957;color:#eaf4ff;box-shadow:inset 0 0 0 1px #3d5e83}.swap{border:1px solid #36506e;background:#14243a;color:var(--text);border-radius:12px;padding:10px 13px;font-weight:700;cursor:pointer}.swap:hover,.seg button:hover{filter:brightness(1.15)}
+.live-clocks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 22px}.clock-card{border:1px solid #2b4562;border-radius:17px;padding:18px 20px;background:linear-gradient(135deg,#12243a,#0b1626);position:relative;overflow:hidden}.clock-card:after{content:"";position:absolute;width:130px;height:130px;right:-55px;top:-60px;border-radius:50%;background:#68a7ff12;pointer-events:none}.india-clock:after{background:#57e3d012}.clock-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.clock-city{font-size:11px;letter-spacing:.13em;font-weight:850;color:#c4d4e9}.clock-dot{font-size:9px;letter-spacing:.12em;color:#7ff0c8;font-weight:900}.clock-dot:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#57e3b4;margin-right:6px;box-shadow:0 0 8px #57e3b4}.clock-time{font-size:clamp(28px,4vw,39px);font-weight:850;letter-spacing:-.055em;margin:12px 0 3px;font-variant-numeric:tabular-nums}.clock-date{font-size:12px;color:#c0cee0}.clock-zone{font-size:10px;color:#7188a5;margin-top:9px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}.zone{border:1px solid var(--line);border-radius:18px;padding:20px;background:#0a1322}.zone-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.flag{width:43px;height:43px;display:grid;place-items:center;font-size:25px;border-radius:13px;background:#1a2c44}.zone h2{margin:0;font-size:18px;letter-spacing:-.02em}.zone .sub{font-size:12px;color:var(--muted);margin-top:4px}.zone-tag{margin-left:auto;font-size:11px;color:var(--muted);border:1px solid var(--line);padding:5px 8px;border-radius:7px}
+label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:800;margin:0 0 8px}.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-bottom:15px}input,select{width:100%;background:#101e31;border:1px solid #30435e;border-radius:11px;padding:13px 12px;color:var(--text);font:inherit;outline:none;min-width:0}input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #68a7ff20}input[type=date],input[type=time]{color-scheme:dark}
+.result{margin-top:20px;border:1px solid #2a5a61;background:linear-gradient(110deg,#102c35,#101c2d);border-radius:18px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.result-label{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--cyan);font-weight:850}.result-time{font-size:clamp(27px,5vw,42px);letter-spacing:-.05em;font-weight:850;margin:7px 0}.result-date{color:#c1d0e4;font-size:14px}.offset{display:inline-flex;align-items:center;gap:7px;margin-top:12px;color:#b7c7dc;font-size:12px}.offset b{color:var(--gold);font-weight:750}.copy{background:var(--cyan);color:#06201e;border:0;border-radius:11px;padding:12px 15px;font-weight:850;cursor:pointer}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.mini{border:1px solid var(--line);border-radius:14px;padding:15px;background:#0b1423}.mini .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:800}.mini .v{font-size:14px;font-weight:750;margin-top:8px}.note{font-size:12px;line-height:1.7;color:var(--muted);margin:20px 2px 0}.note strong{color:#d8e5f7}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#657b98;font-size:11px;margin:18px 3px}.error{color:#ffb5a9;font-size:12px;margin-top:8px;min-height:16px}
+@media(max-width:700px){body{padding:22px 12px}.top{align-items:flex-start}.live{font-size:10px}.live-clocks{grid-template-columns:1fr}.clock-card{padding:15px 17px}.fields{grid-template-columns:1fr}.meta{grid-template-columns:1fr}.zone{padding:16px}.result{padding:18px}.seg button{padding:9px 10px;font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">↔</div><div><div class="eyebrow">Precision time tools</div><h1>NY ↔ IST Converter</h1></div></div>
+    <div class="live">Auto DST · IANA time zones</div>
+  </header>
+  <p class="intro">Convert New York time to India Standard Time—or back again—with the correct date, time, and daylight-saving offset automatically applied.</p>
+  <main class="card">
+    <div class="toolbar">
+      <div class="seg" aria-label="Conversion direction">
+        <button id="nyToIst" class="active" type="button">New York → India</button>
+        <button id="istToNy" type="button">India → New York</button>
+      </div>
+      <button id="swap" class="swap" type="button">⇄ Swap direction</button>
+    </div>
+    <div class="live-clocks">
+      <section class="clock-card">
+        <div class="clock-top"><span class="clock-city">🇺🇸 &nbsp; NEW YORK</span><span class="clock-dot">LIVE</span></div>
+        <div class="clock-time" id="liveNYTime">--:--:--</div>
+        <div class="clock-date" id="liveNYDate">Loading local date…</div>
+        <div class="clock-zone" id="liveNYZone">America/New_York</div>
+      </section>
+      <section class="clock-card india-clock">
+        <div class="clock-top"><span class="clock-city">🇮🇳 &nbsp; INDIA</span><span class="clock-dot">LIVE</span></div>
+        <div class="clock-time" id="liveISTTime">--:--:--</div>
+        <div class="clock-date" id="liveISTDate">Loading local date…</div>
+        <div class="clock-zone" id="liveISTZone">Asia/Kolkata</div>
+      </section>
+    </div>
+    <div class="fields">
+      <section class="zone">
+        <div class="zone-head"><div class="flag" id="fromFlag">🇺🇸</div><div><h2 id="fromTitle">New York</h2><div class="sub" id="fromZone">America/New_York</div></div><span class="zone-tag" id="fromAbbr">ET</span></div>
+        <div class="field"><label for="sourceDate">Date</label><input id="sourceDate" type="date"></div>
+        <div class="field"><label for="sourceTime">Time</label><input id="sourceTime" type="time" value="09:00" step="60"></div>
+      </section>
+      <section class="zone">
+        <div class="zone-head"><div class="flag" id="toFlag">🇮🇳</div><div><h2 id="toTitle">India</h2><div class="sub" id="toZone">Asia/Kolkata</div></div><span class="zone-tag" id="toAbbr">IST</span></div>
+        <div class="field"><label for="targetDate">Converted date</label><input id="targetDate" type="text" readonly></div>
+        <div class="field"><label for="targetTime">Converted time</label><input id="targetTime" type="text" readonly></div>
+      </section>
+    </div>
+    <div class="result">
+      <div><div class="result-label">Converted result</div><div class="result-time" id="resultTime">—</div><div class="result-date" id="resultDate">Choose a date and time</div><div class="offset" id="offsetInfo">Time-zone offsets will appear here</div></div>
+      <button class="copy" id="copy" type="button">Copy result ↗</button>
+    </div>
+    <div class="meta">
+      <div class="mini"><div class="k">New York offset</div><div class="v" id="nyOffset">—</div></div>
+      <div class="mini"><div class="k">India offset</div><div class="v">UTC+05:30 · IST</div></div>
+      <div class="mini"><div class="k">DST status in New York</div><div class="v" id="dstStatus">—</div></div>
+    </div>
+    <div class="error" id="error" role="status"></div>
+    <p class="note"><strong>Daylight saving handled automatically.</strong> New York typically observes EDT (UTC−04:00) from the second Sunday in March to the first Sunday in November, and EST (UTC−05:00) for the rest of the year. India does not observe DST. This converter uses the browser’s built-in IANA time-zone database, so the selected date determines the correct offset—including historical or future rule changes supported by your browser.</p>
+  </main>
+  <div class="footer"><span>NYC · America/New_York</span><span>India · Asia/Kolkata</span><span>Local calculation · no data sent</span></div>
+</div>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ const zones = {ny:{title:'New York',flag:'🇺🇸',zone:'America/New_York'},ist:{title:'India',flag:'🇮🇳',zone:'Asia/Kolkata'}};
+ let direction='ny';
+ const pad=n=>String(n).padStart(2,'0');
+ const today = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ $('sourceDate').value=today;
+ function parts(date,zone){
+   const p=new Intl.DateTimeFormat('en-GB',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',timeZoneName:'short'}).formatToParts(date);
+   return Object.fromEntries(p.map(x=>[x.type,x.value]));
+ }
+ function offsetAt(date,zone){
+   const p=parts(date,zone);
+   const asUTC=Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute,+p.second);
+   return Math.round((asUTC-date.getTime())/60000);
+ }
+ function offsetLabel(mins){
+   const sign=mins>=0?'+':'−', a=Math.abs(mins);
+   return `UTC${sign}${pad(Math.floor(a/60))}:${pad(a%60)}`;
+ }
+ // Interpret the selected wall-clock date/time in a named time zone, iteratively resolving its UTC instant.
+ function wallTimeToInstant(dateStr,timeStr,zone){
+   const [y,m,d]=dateStr.split('-').map(Number),[hh,mm]=timeStr.split(':').map(Number);
+   const wanted=Date.UTC(y,m-1,d,hh,mm,0);
+   let guess=wanted;
+   for(let i=0;i<5;i++){
+     const delta=wanted-(guess+offsetAt(new Date(guess),zone)*60000);
+     if(delta===0)break;
+     guess+=delta;
+   }
+   const result=new Date(guess), actual=parts(result,zone);
+   if(+actual.year!==y||+actual.month!==m||+actual.day!==d||+actual.hour!==hh||+actual.minute!==mm){
+     return {date:result,invalid:true};
+   }
+   return {date:result,invalid:false};
+ }
+ function dateText(p){return `${p.year}-${p.month}-${p.day}`;}
+ function niceDate(p,zone){
+   return new Intl.DateTimeFormat('en-US',{timeZone:zone,weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(new Date(Date.UTC(+p.year,+p.month-1,+p.day,12)));
+ }
+ function updateLiveClocks(){
+   const now=new Date();
+   const timeOpts={hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true};
+   const dateOpts={weekday:'long',year:'numeric',month:'short',day:'numeric'};
+   $('liveNYTime').textContent=new Intl.DateTimeFormat('en-US',{...timeOpts,timeZone:'America/New_York'}).format(now);
+   $('liveISTTime').textContent=new Intl.DateTimeFormat('en-IN',{...timeOpts,timeZone:'Asia/Kolkata'}).format(now);
+   $('liveNYDate').textContent=new Intl.DateTimeFormat('en-US',{...dateOpts,timeZone:'America/New_York'}).format(now);
+   $('liveISTDate').textContent=new Intl.DateTimeFormat('en-IN',{...dateOpts,timeZone:'Asia/Kolkata'}).format(now);
+   const ny=parts(now,'America/New_York');
+   const ist=parts(now,'Asia/Kolkata');
+   $('liveNYZone').textContent=`${ny.timeZoneName} · ${offsetLabel(offsetAt(now,'America/New_York'))}`;
+   $('liveISTZone').textContent=`${ist.timeZoneName} · ${offsetLabel(offsetAt(now,'Asia/Kolkata'))}`;
+ }
+ function render(){
+   const from=zones[direction],to=zones[direction==='ny'?'ist':'ny'];
+   $('fromTitle').textContent=from.title;$('fromFlag').textContent=from.flag;$('fromZone').textContent=from.zone;
+   $('toTitle').textContent=to.title;$('toFlag').textContent=to.flag;$('toZone').textContent=to.zone;
+   $('nyToIst').classList.toggle('active',direction==='ny');$('istToNy').classList.toggle('active',direction==='ist');
+   $('fromAbbr').textContent=direction==='ny'?'ET':'IST';$('toAbbr').textContent=direction==='ny'?'IST':'ET';
+   const d=$('sourceDate').value,t=$('sourceTime').value;
+   if(!d||!t){$('error').textContent='Please choose both a date and a time.';return;}
+   const converted=wallTimeToInstant(d,t,from.zone),instant=converted.date;
+   const srcParts=parts(instant,from.zone),dstParts=parts(instant,to.zone);
+   const srcOffset=offsetAt(instant,from.zone),dstOffset=offsetAt(instant,to.zone);
+   $('targetDate').value=dateText(dstParts);$('targetTime').value=`${dstParts.hour}:${dstParts.minute}`;
+   $('resultTime').textContent=`${dstParts.hour}:${dstParts.minute}`;
+   $('resultDate').textContent=niceDate(dstParts,to.zone);
+   $('offsetInfo').innerHTML=`<b>${srcParts.timeZoneName}</b> (${offsetLabel(srcOffset)}) <span>→</span> <b>${dstParts.timeZoneName}</b> (${offsetLabel(dstOffset)})`;
+   const nyOff=offsetAt(instant,zones.ny.zone);
+   $('nyOffset').textContent=`${offsetLabel(nyOff)} · ${parts(instant,zones.ny.zone).timeZoneName}`;
+   $('dstStatus').textContent=nyOff===-240?'Active · EDT':'Inactive · EST';
+   $('error').textContent=converted.invalid?'This local time may fall inside a daylight-saving clock change. The browser adjusted it to the nearest valid time.':'';
+   $('copy').dataset.text=`${from.title}: ${d} ${t} (${srcParts.timeZoneName}, ${offsetLabel(srcOffset)})\n${to.title}: ${dateText(dstParts)} ${dstParts.hour}:${dstParts.minute} (${dstParts.timeZoneName}, ${offsetLabel(dstOffset)})`;
+ }
+ function changeDirection(){direction=direction==='ny'?'ist':'ny';render();}
+ $('nyToIst').addEventListener('click',()=>{direction='ny';render()});
+ $('istToNy').addEventListener('click',()=>{direction='ist';render()});
+ $('swap').addEventListener('click',changeDirection);
+ $('sourceDate').addEventListener('input',render);$('sourceTime').addEventListener('input',render);
+ $('copy').addEventListener('click',async()=>{
+   const value=$('copy').dataset.text||'';
+   try{await navigator.clipboard.writeText(value);$('copy').textContent='Copied ✓';}
+   catch(e){const ta=document.createElement('textarea');ta.value=value;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();$('copy').textContent='Copied ✓';}
+   setTimeout(()=>$('copy').textContent='Copy result ↗',1600);
+ });
+ render();
+ updateLiveClocks();
+ setInterval(updateLiveClocks,1000);
+})();
+</script>
+</body>
+</html>
