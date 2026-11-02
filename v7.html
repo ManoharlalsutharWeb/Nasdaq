@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASDAQ Vedic V7 - Advanced Multi-Session Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;700&family=Yatra+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #07070f;
+            --surface: #0e0e1c;
+            --surface2: #15152b;
+            --line: #25254a;
+            --line2: #34346a;
+            --text: #ecebfa;
+            --text2: #b9b8d6;
+            --muted: #8887ad;
+            --gold: #f0b90b;
+            --accent: #8b7dff;
+            --accent-soft: #8b7dff22;
+            --up: #2fbf71;
+            --down: #f06a6a;
+            --side: #5aa2f2;
+            --btrap: #e8803f;
+            --rtrap: #a99bff;
+            --crash: #ff4d4d;
+            --font: 'Noto Sans Devanagari', 'Segoe UI', system-ui, sans-serif;
+            --display: 'Yatra One', 'Noto Sans Devanagari', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.55 var(--font);
+            padding: 12px 16px 40px;
+            text-size-adjust: 100%;
+        }
+
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .mast {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 18px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0 12px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 16px;
+        }
+
+        .brand {
+            font-family: var(--display);
+            font-size: 26px;
+            color: var(--gold);
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+        }
+
+        .brand small {
+            display: block;
+            font-family: var(--font);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.3px;
+            margin-top: 3px;
+        }
+
+        .clock {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text2);
+            font-family: 'Courier New', monospace;
+            background: var(--surface);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+        }
+
+        .clock b {
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        /* Session Filter Buttons */
+        .session-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 2px solid var(--line2);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+        }
+
+        /* Grid & Panel Styles */
+        .grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        @media (max-width: 1200px) {
+            .g3, .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 640px) {
+            .g2, .g3, .g4 { grid-template-columns: minmax(0, 1fr); }
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px;
+            min-width: 0;
+        }
+
+        .panel h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.3px;
+            color: var(--gold);
+            margin-bottom: 10px;
+            padding-bottom: 7px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .panel h3 .r {
+            float: right;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--muted);
+            font-weight: 400;
+            font-size: 11px;
+        }
+
+        /* Session Cards */
+        .sess {
+            background: var(--surface2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .sess.hidden {
+            display: none;
+        }
+
+        .sess .hd {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .sess b {
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .sess .muted {
+            font-size: 11px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 9px;
+            border-radius: 99px;
+            border: 1px solid var(--line2);
+            font-size: 11px;
+            color: var(--text2);
+            white-space: nowrap;
+            background: var(--surface);
+        }
+
+        .chip.live {
+            border-color: var(--up);
+            color: var(--up);
+        }
+
+        /* Gap Analysis */
+        .gap-analysis {
+            margin: 10px 0;
+            padding: 8px;
+            background: var(--bg);
+            border-left: 3px solid var(--side);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .gap-analysis.gap-up {
+            border-left-color: var(--up);
+        }
+
+        .gap-analysis.gap-down {
+            border-left-color: var(--down);
+        }
+
+        .gap-analysis.sideways {
+            border-left-color: var(--side);
+        }
+
+        .gap-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .gap-badge.up {
+            background: var(--up);
+            color: white;
+        }
+
+        .gap-badge.down {
+            background: var(--down);
+            color: white;
+        }
+
+        .gap-badge.side {
+            background: var(--side);
+            color: white;
+        }
+
+        /* Trend Direction */
+        .trend-box {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .trend-box.oneway-bull {
+            background: rgba(47, 191, 113, 0.15);
+            border: 1px solid var(--up);
+            color: var(--up);
+        }
+
+        .trend-box.oneway-bear {
+            background: rgba(240, 106, 106, 0.15);
+            border: 1px solid var(--down);
+            color: var(--down);
+        }
+
+        .trend-box.twoway {
+            background: rgba(90, 162, 242, 0.15);
+            border: 1px solid var(--side);
+            color: var(--side);
+        }
+
+        /* Event Calendar */
+        .event-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .event-item {
+            padding: 8px;
+            margin: 6px 0;
+            background: var(--bg);
+            border-left: 3px solid var(--accent);
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .event-time {
+            font-family: 'Courier New', monospace;
+            color: var(--accent);
+            font-weight: 600;
+            flex-shrink: 0;
+            min-width: 45px;
+        }
+
+        .event-desc {
+            flex: 1;
+            color: var(--text2);
+        }
+
+        .event-alert {
+            display: inline-block;
+            padding: 1px 5px;
+            background: var(--crash);
+            color: white;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .event-item.upcoming {
+            background: rgba(240, 185, 11, 0.1);
+            border-left-color: var(--gold);
+        }
+
+        .event-item.live {
+            background: rgba(47, 191, 113, 0.1);
+            border-left-color: var(--up);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Stats & Bars */
+        .bar {
+            height: 6px;
+            background: var(--line);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 6px 0;
+        }
+
+        .bar i {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px 12px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .kv dt {
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .kv dd {
+            margin: 0;
+            color: var(--text);
+        }
+
+        .sig {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Alert Banner */
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border-left: 3px solid var(--gold);
+            background: var(--surface);
+            font-size: 12px;
+        }
+
+        .alert.warning {
+            border-left-color: var(--btrap);
+            color: var(--btrap);
+        }
+
+        .alert.info {
+            border-left-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .mast {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .session-filters {
+                width: 100%;
+            }
+
+            .filter-btn {
+                flex: 1;
+            }
+
+            .g2, .g3, .g4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        footer {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line);
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <!-- Header -->
+        <div class="mast">
+            <div>
+                <div class="brand">🌍 NASDAQ VEDIC V7<small>Advanced Multi-Session Analysis</small></div>
+            </div>
+            <div class="clock">
+                📍 IST: <b id="ist-time">--:--:--</b>
+                <span style="color: var(--muted);">|</span>
+                NY: <b id="ny-time">--:--:--</b>
+            </div>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="alert info">
+            ℹ️ <strong>अगला महत्वपूर्ण Event:</strong> <span id="next-event">NY Session Opening - 19:00 IST</span>
+        </div>
+
+        <!-- Session Filters -->
+        <div class="session-filters">
+            <button class="filter-btn active" onclick="filterSession('all')">🔷 सभी सत्र (All Sessions)</button>
+            <button class="filter-btn" onclick="filterSession('asian')">🌏 एशियन (05:30-13:29)</button>
+            <button class="filter-btn" onclick="filterSession('london')">🇬🇧 लंदन (13:30-19:29)</button>
+            <button class="filter-btn" onclick="filterSession('newyork')">🗽 न्यूयॉर्क (19:00-04:00)</button>
+        </div>
+
+        <!-- Three Global Sessions with Gap Analysis -->
+        <div class="panel" style="margin-bottom: 16px;">
+            <h3>🌍 तीन वैश्विक सत्र - Gap Analysis & Trend Direction</h3>
+            <div class="grid g3">
+                <!-- Asian Session -->
+                <div class="sess" id="asian-sess">
+                    <div class="hd">
+                        <b>🌏 एशियन (एशिया-प्रशांत)</b>
+                        <span class="muted num">05:30 IST से</span>
+                    </div>
+                    <div style="margin: 8px 0;">
+                        <div class="hd">
+                            <span class="sig" style="color: var(--up);">▲ BULLISH</span>
+                            <span class="chip">78%</span>
+                        </div>
+                        <div class="bar"><i style="width:78%;background:var(--up)"></i></div>
+                    </div>
+
+                    <!-- Gap Analysis -->
+                    <div class="gap-analysis gap-up">
+                        <span class="gap-badge up">GAP UP</span>
+                        <strong>+450 पॉइंट्स</strong>
+                        <div style="font-size: 11px; margin-top: 4px; color: var(--text2);">
+                            एशियन ओपनिंग: 22,500 → 22,950
+                        </div>
+                    </div>
+
+                    <!-- Trend Direction -->
+                    <div class="trend-box oneway-bull">
+                        ▲ ONE-WAY BULL
+                    </div>
+
+                    <!-- Details -->
+                    <dl class="kv">
+                        <dt>होरा</dt><dd>बृहस्पति</dd>
+                        <dt>नक्षत्र</dt><dd>कृत्तिका</dd>
+                        <dt>ट्रेंड स्कोर</dt><dd class="num">4/5 ▲</dd>
+                        <dt>ट्रेंड टाइप</dt><dd>Unidirectional</dd>
+                    </dl>
+                </div>
+
+                <!-- London Session -->
+                <div class="sess" id="london-sess">
+                    <div class="hd">
+                        <b>🇬🇧 लंदन (यूरोप)</b>
+                        <span class="muted num">13:30 IST से</span>
+                    </div>
+                    <div style="margin: 8px 0;">
+                        <div class="hd">
+                            <span class="sig" style="color: var(--up);">▲ BULLISH</span>
+                            <span class="chip">71%</span>
+                        </div>
+                        <div class="bar"><i style="width:71%;background:var(--up)"></i></div>
+                    </div>
+
+                    <!-- Gap Analysis -->
+                    <div class="gap-analysis sideways">
+                        <span class="gap-badge side">SIDEWAYS</span>
+                        <strong>±200 पॉइंट्स रेंज</strong>
+                        <div style="font-size: 11px; margin-top: 4px; color: var(--text2);">
+                            लंदन ओपन: 22,900-23,100 (Consolidation)
+                        </div>
+                    </div>
+
+                    <!-- Trend Direction -->
+                    <div class="trend-box twoway">
+                        ◆ TWO-WAY RANGE
+                    </div>
+
+                    <!-- Details -->
+                    <dl class="kv">
+                        <dt>होरा</dt><dd>चंद्र</dd>
+                        <dt>नक्षत्र</dt><dd>रोहिणी</dd>
+                        <dt>ट्रेंड स्कोर</dt><dd class="num">3/5 ◆</dd>
+                        <dt>ट्रेंड टाइप</dt><dd>Consolidation</dd>
+                    </dl>
+                </div>
+
+                <!-- New York Session -->
+                <div class="sess" id="newyork-sess">
+                    <div class="hd">
+                        <b>🗽 न्यूयॉर्क (अमेरिका)</b>
+                        <span class="muted num">19:00 IST से</span>
+                    </div>
+                    <div style="margin: 8px 0;">
+                        <div class="hd">
+                            <span class="sig" style="color: var(--down);">▼ BEARISH</span>
+                            <span class="chip">45%</span>
+                        </div>
+                        <div class="bar"><i style="width:45%;background:var(--down)"></i></div>
+                    </div>
+
+                    <!-- Gap Analysis -->
+                    <div class="gap-analysis gap-down">
+                        <span class="gap-badge down">GAP DOWN</span>
+                        <strong>-350 पॉइंट्स</strong>
+                        <div style="font-size: 11px; margin-top: 4px; color: var(--text2);">
+                            NY ओपनिंग: 23,100 → 22,750
+                        </div>
+                    </div>
+
+                    <!-- Trend Direction -->
+                    <div class="trend-box oneway-bear">
+                        ▼ ONE-WAY BEAR
+                    </div>
+
+                    <!-- Details -->
+                    <dl class="kv">
+                        <dt>होरा</dt><dd>शनि (⚠️ कठिन)</dd>
+                        <dt>नक्षत्र</dt><dd>रोहिणी</dd>
+                        <dt>ट्रेंड स्कोर</dt><dd class="num">1.5/5 ▼</dd>
+                        <dt>ट्रेंड टाइप</dt><dd>Unidirectional Down</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- NY Session Real-Time Playbook with Event Calendar -->
+        <div class="grid g2">
+            <div class="panel">
+                <h3>🗽 NY सत्र Live प्लेबुक <span class="r">ओपन 19:00 IST</span></h3>
+                
+                <!-- Live Events Timeline -->
+                <h4 style="font-size: 12px; color: var(--muted); margin-top: 12px; margin-bottom: 8px;">📅 अगली घटनाएं (Next Events):</h4>
+                
+                <ul class="event-list">
+                    <li class="event-item upcoming">
+                        <span class="event-time">19:00</span>
+                        <span class="event-desc">NY सेशन शुरुआत - Opening Bell 🔔</span>
+                        <span class="event-alert">IN 2h</span>
+                    </li>
+                    <li class="event-item upcoming">
+                        <span class="event-time">19:05</span>
+                        <span class="event-desc">Opening Momentum Confirm (पहले 5 मिनट)</span>
+                        <span class="event-alert">IN 2h</span>
+                    </li>
+                    <li class="event-item upcoming">
+                        <span class="event-time">19:15</span>
+                        <span class="event-desc">15-Min Trend Confirmation (3 candles = Trend Day?)</span>
+                        <span class="event-alert">IN 2h</span>
+                    </li>
+                    <li class="event-item">
+                        <span class="event-time">19:31</span>
+                        <span class="event-desc">होरा बदलाव ✨ Saturn → Jupiter (अच्छा समय)</span>
+                    </li>
+                    <li class="event-item">
+                        <span class="event-time">20:24</span>
+                        <span class="event-desc">होरा बदलाव ⚠️ Jupiter → Mars (सावधानी)</span>
+                    </li>
+                    <li class="event-item">
+                        <span class="event-time">01:00-01:30</span>
+                        <span class="event-desc">Power Hour - Closing Push 🚀</span>
+                    </li>
+                </ul>
+
+                <div style="margin-top: 10px; padding: 8px; background: var(--surface2); border-radius: 6px; font-size: 11px; border-left: 3px solid var(--gold);">
+                    💡 <strong>Smart Alert:</strong> NY ओपन पर Bearish होरा (शनि) + Gap Down = Short Opportunity संभव है
+                </div>
+            </div>
+
+            <!-- Hora Windows - Critical Times -->
+            <div class="panel">
+                <h3>⏰ NY Session होरा विंडो (Planetary Hours)</h3>
+                <p style="font-size: 11px; color: var(--muted); margin-bottom: 10px;">✨ शुभ (Good) | ⚠️ सावधान (Caution)</p>
+
+                <div style="display: grid; gap: 6px;">
+                    <div style="padding: 6px; background: rgba(240, 106, 106, 0.15); border-left: 2px solid var(--down); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--down);">19:00–19:31 ▼</span> शनि (कठिन)
+                    </div>
+                    <div style="padding: 6px; background: rgba(47, 191, 113, 0.15); border-left: 2px solid var(--up); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--up);">19:31–20:24 ▲</span> बृहस्पति (अच्छा)
+                    </div>
+                    <div style="padding: 6px; background: rgba(240, 106, 106, 0.15); border-left: 2px solid var(--down); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--down);">20:24–21:16 ▼</span> मंगल (आक्रामक)
+                    </div>
+                    <div style="padding: 6px; background: rgba(47, 191, 113, 0.15); border-left: 2px solid var(--up); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--up);">21:16–22:09 ▲</span> सूर्य (शक्तिशाली)
+                    </div>
+                    <div style="padding: 6px; background: rgba(47, 191, 113, 0.15); border-left: 2px solid var(--up); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--up);">22:09–23:02 ▲</span> शुक्र (कमल)
+                    </div>
+                    <div style="padding: 6px; background: rgba(47, 191, 113, 0.15); border-left: 2px solid var(--up); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--up);">23:02–23:54 ▲</span> बुध (बुद्धि)
+                    </div>
+                    <div style="padding: 6px; background: rgba(90, 162, 242, 0.15); border-left: 2px solid var(--side); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--side);">23:54–00:47 ◆</span> चंद्र (तटस्थ)
+                    </div>
+                    <div style="padding: 6px; background: rgba(240, 106, 106, 0.15); border-left: 2px solid var(--down); border-radius: 4px; font-size: 11px;">
+                        <span style="color: var(--down);">00:47–01:30 ▼</span> शनि (कठिन) - Close में सावधानी
+                    </div>
+                </div>
+
+                <p style="font-size: 10px; color: var(--muted); margin-top: 10px;">
+                    नोट: समय NY के वास्तविक सूर्योदय-सूर्यास्त पर आधारित है (2nd October 2026)
+                </p>
+            </div>
+        </div>
+
+        <!-- Daily Events Calendar -->
+        <div class="panel" style="margin-top: 16px;">
+            <h3>📅 आज की महत्वपूर्ण घटनाएं (Daily Economic Calendar)</h3>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                    <thead style="border-bottom: 1px solid var(--line);">
+                        <tr>
+                            <th style="text-align: left; padding: 8px; color: var(--gold); font-weight: 600;">समय (IST)</th>
+                            <th style="text-align: left; padding: 8px; color: var(--gold); font-weight: 600;">सत्र</th>
+                            <th style="text-align: left; padding: 8px; color: var(--gold); font-weight: 600;">घटना (Event)</th>
+                            <th style="text-align: left; padding: 8px; color: var(--gold); font-weight: 600;">प्रभाव</th>
+                            <th style="text-align: left; padding: 8px; color: var(--gold); font-weight: 600;">स्थिति</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--line);">
+                            <td style="padding: 8px;">08:00</td>
+                            <td style="padding: 8px;">एशियन</td>
+                            <td style="padding: 8px;">🇯🇵 Japan Services PMI</td>
+                            <td style="padding: 8px; color: var(--muted);">माध्यम</td>
+                            <td style="padding: 8px;"><span style="color: var(--side);">⏳ आने वाला</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--line);">
+                            <td style="padding: 8px;">14:30</td>
+                            <td style="padding: 8px;">लंदन</td>
+                            <td style="padding: 8px;">🇬🇧 UK Retail Sales</td>
+                            <td style="padding: 8px; color: var(--up);">उच्च ⬆️</td>
+                            <td style="padding: 8px;"><span style="color: var(--side);">⏳ आने वाला</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--line);">
+                            <td style="padding: 8px;">19:00</td>
+                            <td style="padding: 8px;">न्यूयॉर्क</td>
+                            <td style="padding: 8px;">🗽 NYSE Opening Bell 🔔</td>
+                            <td style="padding: 8px; color: var(--up);">अत्यधिक ⬆️</td>
+                            <td style="padding: 8px;"><span style="color: var(--side);">⏳ 2 घंटे में</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--line);">
+                            <td style="padding: 8px;">19:30</td>
+                            <td style="padding: 8px;">न्यूयॉर्क</td>
+                            <td style="padding: 8px;">🇺🇸 Core PCE Price Index (तुरंत प्रभावशाली)</td>
+                            <td style="padding: 8px; color: var(--crash);">बहुत अधिक ⬆️⬆️</td>
+                            <td style="padding: 8px;"><span style="color: var(--side);">⏳ 2.5 घंटे में</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--line);">
+                            <td style="padding: 8px;">22:00</td>
+                            <td style="padding: 8px;">न्यूयॉर्क</td>
+                            <td style="padding: 8px;">🇺🇸 Fed Fund Futures (सूचक)</td>
+                            <td style="padding: 8px; color: var(--muted);">माध्यम</td>
+                            <td style="padding: 8px;"><span style="color: var(--side);">⏳ 5 घंटे में</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px;">01:00</td>
+                            <td style="padding: 8px;">न्यूयॉर्क</td>
+                            <td style="padding: 8px;">🚀 Power Hour - Close का आखिरी 30 मिनट</td>
+                            <td style="padding: 8px; color: var(--up);">तेज़ गति</td>
+                            <td style="padding: 8px;"><span style="color: var(--down);">रात 8 घंटे में</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 12px; padding: 10px; background: rgba(255, 77, 77, 0.1); border-left: 3px solid var(--crash); border-radius: 6px; font-size: 11px;">
+                ⚠️ <strong>जोखिम चेतावनी:</strong> 19:30 IST पर Core PCE आएगा जो USD और NQ दोनों को तेज़ी से हिला सकता है। अपनी पोजीशन छोटी रखें।
+            </div>
+        </div>
+
+        <!-- Top Stocks Impact -->
+        <div class="panel" style="margin-top: 16px;">
+            <h3>🏢 Top NASDAQ Stocks - Session-wise Impact</h3>
+            <div class="grid g2">
+                <div>
+                    <h4 style="font-size: 12px; margin: 8px 0; color: var(--muted);">एशियन सेशन में BULL स्टॉक्स</h4>
+                    <div style="display: grid; gap: 6px;">
+                        <div style="padding: 8px; background: var(--bg); border-left: 3px solid var(--up); border-radius: 4px; font-size: 12px;">
+                            <strong style="color: var(--text);">NVDA</strong> <span style="color: var(--muted);">13.2% | ▲ +8%</span>
+                            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">Asia-Pacific tech demand strong</div>
+                        </div>
+                        <div style="padding: 8px; background: var(--bg); border-left: 3px solid var(--up); border-radius: 4px; font-size: 12px;">
+                            <strong style="color: var(--text);">AAPL</strong> <span style="color: var(--muted);">11.38% | ▲ +6.5%</span>
+                            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">iPhone demand in Asia up</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="font-size: 12px; margin: 8px 0; color: var(--muted);">NY सेशन में BEAR स्टॉक्स</h4>
+                    <div style="display: grid; gap: 6px;">
+                        <div style="padding: 8px; background: var(--bg); border-left: 3px solid var(--down); border-radius: 4px; font-size: 12px;">
+                            <strong style="color: var(--text);">TSLA</strong> <span style="color: var(--muted);">3.58% | ▼ -5%</span>
+                            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">US rate hikes concern</div>
+                        </div>
+                        <div style="padding: 8px; background: var(--bg); border-left: 3px solid var(--down); border-radius: 4px; font-size: 12px;">
+                            <strong style="color: var(--text);">META</strong> <span style="color: var(--muted);">3.72% | ▼ -4.2%</span>
+                            <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">Ad spending growth slows</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            NASDAQ Vedic V7 Advanced | लाहिरी अयनांश | Vedic Analysis for NQ Futures | Educational Use | ज्ञान सबका है ☮️
+        </footer>
+    </div>
+
+    <script>
+        // Real-time Clock
+        function updateClock() {
+            const now = new Date();
+            const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+            const nyTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+            
+            const istStr = istTime.toLocaleTimeString('en-IN', { hour12: false });
+            const nyStr = nyTime.toLocaleTimeString('en-IN', { hour12: false });
+            
+            document.getElementById('ist-time').textContent = istStr;
+            document.getElementById('ny-time').textContent = nyStr;
+            
+            updateEventStatus();
+        }
+
+        function updateEventStatus() {
+            const now = new Date();
+            const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+            const hours = istTime.getHours();
+            
+            let nextEvent = 'NY Session Opening - 19:00 IST';
+            if (hours >= 5 && hours < 13) nextEvent = 'London Session - 13:30 IST में';
+            else if (hours >= 13 && hours < 19) nextEvent = 'NY Session Opening - 19:00 IST में';
+            else if (hours >= 19) nextEvent = 'Power Hour (Close) - 01:00 IST में';
+            
+            document.getElementById('next-event').textContent = nextEvent;
+        }
+
+        // Session Filter
+        function filterSession(session) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const asianSess = document.getElementById('asian-sess');
+            const londonSess = document.getElementById('london-sess');
+            const newyorkSess = document.getElementById('newyork-sess');
+            
+            if (session === 'all') {
+                asianSess.classList.remove('hidden');
+                londonSess.classList.remove('hidden');
+                newyorkSess.classList.remove('hidden');
+            } else if (session === 'asian') {
+                asianSess.classList.remove('hidden');
+                londonSess.classList.add('hidden');
+                newyorkSess.classList.add('hidden');
+            } else if (session === 'london') {
+                asianSess.classList.add('hidden');
+                londonSess.classList.remove('hidden');
+                newyorkSess.classList.add('hidden');
+            } else if (session === 'newyork') {
+                asianSess.classList.add('hidden');
+                londonSess.classList.add('hidden');
+                newyorkSess.classList.remove('hidden');
+            }
+        }
+
+        // Initialize
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
