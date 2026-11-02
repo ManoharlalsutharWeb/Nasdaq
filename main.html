@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a0f08">
+<title>Nasdaq Vedic Launcher</title>
+<style>
+  :root {
+    --night: #140a05;
+    --maroon: #2a1408;
+    --panel: rgba(255, 233, 180, 0.04);
+    --gold: #e0b04a;
+    --gold-hi: #ffd978;
+    --saffron: #ff9933;
+    --cream: #fbf0d6;
+    --muted: #b9a57e;
+    --line: rgba(224, 176, 74, 0.28);
+    --glow: 0 0 0 1px rgba(224,176,74,.18), 0 12px 40px rgba(255,153,51,.10);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    color: var(--cream);
+    font-family: "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(255,153,51,.18), transparent 60%),
+      radial-gradient(900px 700px at 110% 10%, rgba(224,176,74,.14), transparent 60%),
+      linear-gradient(180deg, var(--maroon), var(--night) 70%);
+    background-attachment: fixed;
+    padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px);
+  }
+  .mandala {
+    position: fixed; right: -180px; top: -180px; width: 520px; height: 520px;
+    opacity: .07; pointer-events: none; z-index: 0;
+  }
+  .wrap { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 36px 0 56px; }
+
+  header { text-align: center; margin-bottom: 30px; }
+  .om { font-size: 2.2rem; color: var(--saffron); line-height: 1; text-shadow: 0 0 18px rgba(255,153,51,.5); }
+  h1 {
+    font-family: "Noto Serif Devanagari", Georgia, "Times New Roman", serif;
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    margin: 10px 0 6px;
+    background: linear-gradient(90deg, #b8862b, var(--gold-hi), #b8862b);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    letter-spacing: .01em;
+  }
+  .sub { color: var(--muted); margin: 0; font-size: .95rem; }
+  .divider {
+    display: flex; align-items: center; gap: 12px; justify-content: center;
+    margin: 16px auto 0; max-width: 360px; color: var(--gold);
+  }
+  .divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .layout { display: grid; gap: 24px; grid-template-columns: 1fr; }
+  @media (min-width: 920px) { .layout { grid-template-columns: 1.15fr 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: var(--glow);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .panel-title {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Noto Serif Devanagari", Georgia, serif;
+    font-size: 1.1rem; color: var(--gold-hi); margin: 0 0 16px;
+  }
+  .panel-title span.dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--saffron); box-shadow: 0 0 10px var(--saffron);
+  }
+  .group-label {
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--saffron); margin: 18px 0 10px; font-weight: 600;
+  }
+  .group-label:first-of-type { margin-top: 0; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+  .card {
+    position: relative; display: flex; gap: 12px; align-items: center;
+    padding: 14px; border-radius: 14px; color: inherit; text-decoration: none;
+    background: linear-gradient(160deg, rgba(255,233,180,.07), rgba(255,233,180,.01));
+    border: 1px solid var(--line);
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .card:hover, .card:focus-visible {
+    transform: translateY(-3px);
+    border-color: var(--gold-hi);
+    box-shadow: 0 10px 28px rgba(255,153,51,.18);
+    outline: none;
+  }
+  .seal {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 700; font-size: .8rem; letter-spacing: .04em;
+    color: #2a1408;
+    background: radial-gradient(circle at 30% 30%, var(--gold-hi), var(--gold) 55%, #9c6f1f);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.25), 0 0 14px rgba(224,176,74,.35);
+  }
+  .card strong { display: block; font-size: .95rem; color: var(--cream); }
+  .card small { color: var(--muted); font-size: .78rem; word-break: break-all; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip {
+    font: inherit; font-size: .8rem; color: var(--gold-hi); cursor: pointer;
+    background: transparent; border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 14px;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .chip:hover { background: rgba(224,176,74,.12); border-color: var(--gold-hi); }
+
+  .chat-log {
+    height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+    padding: 6px 4px; margin-bottom: 14px; scrollbar-color: var(--gold) transparent;
+  }
+  .msg { padding: 12px 14px; border-radius: 16px; font-size: .93rem; line-height: 1.6; white-space: pre-wrap; max-width: 90%; }
+  .msg.user {
+    align-self: flex-end; color: #2a1408; font-weight: 600;
+    background: linear-gradient(135deg, var(--gold-hi), var(--saffron));
+    border-bottom-right-radius: 4px;
+  }
+  .msg.bot {
+    align-self: flex-start; background: rgba(255,233,180,.06);
+    border: 1px solid var(--line); border-bottom-left-radius: 4px;
+  }
+  .msg.err { align-self: flex-start; background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.4); color: #ffb3b3; }
+  .msg.bot a.inline {
+    display: inline-block; margin: 4px 4px 0 0; padding: 4px 12px; border-radius: 999px;
+    color: #2a1408; background: var(--gold); text-decoration: none; font-weight: 600; font-size: .82rem;
+  }
+
+  form { display: flex; gap: 10px; }
+  textarea {
+    flex: 1; resize: none; min-height: 46px; max-height: 120px;
+    background: rgba(0,0,0,.25); color: var(--cream);
+    border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font: inherit;
+  }
+  textarea::placeholder { color: var(--muted); }
+  textarea:focus { outline: none; border-color: var(--gold-hi); box-shadow: 0 0 0 3px rgba(224,176,74,.15); }
+  button.send {
+    border: 0; border-radius: 14px; padding: 0 22px; font: inherit; font-weight: 700; cursor: pointer;
+    color: #2a1408; background: linear-gradient(135deg, var(--gold-hi), var(--gold));
+    box-shadow: 0 6px 18px rgba(224,176,74,.3);
+  }
+  button.send:disabled { opacity: .5; cursor: default; box-shadow: none; }
+
+  .hint { color: var(--muted); font-size: .78rem; margin: 12px 0 0; }
+  footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 32px; }
+</style>
+</head>
+<body>
+<svg class="mandala" viewBox="0 0 200 200" aria-hidden="true">
+  <g fill="none" stroke="#e0b04a" stroke-width="0.8">
+    <circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="75"/><circle cx="100" cy="100" r="55"/><circle cx="100" cy="100" r="30"/>
+    <g id="petals"></g>
+  </g>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="om">ॐ</div>
+    <h1>नैस्डैक वैदिक द्वार</h1>
+    <p class="sub">सभी पेज एक जगह · AI मार्गदर्शक के साथ</p>
+    <div class="divider">✦</div>
+  </header>
+
+  <div class="layout">
+    <section class="panel">
+      <h2 class="panel-title"><span class="dot"></span>पेज</h2>
+      <div class="group-label">नैस्डैक ट्रैकर्स</div>
+      <div class="grid" id="grid-tracker"></div>
+      <div class="group-label">वैदिक और ज्योतिष</div>
+      <div class="grid" id="grid-vedic"></div>
+    </section>
+
+    <section class="panel">
+      <h2 class="panel-title"><span class="dot"></span>AI मार्गदर्शक</h2>
+      <div class="chips">
+        <button class="chip" type="button" data-q="मुझे कौन सा पेज सबसे पहले खोलना चाहिए?">कौन सा पेज पहले?</button>
+        <button class="chip" type="button" data-q="वैदिक और ज्योतिष पेजों में क्या फर्क है?">वैदिक बनाम ज्योतिष</button>
+        <button class="chip" type="button" data-q="Nasdaq NQ futures के session timings IST में क्या हैं?">NQ session समय</button>
+      </div>
+      <div class="chat-log" id="log" aria-live="polite"></div>
+      <form id="form">
+        <textarea id="input" rows="1" placeholder="अपना सवाल लिखें…" aria-label="Message"></textarea>
+        <button class="send" id="send" type="submit">भेजें</button>
+      </form>
+      <p class="hint">AI केवल जानकारी और पेज नेविगेशन में मदद करता है। यह ट्रेडिंग या निवेश की सलाह नहीं है।</p>
+    </section>
+  </div>
+
+  <footer>✦ लिंक सीधे आपके दिए हुए URLs पर जाते हैं ✦</footer>
+</div>
+
+<script>
+  // Decorative petals for the mandala
+  const petals = document.getElementById("petals");
+  for (let i = 0; i < 12; i++) {
+    const e = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+    e.setAttribute("cx", "100"); e.setAttribute("cy", "35");
+    e.setAttribute("rx", "10"); e.setAttribute("ry", "28");
+    e.setAttribute("transform", "rotate(" + (i * 30) + " 100 100)");
+    petals.appendChild(e);
+  }
+
+  const PAGES = [
+    { id: "nasdaq-track", group: "tracker", seal: "TR", title: "Nasdaq Track", note: "Manus App", url: "https://nasdaqtrack-2yhwubhf.manus.space" },
+    { id: "nasdaq-v7", group: "tracker", seal: "V7", title: "Nasdaq v7", note: "Nasdaq/v7.html", url: "https://manoharlalsutharweb.github.io/Nasdaq/v7.html" },
+    { id: "nasdaq-home", group: "tracker", seal: "HM", title: "Nasdaq Home", note: "Nasdaq/index.html", url: "https://manoharlalsutharweb.github.io/Nasdaq/index.html" },
+    { id: "nasdaq-v5", group: "tracker", seal: "V5", title: "Nasdaq v5 App", note: "Nasdaq/v5/app", url: "https://manoharlalsutharweb.github.io/Nasdaq/v5/app/index.html" },
+    { id: "nasdaq-v9-day", group: "tracker", seal: "V9", title: "Nasdaq V9 (Day)", note: "Nasdaq/V9", url: "https://manoharlalsutharweb.github.io/Nasdaq/V9/#day" },
+    { id: "nasdaq-vedic", group: "vedic", seal: "NV", title: "Nasdaq Vedic", note: "NasdaqVedic/index.html", url: "https://manoharlalsutharweb.github.io/NasdaqVedic/index.html" },
+    { id: "vedic-v6-day", group: "vedic", seal: "V6", title: "Vedic V6.1 (Day)", note: "NASDAQ_Vedic_V6.1", url: "https://manoharlalsutharweb.github.io/Nasdaq/NASDAQ_Vedic_V6.1.html#day" },
+    { id: "astro-v3", group: "vedic", seal: "A3", title: "Astro v3", note: "nasdaq_astro_v3.html", url: "https://manoharlalsutharweb.github.io/Nasdaq/nasdaq_astro_v3.html" },
+    { id: "astro-v4", group: "vedic", seal: "A4", title: "Astro v4", note: "nasdaq_astro_v4.html", url: "https://manoharlalsutharweb.github.io/Nasdaq/nasdaq_astro_v4.html" }
+  ];
+
+  const grids = { tracker: document.getElementById("grid-tracker"), vedic: document.getElementById("grid-vedic") };
+  function esc(s) {
+    return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  PAGES.forEach(p => {
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = p.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.innerHTML = '<div class="seal">' + esc(p.seal) + '</div><div><strong>' + esc(p.title) + '</strong><small>' + esc(p.note) + '</small></div>';
+    grids[p.group].appendChild(a);
+  });
+
+  const SYSTEM = [
+    "You are a helpful guide inside a launcher page that links to these pages:",
+    ...PAGES.map(p => "- id=" + p.id + " | " + p.title + " (" + p.note + ")"),
+    "",
+    "Rules:",
+    "- Reply in the same language mix the user uses (Hindi, Roman Hindi, or English). Be concise.",
+    "- When recommending a page, include its id as [[open:ID]] so the UI can show a button.",
+    "- Explain Nasdaq, Vedic, and astro terms when asked, clearly labeled as general information.",
+    "- Never predict specific market moves or give buy/sell advice. Remind the user this is not financial advice when relevant.",
+    "- Never ask for or store passwords or login details."
+  ].join("\n");
+
+  const history = [];
+  const log = document.getElementById("log");
+  const input = document.getElementById("input");
+  const sendBtn = document.getElementById("send");
+
+  function addMsg(role, text) {
+    const d = document.createElement("div");
+    d.className = "msg " + role;
+    d.textContent = text;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+    return d;
+  }
+
+  function renderBot(el, text) {
+    el.textContent = "";
+    text.split(/\[\[open:([a-z0-9-]+)\]\]/gi).forEach((part, i) => {
+      if (i % 2 === 1) {
+        const p = PAGES.find(x => x.id === part);
+        if (p) {
+          const a = document.createElement("a");
+          a.className = "inline";
+          a.href = p.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+          a.textContent = "खोलें: " + p.title;
+          el.appendChild(document.createTextNode(" "));
+          el.appendChild(a);
+          el.appendChild(document.createTextNode(" "));
+        }
+      } else {
+        el.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
+  async function ask(text) {
+    const q = text.trim();
+    if (!q) return;
+    addMsg("user", q);
+    history.push({ role: "user", content: q });
+    input.value = "";
+    sendBtn.disabled = true;
+    const thinking = addMsg("bot", "…");
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, system: SYSTEM, messages: history })
+      });
+      const data = await res.json();
+      const reply = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n").trim() || "जवाब नहीं मिला।";
+      history.push({ role: "assistant", content: reply });
+      renderBot(thinking, reply);
+    } catch (err) {
+      thinking.className = "msg err";
+      thinking.textContent = "कुछ गलत हो गया। दोबारा कोशिश करें।";
+      history.pop();
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  document.getElementById("form").addEventListener("submit", e => { e.preventDefault(); ask(input.value); });
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(input.value); }
+  });
+  document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => ask(c.dataset.q)));
+</script>
+</body>
+</html>
