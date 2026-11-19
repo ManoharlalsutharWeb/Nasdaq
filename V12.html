@@ -1,0 +1,1052 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NASDAQ वैदिक V12 — तारीख़-समय विश्लेषण</title>
+<style>
+:root{--bg:#07070f;--s:#0e0e1c;--s2:#15152b;--ln:#25254a;--tx:#ecebfa;--mu:#8887ad;--gd:#f0b90b;--ac:#8b7dff;--up:#2fbf71;--dn:#f06a6a;--sd:#5aa2f2;--wn:#f0b90b;--r:10px}
+@media (prefers-color-scheme: light){:root:not([data-theme=dark]){--bg:#f5f4fb;--s:#fff;--s2:#eeedf8;--ln:#d9d8ea;--tx:#14132b;--mu:#6c6b93;--gd:#8a6500;--ac:#4a3aa7;--up:#0b7a3e;--dn:#c62f2f;--sd:#1f64b8;--wn:#8a6500}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.6 "Noto Sans Devanagari","Segoe UI",system-ui,sans-serif}
+body{padding:12px 12px 60px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;margin:4px 0 2px;color:var(--gd)} h2{font-size:15px;margin:6px 0 8px;color:var(--gd)} h3{font-size:14px;margin:10px 0 6px}
+.sub{color:var(--mu);font-size:12.5px;margin:0 0 8px}
+.card{background:var(--s);border:1px solid var(--ln);border-radius:var(--r);padding:12px;margin-bottom:10px;min-width:0}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:8px 0 12px}
+nav button{flex:none;background:var(--s);border:1px solid var(--ln);color:var(--mu);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--ac);border-color:var(--ac);color:#fff}
+.warn{border:1px solid var(--ln);border-left:3px solid var(--wn);background:var(--s);border-radius:8px;padding:8px 11px;font-size:12.5px;color:var(--mu);margin-bottom:10px}
+.badge{display:inline-block;font-size:11.5px;border:1px solid var(--ln);border-radius:6px;padding:1px 7px;margin:2px 3px 2px 0;color:var(--mu)}
+.b-up{color:var(--up);border-color:var(--up)} .b-dn{color:var(--dn);border-color:var(--dn)} .b-sd{color:var(--sd);border-color:var(--sd)} .b-wn{color:var(--wn);border-color:var(--wn)}
+.big{font-size:22px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:6px;border-bottom:1px solid var(--ln);vertical-align:top}
+th{color:var(--mu);font-weight:600;font-size:11.5px}
+.tblwrap{overflow-x:auto;max-width:100%}
+.ev{display:grid;grid-template-columns:62px 1fr;gap:6px;padding:6px 0;border-bottom:1px dashed var(--ln);font-size:13px}
+.ev b{color:var(--gd);font-family:ui-monospace,Menlo,monospace}
+.tone-p{color:var(--up)} .tone-n{color:var(--dn)} .tone-z{color:var(--mu)}
+input,select{background:var(--s2);border:1px solid var(--ln);color:var(--tx);border-radius:7px;padding:6px 8px;font:inherit;font-size:13px;width:100%;min-width:0}
+label{font-size:12px;color:var(--mu);display:flex;flex-direction:column;gap:3px;min-width:0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end}
+button.p{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:7px 12px;font:inherit;cursor:pointer}
+button.g{background:var(--s2);color:var(--tx);border:1px solid var(--ln);border-radius:8px;padding:6px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.hora{display:flex;flex-wrap:wrap;gap:4px}
+.hora span{border:1px solid var(--ln);border-radius:6px;padding:2px 6px;font-size:11.5px;color:var(--mu)}
+.hora span.now{border-color:var(--gd);color:var(--gd)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .hd{font-size:11px;color:var(--mu);text-align:center}
+.cd{min-height:58px;border:1px solid var(--ln);border-radius:7px;padding:4px;background:var(--s);font-size:12px;cursor:pointer;color:var(--tx);text-align:left;font:inherit;display:flex;flex-direction:column;justify-content:space-between}
+.cd .n{font-weight:700}
+.cd .z{font-size:10.5px;color:var(--mu)}
+.cd.out{opacity:.35}
+.cd.red{background:color-mix(in srgb,var(--dn) 22%,var(--s))}
+.cd.amb{background:color-mix(in srgb,var(--wn) 18%,var(--s))}
+.cd.grn{background:color-mix(in srgb,var(--up) 20%,var(--s))}
+.cd.gry{background:var(--s2)}
+.bar{height:6px;background:var(--s2);border-radius:4px;overflow:hidden;margin:4px 0}
+.bar i{display:block;height:100%;background:var(--ac)}
+svg.ni{width:100%;max-width:340px;display:block;margin:0 auto;color:var(--tx)}
+svg.ni text{font-family:"Noto Sans Devanagari","Segoe UI",sans-serif}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+footer{margin-top:18px;color:var(--mu);font-size:11.5px;text-align:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<h1>☽ NASDAQ वैदिक V12 — तारीख़-समय विश्लेषण</h1>
+<p class="sub">कोई भी तारीख़ और समय चुनें — सिस्टम वहीं का एशियन और NY सत्र, नक्षत्र, होरा, मृत्यु-भाग, क्रैश-शर्तें और दोहरी कुंडली खुद निकालता है · लाहिरी निरयन · शैक्षिक शोध</p>
+
+<div class="warn"><b>यह निवेश सलाह नहीं है।</b> सभी दिशा-संकेत <b>परिकल्पना</b> हैं और सांख्यिकीय रूप से सिद्ध नहीं हुए। ऐप में NQ मूल्य-डेटा लोड नहीं है, इसलिए कोई "जीत की संभावना %" नहीं दी गई। मैक्रो आँकड़े केवल वही दिखेंगे जो आप स्रोत के साथ दर्ज करें।</div>
+
+<div class="row" style="margin-bottom:6px">
+  <label>तारीख़ (विश्लेषण)<input id="dpick" type="date"></label>
+  <div><button class="g" id="dprev">← पिछला</button> <button class="g" id="dtoday">आज</button> <button class="g" id="dnext">अगला →</button></div>
+</div>
+
+<nav id="nav" role="tablist"></nav>
+<main id="view"></main>
+<footer id="foot"></footer>
+
+<script>
+"use strict";
+/* NASDAQ Vedic V11 — in-browser ephemeris (no libraries).
+ * Sun: Meeus ch.25 (low precision). Moon: Meeus ch.47 main terms.
+ * Planets: Standish (JPL) 1800–2050 Keplerian elements, heliocentric → geocentric.
+ * Rahu: Meeus mean node. Ayanamsa: Lahiri approximation (skill V9 spec).
+ * Sunrise/sunset: NOAA solar algorithm.
+ * Accuracy: validated against PyEphem in ref_check.js (see report).
+ */
+var E = (function () {
+  const RAD = Math.PI / 180, DEG = 180 / Math.PI;
+  const J2000 = 2451545.0;
+  const nrm = x => ((x % 360) + 360) % 360;
+  const jdOf = ms => ms / 86400000 + 2440587.5;
+  const centuries = ms => (jdOf(ms) - J2000) / 36525;
+
+  function sunGeo(t) {                     // apparent geocentric ecliptic longitude (tropical)
+    const L0 = 280.46646 + 36000.76983 * t + 0.0003032 * t * t;
+    const M = (357.52911 + 35999.05029 * t - 0.0001537 * t * t) * RAD;
+    const C = (1.914602 - 0.004817 * t - 0.000014 * t * t) * Math.sin(M)
+            + (0.019993 - 0.000101 * t) * Math.sin(2 * M) + 0.000289 * Math.sin(3 * M);
+    const om = (125.04 - 1934.136 * t) * RAD;
+    return nrm(L0 + C - 0.00569 - 0.00478 * Math.sin(om));
+  }
+
+  function moonGeo(t) {                    // Meeus 47 main terms, tropical longitude
+    const Lp = 218.3164477 + 481267.88123421 * t - 0.0015786 * t * t;
+    const D = (297.8501921 + 445267.1114034 * t - 0.0018819 * t * t) * RAD;
+    const M = (357.5291092 + 35999.0502909 * t - 0.0001536 * t * t) * RAD;
+    const Mp = (134.9633964 + 477198.8675055 * t + 0.0087414 * t * t) * RAD;
+    const F = (93.2720950 + 483202.0175233 * t - 0.0036539 * t * t) * RAD;
+    // [d, m, mp, f, coeff(1e-6 deg)]
+    const T = [
+      [0,0,1,0,6288774],[2,0,-1,0,1274027],[2,0,0,0,658314],[0,0,2,0,213618],
+      [0,1,0,0,-185116],[0,0,0,2,-114332],[2,0,-2,0,58793],[2,-1,-1,0,57066],
+      [2,0,1,0,53322],[2,-1,0,0,45758],[0,1,-1,0,-40923],[1,0,0,0,-34720],
+      [0,1,1,0,-30383],[2,0,0,-2,15327],[0,0,1,2,-12528],[0,0,1,-2,10980],
+      [4,0,-1,0,10675],[0,0,3,0,10034],[4,0,-2,0,8548],[2,1,-1,0,-7888],
+      [2,1,0,0,-6766],[1,0,-1,0,-5163],[1,1,0,0,4987],[2,-1,1,0,4036],
+      [2,0,2,0,3994],[4,0,0,0,3861],[2,0,-3,0,3665],[0,1,-2,0,-2689],
+      [2,0,-1,2,-2602],[2,-1,-2,0,2390],[1,0,1,0,-2348],[2,-2,0,0,2236]
+    ];
+    let s = 0;
+    for (const [d, m, mp, f, c] of T) s += c * Math.sin(d * D + m * M + mp * Mp + f * F);
+    return nrm(Lp + s / 1e6);
+  }
+
+  // Standish elements: [a, e, I, L, varpi, Omega] at J2000 and per-century rates
+  const EL = {
+    Mercury: [[0.38709927, 0.00000037],[0.20563593, 0.00001906],[7.00497902, -0.00594749],[252.25032350, 149472.67411175],[77.45779628, 0.16047689],[48.33076593, -0.12534081]],
+    Venus:   [[0.72333566, 0.00000390],[0.00677672, -0.00004107],[3.39467605, -0.00078890],[181.97909950, 58517.81538729],[131.60246718, 0.00268329],[76.67984255, -0.27769418]],
+    EMB:     [[1.00000261, 0.00000562],[0.01671123, -0.00004392],[-0.00001531, -0.01294668],[100.46457166, 35999.37244981],[102.93768193, 0.32327364],[0, 0]],
+    Mars:    [[1.52371034, 0.00001847],[0.09339410, 0.00007882],[1.84969142, -0.00813131],[-4.55343205, 19140.30268499],[-23.94362959, 0.44441088],[49.55953891, -0.29257343]],
+    Jupiter: [[5.20288700, -0.00011607],[0.04838624, -0.00013253],[1.30439695, -0.00183714],[34.39644051, 3034.74612775],[14.72847983, 0.21252668],[100.47390909, 0.20469106]],
+    Saturn:  [[9.53667594, -0.00125060],[0.05386179, -0.00050991],[2.48599187, 0.00193609],[49.95424423, 1222.49362201],[92.59887831, -0.41897216],[113.66242448, -0.28867794]]
+  };
+
+  function helio(name, t) {
+    const el = EL[name].map(([v, r]) => v + r * t);
+    const [a, e, I, L, lp, Om] = el;
+    const Ir = I * RAD, Or = Om * RAD;
+    let M = ((L - lp) % 360 + 540) % 360 - 180;            // mean anomaly, (-180,180]
+    const Mr = M * RAD;
+    let En = Mr + e * Math.sin(Mr) * (1 + e * Math.cos(Mr));
+    for (let k = 0; k < 12; k++) En = En - (En - e * Math.sin(En) - Mr) / (1 - e * Math.cos(En));
+    const xp = a * (Math.cos(En) - e), yp = a * Math.sqrt(1 - e * e) * Math.sin(En);
+    const w = (lp - Om) * RAD;
+    const cw = Math.cos(w), sw = Math.sin(w), cO = Math.cos(Or), sO = Math.sin(Or), cI = Math.cos(Ir), sI = Math.sin(Ir);
+    return {
+      x: (cw * cO - sw * sO * cI) * xp + (-sw * cO - cw * sO * cI) * yp,
+      y: (cw * sO + sw * cO * cI) * xp + (-sw * sO + cw * cO * cI) * yp,
+      z: (sw * sI) * xp + (cw * sI) * yp
+    };
+  }
+
+  function planetGeo(name, t) {            // geocentric ecliptic longitude (tropical)
+    const p = helio(name, t), e = helio("EMB", t);
+    const lon0 = Math.atan2(p.y - e.y, p.x - e.x) * DEG;          // J2000 ecliptic
+    const pA = (5028.796195 * t + 1.1054348 * t * t) / 3600;       // general precession in longitude (deg)
+    return nrm(lon0 + pA);                                          // of-date (tropical)
+  }
+
+  function ayanamsa(t) { return 23.85306 + 1.396042 * t + 0.000308 * t * t; }
+
+  // order matches DATA.meta.planets: Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu
+  const NAMES = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
+
+  function bodies(ms) {
+    const t = centuries(ms);
+    const ay = ayanamsa(t);
+    const trop = {
+      Sun: sunGeo(t), Moon: moonGeo(t), Mars: planetGeo("Mars", t), Mercury: planetGeo("Mercury", t),
+      Jupiter: planetGeo("Jupiter", t), Venus: planetGeo("Venus", t), Saturn: planetGeo("Saturn", t)
+    };
+    const node = nrm(125.0445479 - 1934.1362891 * t + 0.0020754 * t * t);
+    trop.Rahu = node; trop.Ketu = nrm(node + 180);
+    const lon = NAMES.map(n => nrm(trop[n] - ay));
+    return {t, ay, lon};
+  }
+
+  // ascendant (sidereal) for a location (lat/lon degrees, lon east +)
+  function ascendant(ms, lat, lonE, ay, t) {
+    const jd = jdOf(ms);
+    const gmst = 280.46061837 + 360.98564736629 * (jd - J2000) + 0.000387933 * t * t - t * t * t / 38710000;
+    const ramc = nrm(gmst + lonE) * RAD;
+    const eps = (23.4392911 - 0.0130042 * t) * RAD;
+    const phi = lat * RAD;
+    const asc = Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) * DEG;
+    return nrm(asc - ay);
+  }
+
+  // sunrise / sunset (UTC ms) for civil date that starts at utcMidnight (ms); lat, lonE degrees
+  function sunTimes(utcMidnight, lat, lonE) {
+    const tNoon = centuries(utcMidnight + 12 * 3600000);
+    const L0 = 280.46646 + 36000.76983 * tNoon;
+    const M = (357.52911 + 35999.05029 * tNoon) * RAD;
+    const ecc = 0.016708634 - 0.000042037 * tNoon;
+    const eps = (23.4392911 - 0.0130042 * tNoon) * RAD;
+    const y = Math.tan(eps / 2) ** 2;
+    const L0r = L0 * RAD;
+    const eqt = 4 * DEG * (y * Math.sin(2 * L0r) - 2 * ecc * Math.sin(M) + 4 * ecc * y * Math.sin(M) * Math.cos(2 * L0r)
+             - 0.5 * y * y * Math.sin(4 * L0r) - 1.25 * ecc * ecc * Math.sin(2 * M));   // minutes
+    const dec = Math.asin(Math.sin(eps) * Math.sin(sunGeo(tNoon) * RAD));
+    const phi = lat * RAD;
+    const c = (Math.cos(90.833 * RAD) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec));
+    if (c > 1 || c < -1) return null;
+    const H = Math.acos(c) * DEG;
+    const riseMin = 720 - 4 * (lonE + H) - eqt;
+    const setMin = 720 - 4 * (lonE - H) - eqt;
+    return {rise: utcMidnight + riseMin * 60000, set: utcMidnight + setMin * 60000};
+  }
+
+  function tzOffsetMin(ms, tz) {          // local - UTC, minutes
+    const p = {};
+    new Intl.DateTimeFormat("en-US", {timeZone: tz, hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit"})
+      .formatToParts(new Date(ms)).forEach(x => { if (x.type !== "literal") p[x.type] = +x.value; });
+    const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour % 24, p.minute, p.second);
+    return Math.round((asUtc - ms) / 60000);
+  }
+  function zonedToUtc(y, mo, d, h, mi, tz) {
+    const guess = Date.UTC(y, mo - 1, d, h, mi);
+    const o1 = tzOffsetMin(guess, tz);
+    let u = guess - o1 * 60000;
+    const o2 = tzOffsetMin(u, tz);
+    if (o2 !== o1) u = guess - o2 * 60000;
+    return u;
+  }
+
+  return {NAMES, bodies, ascendant, sunTimes, zonedToUtc, tzOffsetMin, centuries, sunGeo, moonGeo, planetGeo, ayanamsa};
+})();
+if (typeof module !== "undefined") module.exports = E;
+
+
+/* ================= constants ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = x => ((x % 360) + 360) % 360;
+const wrap = x => ((x + 540) % 360) - 180;
+const sgn = l => Math.floor(norm(l) / 30);
+const dg = l => norm(l) % 30;
+const NAKW = 360 / 27, PADAW = 360 / 108;
+const nakI = l => Math.floor(norm(l) / NAKW);
+const pada = l => Math.floor((norm(l) % NAKW) / PADAW) + 1;
+const sepOf = (a, b) => Math.abs(wrap(a - b));
+const STEP = 15 * 60000;
+let CUR_STEP = STEP;
+const NYC_TZ = "America/New_York", IST_OFF = 330 * 60000;
+const NYC = {lat: 40.7128, lon: -74.0060, name: "न्यूयॉर्क (NYC)"};
+const LOCS = [NYC, {lat: 35.6762, lon: 139.6503, name: "टोक्यो"}, {lat: 19.0760, lon: 72.8777, name: "मुंबई"}];
+const NATAL_MS = Date.UTC(1971, 1, 8, 15, 0);            // 8 Feb 1971, 10:00 EST = 15:00 UTC
+const PL = E.NAMES;                                       // Sun..Ketu
+const PH = {Sun:"सूर्य",Moon:"चंद्र",Mars:"मंगल",Mercury:"बुध",Jupiter:"गुरु",Venus:"शुक्र",Saturn:"शनि",Rahu:"राहु",Ketu:"केतु"};
+const AB = {Sun:"सू",Moon:"चं",Mars:"मं",Mercury:"बु",Jupiter:"गु",Venus:"शु",Saturn:"श",Rahu:"रा",Ketu:"के"};
+const SG = ["मेष","वृष","मिथुन","कर्क","सिंह","कन्या","तुला","वृश्चिक","धनु","मकर","कुंभ","मीन"];
+const NK = ["अश्विनी","भरणी","कृत्तिका","रोहिणी","मृगशिरा","आर्द्रा","पुनर्वसु","पुष्य","आश्लेषा","मघा","पूर्वाफाल्गुनी","उत्तराफाल्गुनी","हस्त","चित्रा","स्वाति","विशाखा","अनुराधा","ज्येष्ठा","मूल","पूर्वाषाढ़ा","उत्तराषाढ़ा","श्रवण","धनिष्ठा","शतभिषा","पूर्वाभाद्रपद","उत्तराभाद्रपद","रेवती"];
+const NYB = ["पुष्य","रोहिणी","पुनर्वसु","उत्तराफाल्गुनी","अनुराधा","रेवती","मृगशिरा","हस्त","अश्विनी"];
+const NYS = ["मघा","भरणी","पूर्वाभाद्रपद","पूर्वाषाढ़ा","पूर्वाफाल्गुनी","मूल","ज्येष्ठा"];
+const NYK = ["स्वाति","शतभिषा","धनिष्ठा","चित्रा","श्रवण","कृत्तिका","विशाखा"];
+const NYR = ["उत्तराषाढ़ा","उत्तराभाद्रपद","आर्द्रा","आश्लेषा"];
+const GRP = [
+ ["स्थिर",["रोहिणी","उत्तराफाल्गुनी","उत्तराषाढ़ा","उत्तराभाद्रपद"],0],
+ ["चर",["पुनर्वसु","स्वाति","श्रवण","धनिष्ठा","शतभिषा"],0],
+ ["उग्र",["भरणी","मघा","पूर्वाफाल्गुनी","पूर्वाषाढ़ा","पूर्वाभाद्रपद"],-1],
+ ["मिश्र",["कृत्तिका","विशाखा"],0],
+ ["क्षिप्र",["अश्विनी","हस्त","पुष्य"],0],
+ ["मृदु",["मृगशिरा","चित्रा","अनुराधा","रेवती"],1],
+ ["तीक्ष्ण",["आर्द्रा","आश्लेषा","ज्येष्ठा","मूल"],0]
+];
+const EXALT = {Sun:[0,10],Moon:[1,3],Mars:[9,28],Mercury:[5,15],Jupiter:[3,5],Venus:[11,27],Saturn:[6,20],Ketu:[7,15]};
+const DEBIL = {Sun:[6,10],Moon:[7,3],Mars:[3,28],Mercury:[11,15],Jupiter:[9,5],Venus:[5,27],Saturn:[0,20],Rahu:[7,15],Ketu:[1,15]};
+const OWN = {Sun:[4],Moon:[3],Mars:[0,7],Mercury:[2,5],Jupiter:[8,11],Venus:[1,6],Saturn:[9,10]};
+const MB = [
+ [20,26,19,15,19,28,10,14,8,23,1],[9,12,28,14,29,15,4,13,18,24,9],[12,13,25,13,12,11,7,12,20,11,22],
+ [6,25,23,12,27,17,9,11,10,12,22],[8,24,29,8,6,10,12,24,21,13,25],[24,11,28,18,4,13,16,23,22,14,2],
+ [16,26,14,20,13,4,3,22,23,8,4],[17,14,21,10,10,6,18,21,24,18,23],[22,13,2,21,17,27,28,10,11,20,18],
+ [2,25,15,22,11,12,14,20,12,10,20],[3,5,11,7,15,29,13,18,13,21,24],[23,12,6,5,28,19,15,8,14,22,10]
+];
+const LAGMB = 10;
+const ASP = [[0,"युति"],[90,"वर्ग"],[120,"त्रिकोण"],[180,"प्रतियुति"]];
+const ASP_TONE = {0:0,90:-1,120:1,180:-1};
+const WD_LORD = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];   // index = JS getUTCDay()
+const CHAL = ["Sun","Venus","Mercury","Moon","Saturn","Jupiter","Mars"];
+
+/* ================= time helpers ================= */
+const istDate = ms => new Intl.DateTimeFormat("en-CA", {timeZone: "Asia/Kolkata"}).format(new Date(ms));
+const istHM = ms => new Intl.DateTimeFormat("en-GB", {timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false}).format(new Date(ms));
+const etHM = ms => new Intl.DateTimeFormat("en-GB", {timeZone: NYC_TZ, hour: "2-digit", minute: "2-digit", hour12: false}).format(new Date(ms));
+const etDate = ms => new Intl.DateTimeFormat("en-CA", {timeZone: NYC_TZ}).format(new Date(ms));
+const isoToIST = ms => istDate(ms) + "T" + istHM(ms);                 // "YYYY-MM-DDTHH:MM"
+const parseIST = s => { const [d, t] = s.split("T"); const [y, m, dd] = d.split("-").map(Number); const [h, mi] = t.split(":").map(Number); return Date.UTC(y, m - 1, dd, h, mi) - IST_OFF; };
+const dateParts = iso => iso.split("-").map(Number);
+const utcMid = iso => { const [y, m, d] = dateParts(iso); return Date.UTC(y, m - 1, d); };
+const addDays = (iso, n) => { const t = utcMid(iso) + n * 86400000; return new Date(t).toISOString().slice(0, 10); };
+const dowOf = iso => new Date(utcMid(iso)).getUTCDay();
+const dayLabel = iso => new Intl.DateTimeFormat("hi-IN", {timeZone: "UTC", weekday: "long", day: "numeric", month: "long", year: "numeric"}).format(new Date(utcMid(iso)));
+const nowIST = () => { const ms = Date.now(); return ms - ms % 60000; };
+const todayISO = () => istDate(Date.now());
+
+/* ================= state & per-instant engine ================= */
+function stateAt(ms, loc) {
+  const b = E.bodies(ms);
+  const L = loc || NYC;
+  return {ms, lon: b.lon, asc: E.ascendant(ms, L.lat, L.lon, b.ay, b.t)};
+}
+function sampleRange(a, b) { const out = []; for (let t = a; t <= b; t += STEP) out.push(stateAt(t)); return out; }
+
+function windowsOf(iso) {
+  const [y, m, d] = dateParts(iso);
+  const asianStart = Date.UTC(y, m - 1, d, 5, 30) - IST_OFF;
+  const nyStart = E.zonedToUtc(y, m, d, 9, 30, NYC_TZ);
+  const nyEnd = E.zonedToUtc(y, m, d, 16, 0, NYC_TZ);
+  return {asian: [asianStart, asianStart + 5 * 3600000], ny: [nyStart, nyEnd]};
+}
+function horasFor(iso, lat, lon) {
+  const m0 = utcMid(iso);
+  const a = E.sunTimes(m0, lat, lon), b = E.sunTimes(m0 + 86400000, lat, lon);
+  if (!a || !b) return null;
+  const lord0 = WD_LORD[dowOf(iso)];
+  const i0 = CHAL.indexOf(lord0);
+  const out = [];
+  const dl = a.set - a.rise, nl = b.rise - a.set;
+  for (let k = 0; k < 12; k++) out.push({lord: CHAL[(i0 + k) % 7], s: a.rise + dl / 12 * k, e: a.rise + dl / 12 * (k + 1), kind: "day"});
+  for (let k = 0; k < 12; k++) out.push({lord: CHAL[(i0 + 12 + k) % 7], s: a.set + nl / 12 * k, e: a.set + nl / 12 * (k + 1), kind: "night"});
+  return {rise: a.rise, set: a.set, horas: out};
+}
+function horaAt(H, ms) { if (!H) return null; return H.horas.find(h => ms >= h.s && ms < h.e) || null; }
+
+function crashParts(lon) {
+  const moon = lon[1], out = [];
+  if (sepOf(moon, lon[7]) <= 3 || Math.abs(sepOf(moon, lon[7]) - 180) <= 3 || sepOf(moon, lon[8]) <= 3 || Math.abs(sepOf(moon, lon[8]) - 180) <= 3)
+    out.push("B6.1 चंद्र–राहु/केतु ≤3°");
+  const mS = sepOf(lon[2], lon[6]), mR = sepOf(lon[2], lon[7]);
+  if (mS <= 1 || Math.abs(mS - 180) <= 1 || mR <= 1 || Math.abs(mR - 180) <= 1) out.push("B6.2 मंगल–शनि/राहु ≤1°");
+  const sR = sepOf(lon[0], lon[7]), sK = sepOf(lon[0], lon[8]);
+  if (sR <= 1.5 || Math.abs(sR - 180) <= 1.5 || sK <= 1.5 || Math.abs(sK - 180) <= 1.5) out.push("B6.4 सूर्य–राहु/केतु ≤1.5°");
+  return out;
+}
+function dignity(p, lon) {
+  const s = sgn(lon), d = dg(lon), ex = EXALT[p], db = DEBIL[p];
+  if (ex && s === ex[0] && Math.abs(d - ex[1]) <= 0.5) return {tag: "परम उच्च", pts: 1};
+  if (db && s === db[0] && Math.abs(d - db[1]) <= 0.5) return {tag: "परम नीच", pts: -2};
+  if (ex && s === ex[0]) return {tag: "उच्च राशि", pts: 0};
+  if (db && s === db[0]) return {tag: "नीच राशि", pts: 0};
+  if (OWN[p] && OWN[p].includes(s)) return {tag: "स्वगृह", pts: 0};
+  return {tag: "", pts: 0};
+}
+const mbHit = (col, lon) => Math.abs(dg(lon) - MB[sgn(lon)][col]) <= 0.5;
+
+function scoreState(lon, asc) {
+  const parts = [];
+  const nk = NK[nakI(lon[1])], grp = GRP.find(g => g[1].includes(nk)) || ["—", [], 0];
+  if (NYB.includes(nk)) parts.push({l: `चंद्र नक्षत्र ${nk} (ख़रीद-सूची)`, p: 2, k: "nak"});
+  else if (NYS.includes(nk)) parts.push({l: `चंद्र नक्षत्र ${nk} (बिकवाली-सूची)`, p: -2, k: "nak"});
+  if (grp[2]) parts.push({l: `समूह ${grp[0]} (V6.4 मॉडिफ़ायर)`, p: grp[2], k: "grp"});
+  for (let i = 0; i < 9; i++) {
+    const d = dignity(PL[i], lon[i]);
+    if (d.pts) parts.push({l: `${PH[PL[i]]} ${d.tag}`, p: d.pts, k: "dig"});
+    if (mbHit(i, lon[i])) parts.push({l: `${PH[PL[i]]} मृत्यु-भाग (±0.5°)`, p: -1, k: "mb"});
+  }
+  if (mbHit(LAGMB, asc)) parts.push({l: "लग्न मृत्यु-भाग (±0.5°)", p: -2, k: "mb"});
+  for (const c of crashParts(lon)) parts.push({l: c, p: -1, k: "crash"});
+  const lagSign = sgn(asc), moonH = ((sgn(lon[1]) - lagSign + 12) % 12) + 1;
+  const hM = ((sgn(lon[2]) - lagSign + 12) % 12) + 1, hR = ((sgn(lon[7]) - lagSign + 12) % 12) + 1;
+  if ([6, 8, 12].includes(moonH) && ([1, 4, 7, 8].includes(hM) || [1, 5, 7, 9].includes(hR)))
+    parts.push({l: "B6.5 लग्न–चंद्र 6/8/12 + मंगल/राहु दृष्टि (व्याख्या)", p: -1, k: "crash"});
+  const total = parts.reduce((a, b) => a + b.p, 0);
+  const zone = total >= 2 ? "BUY" : total <= -2 ? "SELL" : "RANGE";
+  return {total, zone, parts, nak: nk, group: grp[0], moonH, lagSign};
+}
+const ZONE = {BUY: ["🟢 BUY ज़ोन (परिकल्पना)", "b-up"], SELL: ["🔴 SELL ज़ोन (परिकल्पना)", "b-dn"], RANGE: ["🟡 रेंज / साइडवेज़ (परिकल्पना)", "b-wn"]};
+const nyCat = nk => NYB.includes(nk) ? ["🟢 ख़रीद", "b-up"] : NYS.includes(nk) ? ["🔴 बिकवाली", "b-dn"] : NYK.includes(nk) ? ["🟡 ब्रेकआउट", "b-wn"] : NYR.includes(nk) ? ["🟡 रेंज", "b-sd"] : ["—", ""];
+
+/* ================= events on a sampled session ================= */
+function crossEvents(samples, p, step, label, out) {
+  for (let i = 1; i < samples.length; i++) {
+    const a = samples[i - 1].lon[p], b = samples[i].lon[p];
+    const ia = Math.floor(norm(a) / step), ib = Math.floor(norm(b) / step);
+    if (ia === ib) continue;
+    const delta = wrap(b - a);
+    if (Math.abs(delta) > 60) continue;
+    const n = Math.round(360 / step);
+    const bound = delta > 0 ? ((ia + 1) % n) * step : ia * step;
+    const frac = Math.max(0, Math.min(1, wrap(bound - a) / delta));
+    out.push({ms: samples[i - 1].ms + frac * CUR_STEP, kind: label.kind, text: label.fn(bound, delta)});
+  }
+}
+function transitions(samples, test, text, out) {
+  let prev = test(samples[0]);
+  for (let i = 1; i < samples.length; i++) {
+    const cur = test(samples[i]);
+    if (cur && !prev) out.push({ms: samples[i].ms, kind: "state", text});
+    prev = cur;
+  }
+}
+function aspectEvents(samples, out) {
+  const N = NATAL.lon.concat([NATAL.asc]);
+  const NLAB = i => i === 9 ? "जन्म लग्न" : `जन्म ${PH[PL[i]]}`;
+  const orb = 2.5;
+  for (let p = 0; p < 9; p++) for (let n = 0; n < 10; n++) for (const [ang, name] of ASP) {
+    const v = samples.map(s => Math.abs(sepOf(s.lon[p], N[n]) - ang));
+    for (let i = 1; i < v.length - 1; i++) {
+      if (v[i] < v[i - 1] && v[i] <= v[i + 1] && v[i] <= orb) {
+        const den = v[i - 1] - 2 * v[i] + v[i + 1];
+        const x = den > 0 ? Math.max(-1, Math.min(1, 0.5 * (v[i - 1] - v[i + 1]) / den)) : 0;
+        out.push({ms: samples[i].ms + x * CUR_STEP, kind: "aspect", key: `${p}|${n}|${ang}`, orbv: v[i],
+          text: `${PH[PL[p]]} ${name} ${NLAB(n)} (orb ${v[i].toFixed(2)}°)`, tone: ASP_TONE[ang]});
+      }
+    }
+  }
+}
+function dedupe(list) {
+  const out = [];
+  for (const e of list) {
+    const key = e.key || (e.kind + "|" + e.text);
+    const d = out.find(o => (o.key || (o.kind + "|" + o.text)) === key && Math.abs(o.ms - e.ms) < 3 * 3600e3);
+    if (!d) { out.push({...e}); continue; }
+    if (e.orbv !== undefined && d.orbv !== undefined && e.orbv < d.orbv) { d.ms = e.ms; d.orbv = e.orbv; d.text = e.text; }
+  }
+  return out;
+}
+function analyseSamples(samples) {
+  const open = samples[0];
+  const score = scoreState(open.lon, open.asc);
+  const ev = [];
+  crossEvents(samples, 1, NAKW, {kind: "nak", fn: (b, d) => `चंद्र नक्षत्र ${NK[Math.round(b / NAKW) % 27]} में ${d > 0 ? "प्रवेश" : "पीछे लौटा"}`}, ev);
+  for (let p = 1; p < 9; p++) crossEvents(samples, p, 30, {kind: "sign", fn: (b, d) => `${PH[PL[p]]} ${SG[Math.round(b / 30) % 12]} राशि में ${d > 0 ? "प्रवेश" : "(वापस)"}`}, ev);
+  for (let p = 0; p < 9; p++) transitions(samples, s => mbHit(p, s.lon[p]), `${PH[PL[p]]} मृत्यु-भाग पर (±0.5°)`, ev);
+  transitions(samples, s => mbHit(LAGMB, s.asc), "लग्न मृत्यु-भाग पर (±0.5°)", ev);
+  transitions(samples, s => crashParts(s.lon).length > 0, "B6 क्रैश-शर्त शुरू", ev);
+  aspectEvents(samples, ev);
+  const d = dedupe(ev).sort((a, b) => a.ms - b.ms);
+  let maxCrash = 0;
+  for (const s of samples) maxCrash = Math.max(maxCrash, crashParts(s.lon).length);
+  return {open, score, ev: d, samples, maxCrash};
+}
+
+/* ================= natal (computed once) ================= */
+const NATAL = (() => { const s = stateAt(NATAL_MS, NYC); return {lon: s.lon, asc: s.asc, ms: NATAL_MS}; })();
+
+/* ================= day bundle (any date) ================= */
+const DCACHE = {};
+function dayFull(iso) {
+  if (DCACHE[iso]) return DCACHE[iso];
+  const w = windowsOf(iso);
+  const asian = sampleRange(w.asian[0], w.asian[1]);
+  const ny = sampleRange(w.ny[0], w.ny[1]);
+  const [y, m, d] = dateParts(iso);
+  const nyOff = E.tzOffsetMin(w.ny[0], NYC_TZ);
+  const hol = holidayOf(iso);
+  const obj = {
+    iso, dow: dowOf(iso), weekend: [0, 6].includes(dowOf(iso)), holiday: hol.h, early: hol.e,
+    win: w, nyTZ: nyOff === -240 ? "EDT" : "EST",
+    asian: analyseSamples(asian), ny: analyseSamples(ny),
+    nyH: horasFor(iso, NYC.lat, NYC.lon), tokH: horasFor(iso, LOCS[1].lat, LOCS[1].lon)
+  };
+  return DCACHE[iso] = obj;
+}
+function holidayOf(iso) {
+  const H = {"2026-11-26": "Thanksgiving", "2026-12-25": "Christmas", "2027-01-01": "New Year's Day", "2027-01-18": "MLK Day", "2027-02-15": "Presidents' Day", "2027-03-26": "Good Friday"};
+  const EC = {"2026-11-27": "Day after Thanksgiving 13:00 ET", "2026-12-24": "Christmas Eve 13:00 ET"};
+  return {h: H[iso] || null, e: EC[iso] || null};
+}
+
+/* ================= UI state ================= */
+const TABS = [["day","🏠 आज"],["asia","🌏 एशियन सत्र"],["ny","🗽 NY डीप डाइव"],["dl","📆 दिन-सूची"],["cc","💥 क्रैश कैलेंडर"],["dual","🔭 दोहरी कुंडली"],["rp","📑 रिपोर्ट बिल्डर"],["ev","⏱ सटीक घटनाएँ"],["mac","🧮 मैक्रो डेस्क"],["ver","🧪 स्थिति / सत्यापन"]];
+const st = {tab: "day", iso: todayISO(), evFilter: "all", cm: todayISO().slice(0, 7), dlFrom: todayISO(), dlTo: addDays(todayISO(), 30), dual: null, regime: "rate"};
+st.dual = {ms: nowIST(), loc: 0};
+st.rp = {from: isoToIST(nowIST()), to: isoToIST(nowIST() + 86400000), mode: "live", step: 5, res: null, f: "all", watch: false, out: null};
+
+function drawNav() { $("#nav").innerHTML = TABS.map(([k, l]) => `<button role="tab" aria-selected="${st.tab === k}" data-tab="${k}">${l}</button>`).join(""); }
+function badgesOf(D) {
+  const b = [];
+  if (D.weekend) b.push(`<span class="badge b-wn">सप्ताहांत — बाज़ार बंद</span>`);
+  if (D.holiday) b.push(`<span class="badge b-wn">अमेरिकी छुट्टी: ${esc(D.holiday)}</span>`);
+  if (D.early) b.push(`<span class="badge b-wn">जल्दी बंद: ${esc(D.early)}</span>`);
+  if (D.ny.samples.length) b.push(`<span class="badge">NY ओपन ${istHM(D.win.ny[0])} IST (${D.nyTZ})</span>`);
+  return b.join("");
+}
+function zoneBadge(z) { const [t, c] = ZONE[z]; return `<span class="badge ${c}">${t}</span>`; }
+function sampleTable(S) {
+  const rows = S.samples.filter((_, i) => i % 2 === 0).map(s => {
+    const sc = scoreState(s.lon, s.asc), nk = NK[nakI(s.lon[1])];
+    return `<tr><td>${istHM(s.ms)}</td><td>${nk} ${pada(s.lon[1])}</td><td>${SG[sgn(s.lon[1])]}</td><td>${SG[sgn(s.asc)]} ${dg(s.asc).toFixed(1)}°</td><td>${SG[sgn(s.lon[0])]} ${dg(s.lon[0]).toFixed(1)}°</td><td>${sc.total > 0 ? "+" : ""}${sc.total}</td></tr>`;
+  }).join("");
+  return `<div class="tblwrap"><table><thead><tr><th>IST</th><th>चंद्र नक्षत्र</th><th>चंद्र राशि</th><th>लग्न</th><th>सूर्य</th><th>अंक</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function eventList(list, sessTag) {
+  if (!list.length) return `<p class="sub">इस सत्र में कोई घटना नहीं।</p>`;
+  return list.map(e => `<div class="ev"><b>${istHM(e.ms)}</b><div>${sessTag || ""}<span class="${e.tone > 0 ? "tone-p" : e.tone < 0 ? "tone-n" : "tone-z"}">${esc(e.text)}</span> <span class="badge">${kindName(e.kind)}</span></div></div>`).join("");
+}
+const kindName = k => ({nak: "नक्षत्र", sign: "राशि", state: "स्थिति", aspect: "जन्म-पहलू"}[k] || k);
+function sessionPanel(which, D) {
+  const S = which === "asia" ? D.asian : D.ny;
+  const sc = S.score, cat = nyCat(sc.nak);
+  const parts = sc.parts.length ? sc.parts.map(p => `<li>${esc(p.l)} <b class="${p.p > 0 ? "tone-p" : p.p < 0 ? "tone-n" : ""}">${p.p > 0 ? "+" : ""}${p.p}</b></li>`).join("") : "<li>कोई सक्रिय नियम नहीं</li>";
+  const title = which === "asia" ? "🌏 एशियन सत्र (05:30–10:30 IST)" : `🗽 न्यूयॉर्क सत्र (09:30–16:00 ET · ${istHM(D.win.ny[0])}–${istHM(D.win.ny[1])} IST)`;
+  return `<div class="card">
+    <h2>${title}</h2>
+    <div>${zoneBadge(sc.zone)} <span class="badge">अंक ${sc.total > 0 ? "+" : ""}${sc.total}</span> <span class="badge">${esc(sc.nak)} · पद ${pada(S.open.lon[1])}</span> <span class="badge ${cat[1]}">${cat[0]}</span></div>
+    <p class="sub">ज़ोन: अंक ≥ +2 BUY, ≤ −2 SELL, बीच में रेंज (B7.3)। सत्र-खुलने की स्थिति से। परिकल्पना।</p>
+    <div class="grid">
+      <div class="card" style="margin:0"><h3>खुलने पर स्थिति</h3>
+        <div>चंद्र ${SG[sgn(S.open.lon[1])]} ${dg(S.open.lon[1]).toFixed(1)}° · ${esc(sc.nak)} पद ${pada(S.open.lon[1])} · समूह ${esc(sc.group)}</div>
+        <div>लग्न ${SG[sc.lagSign]} ${dg(S.open.asc).toFixed(1)}° · चंद्र भाव ${sc.moonH}</div>
+        <h3>अंक का विवरण</h3><ul style="margin:0;padding-left:18px">${parts}</ul>
+      </div>
+      <div class="card" style="margin:0"><h3>सत्र की घटनाएँ (${S.ev.length})</h3>
+        <div class="tblwrap" style="max-height:340px;overflow:auto">${eventList(S.ev)}</div>
+      </div>
+    </div>
+    <h3>स्थिति-नमूने (हर 30 मि)</h3>${sampleTable(S)}
+  </div>`;
+}
+function horasPanel(H, label, nowMs) {
+  if (!H) return `<div class="card"><h3>${label} — होरा</h3><p class="sub">इस तारीख़ पर सूर्योदय/सूर्यास्त उपलब्ध नहीं (ध्रुवीय दिन/रात)।</p></div>`;
+  const cur = horaAt(H, nowMs);
+  const cells = H.horas.map(h => `<span class="${cur === h ? "now" : ""}">${istHM(h.s)} ${h.lord}${h.kind === "night" ? " (रात)" : ""}</span>`).join("");
+  return `<div class="card"><h3>${label} — होरा (सूर्योदय/सूर्यास्त से, IST)</h3><div class="hora">${cells}</div><p class="sub">सूर्योदय ${istHM(H.rise)} IST · सूर्यास्त ${istHM(H.set)} IST · NOAA सूत्र से (±1 मि)। होरा-क्रम चाल्डियन।</p></div>`;
+}
+
+/* ================= views ================= */
+function vDay() {
+  const D = dayFull(st.iso);
+  const sa = D.asian.score, sn = D.ny.score;
+  return `<div class="card">${badgesOf(D)} <span class="badge">${dayLabel(st.iso)}</span></div>
+  <div class="grid">
+    <div class="card"><h2>🌏 एशियन सत्र</h2>${zoneBadge(sa.zone)}<div class="big">${sa.total > 0 ? "+" : ""}${sa.total}</div><div class="sub">चंद्र ${esc(sa.nak)} · ${SG[sgn(D.asian.open.lon[1])]} · परिकल्पना</div>
+      <div class="sub">सटीक घटनाएँ: ${D.asian.ev.length}</div><button class="g" data-go="asia">विस्तार →</button></div>
+    <div class="card"><h2>🗽 न्यूयॉर्क सत्र</h2>${zoneBadge(sn.zone)}<div class="big">${sn.total > 0 ? "+" : ""}${sn.total}</div><div class="sub">चंद्र ${esc(sn.nak)} · ${SG[sgn(D.ny.open.lon[1])]} · परिकल्पना</div>
+      <div class="sub">सटीक घटनाएँ: ${D.ny.ev.length} · B6 अधिकतम शर्तें: ${D.ny.maxCrash}</div><button class="g" data-go="ny">विस्तार →</button></div>
+  </div>
+  <div class="card"><h2>इस तारीख़ पर ध्यान दें</h2><ul style="margin:0;padding-left:18px">
+    <li>नक्षत्र, होरा, मृत्यु-भाग और B6 शर्तें परिकल्पना हैं। सांख्यिकीय रूप से सिद्ध नहीं।</li>
+    <li>NY सत्र अमेरिकी DST के साथ बदलता है; ऊपर का IST समय उसी तारीख़ के लिए सही है।</li>
+    <li>किसी और तारीख़ या समय का विश्लेषण 🔭 दोहरी कुंडली में समय चुनकर देखें।</li></ul></div>`;
+}
+function vAsia() {
+  const D = dayFull(st.iso);
+  return `<div style="margin-bottom:6px">${badgesOf(D)}</div>${sessionPanel("asia", D)}${horasPanel(D.tokH, "टोक्यो", nowIST())}
+    <div class="warn">एशियन सत्र के लिए नक्षत्र-सूची NY सूची से उधार ली गई है (परिकल्पना)।</div>`;
+}
+function vNY() {
+  const D = dayFull(st.iso);
+  return `<div style="margin-bottom:6px">${badgesOf(D)}</div>${sessionPanel("ny", D)}
+    <div class="grid">${horasPanel(D.nyH, "NY", nowIST())}
+      <div class="card"><h3>B3 समूह और B2 सूची</h3>
+        <div>चंद्र नक्षत्र: <b>${esc(D.ny.score.nak)}</b> · समूह: <b>${esc(D.ny.score.group)}</b> · ${nyCat(D.ny.score.nak)[0]}</div>
+        <h3>🟢 ख़रीद</h3><div class="chips">${NYB.map(n => `<span class="badge">${n}</span>`).join("")}</div>
+        <h3>🔴 बिकवाली</h3><div class="chips">${NYS.map(n => `<span class="badge">${n}</span>`).join("")}</div>
+        <h3>🟡 ब्रेकआउट / रेंज</h3><div class="chips">${NYK.concat(NYR).map(n => `<span class="badge">${n}</span>`).join("")}</div>
+      </div></div>
+    <div class="card"><h2>NY सत्र की घटनाएँ (${D.ny.ev.length})</h2><div class="tblwrap" style="max-height:420px;overflow:auto">${eventList(D.ny.ev)}</div></div>`;
+}
+function vDL() {
+  const rows = [];
+  let d = st.dlFrom;
+  let guard = 0;
+  while (d <= st.dlTo && guard++ < 400) {
+    const D = dayFull(d);
+    const sa = D.asian.score.zone, sn = D.ny.score.zone;
+    rows.push(`<tr class="rowdl" data-iso="${d}" style="cursor:pointer"><td>${d}</td><td>${["रवि","सोम","मंगल","बुध","गुरु","शुक्र","शनि"][D.dow]}</td><td>${badgesOf(D).replace(/<span class="badge">NY[^]*?<\/span>/,"") || "—"}</td>
+      <td>${ZONE[sa][0].split(" ")[0]}</td><td>${ZONE[sn][0].split(" ")[0]}</td><td>${esc(D.ny.score.nak)}</td>
+      <td>${D.ny.ev.length}</td><td>${D.ny.maxCrash ? `<span class="badge b-dn">${D.ny.maxCrash}</span>` : "—"}</td></tr>`);
+    d = addDays(d, 1);
+  }
+  return `<div class="card"><h2>दिन-सूची</h2>
+    <div class="row"><label>से<input id="dlFrom" type="date" value="${st.dlFrom}"></label><label>तक<input id="dlTo" type="date" value="${st.dlTo}"></label></div>
+    <p class="sub">पंक्ति पर क्लिक करें तो वह तारीख़ विश्लेषण में खुलेगी। अधिकतम 400 दिन।</p>
+    <div class="tblwrap" style="max-height:560px;overflow:auto"><table><thead><tr><th>तारीख़</th><th>वार</th><th>स्थिति</th><th>एशियन</th><th>NY</th><th>NY चंद्र नक्षत्र</th><th>NY घटनाएँ</th><th>B6 शर्तें</th></tr></thead><tbody>${rows.join("")}</tbody></table></div></div>`;
+}
+function vCC() {
+  const [y, m] = st.cm.split("-").map(Number);
+  const first = Date.UTC(y, m - 1, 1), daysIn = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const lead = new Date(first).getUTCDay();
+  const cells = [];
+  for (let i = 0; i < lead; i++) cells.push(`<div></div>`);
+  for (let k = 1; k <= daysIn; k++) {
+    const iso = `${y}-${String(m).padStart(2,"0")}-${String(k).padStart(2,"0")}`;
+    const D = dayFull(iso);
+    let cls = "grn";
+    if (D.weekend || D.holiday) cls = "gry";
+    else if (D.ny.score.zone === "SELL" || D.ny.maxCrash >= 2) cls = "red";
+    else if (D.ny.score.zone === "RANGE" || D.ny.maxCrash === 1) cls = "amb";
+    const tag = D.weekend ? "सप्ताहांत" : D.holiday ? "छुट्टी" : `${D.ny.score.zone === "SELL" ? "SELL" : D.ny.score.zone === "BUY" ? "BUY" : "रेंज"}${D.ny.maxCrash ? " · B6:" + D.ny.maxCrash : ""}`;
+    cells.push(`<button class="cd ${cls} ${iso === st.iso ? "" : ""}" data-iso="${iso}" title="${esc(iso)} NY: ${esc(D.ny.score.nak)} · अंक ${D.ny.score.total}"><span class="n">${k}</span><span class="z">${esc(tag)}</span></button>`);
+  }
+  const monthName = new Intl.DateTimeFormat("hi-IN", {timeZone: "UTC", month: "long", year: "numeric"}).format(new Date(first));
+  return `<div class="card"><h2>💥 क्रैश कैलेंडर — ${monthName}</h2>
+    <div class="row" style="margin-bottom:8px"><div><button class="g" data-cm="-1">← पिछला महीना</button> <button class="g" data-cm="1">अगला महीना →</button></div></div>
+    <div class="cal">${["रवि","सोम","मंगल","बुध","गुरु","शुक्र","शनि"].map(x => `<div class="hd">${x}</div>`).join("")}${cells.join("")}</div>
+    <p class="sub" style="margin-top:8px">लाल = NY SELL ज़ोन या B6 की ≥2 शर्तें · पीला = रेंज या 1 शर्त · हरा = BUY ज़ोन · ग्रे = सप्ताहांत/छुट्टी। ये सभी परिकल्पना हैं; क्रैश की भविष्यवाणी नहीं।</p></div>`;
+}
+function niSVG(title, lagSign, lon, asc) {
+  const HP = [[200,67],[100,33],[33,100],[67,200],[33,300],[100,367],[200,333],[300,367],[367,300],[333,200],[367,100],[300,33]];
+  const houses = Array.from({length: 12}, () => []);
+  PL.forEach((p, i) => houses[(sgn(lon[i]) - lagSign + 12) % 12].push(`${AB[p]} ${Math.floor(dg(lon[i]))}°`));
+  houses[0].unshift(`लग्न ${Math.floor(dg(asc))}°`);
+  let s = `<svg viewBox="0 0 400 400" class="ni" role="img" aria-label="${esc(title)}">`;
+  s += `<rect x="0" y="0" width="400" height="400" fill="none" stroke="currentColor" stroke-width="1.5"/>`;
+  s += `<line x1="0" y1="0" x2="400" y2="400" stroke="currentColor" stroke-width="1"/><line x1="400" y1="0" x2="0" y2="400" stroke="currentColor" stroke-width="1"/>`;
+  s += `<polygon points="200,0 400,200 200,400 0,200" fill="none" stroke="currentColor" stroke-width="1"/>`;
+  for (let h = 0; h < 12; h++) {
+    const [x, y] = HP[h], sign = (lagSign + h) % 12;
+    s += `<text x="${x}" y="${y - 16}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".65">${h + 1} · ${SG[sign]}</text>`;
+    houses[h].forEach((t, k) => { s += `<text x="${x}" y="${y + k * 13}" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">${esc(t)}</text>`; });
+  }
+  return s + `</svg>`;
+}
+function vDual() {
+  const dl = st.dual;
+  const ms = dl.ms;
+  const L = LOCS[dl.loc];
+  const b = E.bodies(ms);
+  const asc = E.ascendant(ms, L.lat, L.lon, b.ay, b.t);
+  const live = {lon: b.lon, asc};
+  const lagS = sgn(live.asc), natS = sgn(NATAL.asc);
+  // transit ↔ natal aspects (orb ≤ 3°)
+  const asps = [];
+  const NL = NATAL.lon.concat([NATAL.asc]);
+  const NLAB = i => i === 9 ? "जन्म लग्न" : `जन्म ${PH[PL[i]]}`;
+  for (let p = 0; p < 9; p++) for (let n = 0; n < 10; n++) for (const [ang, name] of ASP) {
+    const v = Math.abs(sepOf(live.lon[p], NL[n]) - ang);
+    if (v <= 3) asps.push({p, n, name, orb: v, tone: ASP_TONE[ang]});
+  }
+  asps.sort((a, b) => a.orb - b.orb);
+  const sc = scoreState(live.lon, live.asc);
+  const iso = istDate(ms);
+  const H = horasFor(iso, L.lat, L.lon);
+  const cur = horaAt(H, ms);
+  const sess = (() => {
+    const w = windowsOf(iso);
+    if (ms >= w.asian[0] && ms < w.asian[1]) return "🌏 एशियन सत्र के भीतर";
+    if (ms >= w.ny[0] && ms < w.ny[1]) return "🗽 NY सत्र के भीतर";
+    return "सत्र के बाहर";
+  })();
+  const cat = nyCat(sc.nak);
+  return `<div class="card"><h2>🔭 दोहरी कुंडली — जन्म बनाम चुना गया समय</h2>
+    <div class="row">
+      <label>तारीख़-समय (IST)<input id="dualIST" type="datetime-local" value="${isoToIST(ms)}"></label>
+      <label>स्थान<select id="dualLoc">${LOCS.map((l, i) => `<option value="${i}" ${i === dl.loc ? "selected" : ""}>${l.name}</option>`).join("")}</select></label>
+      <div><button class="p" id="dualGo">विश्लेषण</button> <button class="g" id="dualNow">अभी का समय</button></div>
+    </div>
+    <p class="sub">लग्न और भाव चुने गए स्थान से; ग्रह-स्थितियाँ वही रहती हैं। जन्म: NASDAQ, 8 Feb 1971, 10:00 EST, NYC।</p>
+  </div>
+  <div class="grid">
+    <div class="card"><h2>जन्म-कुंडली (NASDAQ)</h2>${niSVG("जन्म कुंडली", natS, NATAL.lon, NATAL.asc)}<p class="sub" style="text-align:center">लग्न ${SG[natS]} ${dg(NATAL.asc).toFixed(2)}° · राशि-भाव (whole sign)</p></div>
+    <div class="card"><h2>चुने गए समय की कुंडली</h2>${niSVG("वर्तमान कुंडली", lagS, live.lon, live.asc)}<p class="sub" style="text-align:center">लग्न ${SG[lagS]} ${dg(live.asc).toFixed(2)}° · ${esc(L.name)} · ${istDate(ms)} ${istHM(ms)} IST</p></div>
+  </div>
+  <div class="card"><h2>विश्लेषण — ${istDate(ms)} ${istHM(ms)} IST</h2>
+    <div>${zoneBadge(sc.zone)} <span class="badge">अंक ${sc.total > 0 ? "+" : ""}${sc.total}</span> <span class="badge">${esc(sc.nak)} पद ${pada(live.lon[1])}</span> <span class="badge ${cat[1]}">${cat[0]}</span> <span class="badge">${sess}</span></div>
+    <div class="sub">होरा: ${cur ? `${cur.lord} (${cur.kind === "day" ? "दिन" : "रात"}) — NYC होरा` : "—"} · ${H ? "" : "होरा उपलब्ध नहीं"}</div>
+    <h3>नियम-अंक</h3><ul style="margin:0;padding-left:18px">${sc.parts.length ? sc.parts.map(p => `<li>${esc(p.l)} <b class="${p.p > 0 ? "tone-p" : p.p < 0 ? "tone-n" : ""}">${p.p > 0 ? "+" : ""}${p.p}</b></li>`).join("") : "<li>कोई सक्रिय नियम नहीं</li>"}</ul>
+  </div>
+  <div class="card"><h2>चुने समय के जन्म-पहलू (orb ≤ 3°)</h2>
+    ${asps.length ? `<div class="tblwrap"><table><thead><tr><th>गृह</th><th>जन्म-बिंदु</th><th>पहलू</th><th>orb</th></tr></thead><tbody>${asps.map(a => `<tr><td>${PH[PL[a.p]]}</td><td>${NLAB(a.n)}</td><td class="${a.tone > 0 ? "tone-p" : a.tone < 0 ? "tone-n" : ""}">${a.name}</td><td>${a.orb.toFixed(2)}°</td></tr>`).join("")}</tbody></table></div>` : "<p class='sub'>इस क्षण कोई पहलू ≤3° नहीं।</p>"}
+  </div>`;
+}
+function vEv() {
+  const D = dayFull(st.iso);
+  const all = [...D.asian.ev.map(e => ({...e, s: "🌏 "})), ...D.ny.ev.map(e => ({...e, s: "🗽 "}))].sort((a, b) => a.ms - b.ms);
+  const f = all.filter(e => st.evFilter === "all" || e.kind === st.evFilter);
+  const F = [["all","सभी"],["aspect","जन्म-पहलू"],["nak","नक्षत्र"],["sign","राशि"],["state","मृत्यु-भाग/B6"]];
+  return `<div class="card"><h2>⏱ सटीक घटनाएँ — ${st.iso}</h2><div class="chips" style="margin-bottom:8px">${F.map(([k, l]) => `<button class="g" data-evf="${k}" ${st.evFilter === k ? 'style="border-color:var(--ac)"' : ""}>${l}</button>`).join(" ")}</div>
+  <p class="sub">समय IST में। ±15 मि नमूना-अंतराल के भीतर। जन्म-पहलू का orb ±2.5°।</p>
+  <div class="tblwrap" style="max-height:540px;overflow:auto">${f.length ? f.map(e => `<div class="ev"><b>${istHM(e.ms)}</b><div>${e.s}<span class="${e.tone > 0 ? "tone-p" : e.tone < 0 ? "tone-n" : "tone-z"}">${esc(e.text)}</span> <span class="badge">${kindName(e.kind)}</span></div></div>`).join("") : "<p>इस फ़िल्टर में कोई घटना नहीं।</p>"}</div></div>`;
+}
+function vMac() {
+  const list = loadMacro();
+  const rows = list.map((e, i) => {
+    const sc = scoreMacro(e, st.regime);
+    return `<tr><td>${esc(e.ist || "")}</td><td>${esc(e.name)}</td><td>${esc(e.cat)}</td><td>${esc(e.impact)}</td><td>${esc(e.forecast)}</td><td>${esc(e.actual)}</td><td>${sc.s === null ? "—" : (sc.s * 100).toFixed(1) + "%"}</td><td>${sc.label}</td><td class="${e.status === "VERIFIED" ? "tone-p" : "tone-n"}">${esc(e.status)}</td><td><button class="g" data-del="${i}">हटाएँ</button></td></tr>`;
+  }).join("");
+  const t = macroTotal(list, st.regime);
+  return `<div class="warn">केवल <b>VERIFIED</b> (स्रोत सहित) इवेंट कुल स्कोर में गिने जाते हैं। ऐप कोई पूर्व-भरा आँकड़ा नहीं देता।</div>
+  <div class="card"><h2>नया इवेंट</h2>
+    <div class="row">
+      <label>नाम<input id="m_name" placeholder="जैसे CPI m/m"></label>
+      <label>श्रेणी<select id="m_cat"><option value="inflation">महंगाई (CPI/PCE/PPI)</option><option value="labor">रोज़गार (NFP/बेरोज़गारी/claims)</option><option value="growth">विकास (GDP/ISM/retail)</option><option value="rates">ब्याज (FOMC)</option></select></label>
+      <label>प्रभाव<select id="m_imp"><option value="3">High (3)</option><option value="2">Medium (2)</option><option value="1">Low (1)</option></select></label>
+      <label>IST समय<input id="m_ist" type="datetime-local"></label>
+      <label>अनुमान<input id="m_fc" type="number" step="any"></label>
+      <label>पिछला<input id="m_pv" type="number" step="any"></label>
+      <label>असली<input id="m_ac" type="number" step="any" placeholder="आने पर"></label>
+      <label>स्रोत<input id="m_src" placeholder="bls.gov / bea.gov"></label>
+      <label>स्थिति<select id="m_st"><option>VERIFIED</option><option selected>UNVERIFIED</option><option>MISSING</option></select></label>
+    </div><div style="margin-top:8px"><button class="p" id="m_add">जोड़ें</button></div></div>
+  <div class="card"><h2>बायस (परिकल्पना)</h2>
+    <label>नियम-क्षेत्र<select id="m_reg"><option value="rate" ${st.regime === "rate" ? "selected" : ""}>ब्याज-संवेदी (डिफ़ॉल्ट)</option><option value="growth" ${st.regime === "growth" ? "selected" : ""}>विकास-डर</option></select></label>
+    <p class="sub">नियम-क्षेत्र एक मान्यता है। सीमा ±1.0।</p>
+    <div>कुल स्कोर: <b class="big">${t.total.toFixed(2)}</b> · ${t.label}</div>
+    <div class="sub">VERIFIED: ${t.used} · बाहर (UNVERIFIED/MISSING): ${t.excluded} · उच्च-प्रभाव नतीजा बाकी: ${t.pendingHigh}</div></div>
+  <div class="card"><h2>दर्ज इवेंट</h2><div class="tblwrap"><table><thead><tr><th>IST</th><th>नाम</th><th>श्रेणी</th><th>प्रभाव</th><th>अनुमान</th><th>असली</th><th>अंतर</th><th>परिणाम</th><th>स्थिति</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="10">अभी कोई इवेंट नहीं।</td></tr>`}</tbody></table></div></div>
+  <div class="card"><h2>CPI m/m आधार-दर (संदर्भ)</h2><table><tbody>
+    <tr><td>Actual > Forecast</td><td>65 (~29%)</td></tr><tr><td>Actual < Forecast</td><td>79 (~35%)</td></tr><tr><td>Actual = Forecast</td><td>81 (~36%)</td></tr><tr><td>औसत actual 2025–26</td><td>0.30%</td></tr></tbody></table>
+    <p class="sub">225 रिलीज़ (Dec 2007–Oct 2026), आपकी इतिहास फ़ाइल से। केवल संदर्भ।</p></div>`;
+}
+function vVer() {
+  return `<div class="card"><h2>इंजन की सटीकता (PyEphem से तुलना)</h2>
+  <div class="tblwrap"><table><thead><tr><th>घटक</th><th>औसत |त्रुटि|</th><th>अधिकतम</th></tr></thead><tbody>
+    <tr><td>सूर्य</td><td>0.002°</td><td>0.007°</td></tr>
+    <tr><td>चंद्र</td><td>0.012°</td><td>0.024°</td></tr>
+    <tr><td>मंगल / बुध / शुक्र</td><td>0.004–0.006°</td><td>0.014–0.021°</td></tr>
+    <tr><td>गुरु</td><td>0.023°</td><td>0.046°</td></tr>
+    <tr><td>शनि</td><td>0.075°</td><td>0.085°</td></tr>
+    <tr><td>राहु / केतु (मीन नोड)</td><td>0.0003°</td><td>0.0005°</td></tr>
+    <tr><td>लग्न (NYC)</td><td>0.003°</td><td>0.007°</td></tr>
+    <tr><td>सूर्योदय / सूर्यास्त (NYC, Tokyo)</td><td>~0.3 मि</td><td>~0.9 मि</td></tr></tbody></table></div>
+  <p class="sub">160 यादृच्छिक क्षण (2026–27) और 84 सूर्योदय-जोड़ों पर मापा गया। लाहिरी अयनांश एक सूत्र है (23.85306 + 1.396042T + 0.000308T²), Swiss Ephemeris-स्तर सटीक नहीं।</p></div>
+  <div class="card"><h2>क्या बना है</h2><ul style="margin:0;padding-left:18px">
+    <li>किसी भी तारीख़-समय का विश्लेषण, ब्राउज़र में ही (कोई सर्वर नहीं, कोई बाहरी लाइब्रेरी नहीं)।</li>
+    <li>दिन-सूची, क्रैश कैलेंडर, दोहरी कुंडली (NI शैली SVG), सटीक घटनाएँ।</li>
+    <li>नियम: B2 (NY सूची), B3 (7 समूह), B4 (परम उच्च/नीच ±0.5°), B5 (मृत्यु-भाग ±0.5°), B6 (क्रैश शर्तें), B7 (अंक/ज़ोन)।</li>
+    <li>V12: IST में शुरू–अंत की रिपोर्ट, नमूना-अंतराल 5–60 मि, लाइव या NASDAQ जन्म-लग्न, CSV/TXT।</li>
+    <li>मैक्रो: बायस स्कोरर, VERIFIED/UNVERIFIED/MISSING।</li></ul></div>
+  <div class="card"><h2>अभी नहीं / सिद्ध नहीं</h2><ul style="margin:0;padding-left:18px">
+    <li><b>NQ मूल्य-डेटा नहीं</b> — दिशा-संकेतों की बढ़त की जाँच नहीं हुई। कोई सत्यापित % नहीं।</li>
+    <li>Mercury स्थिरता (B6.3) के लिए गति-डेटा नहीं जोड़ा गया (इंजन गति भी दे सकता है; अगला कदम)।</li>
+    <li>मांदी (B5.4) अभी नहीं गिनी।</li>
+    <li>B6.5 मेरी व्याख्या है।</li>
+    <li>मैक्रो कैलेंडर का स्वचालित डेटा नहीं; आप स्रोत सहित दर्ज करें।</li></ul></div>`;
+}
+
+/* ================= V12 — रिपोर्ट बिल्डर (IST शुरू → अंत, अंतराल-वार अपडेट) ================= */
+const RP_MAX = 8000;
+const RP_ZC = {BUY: "var(--up)", SELL: "var(--dn)", RANGE: "var(--wn)"};
+const RP_ZL = {BUY: "BUY", SELL: "SELL", RANGE: "रेंज"};
+const RP_FILTERS = [["all","सभी"],["imp3","🔥 उच्च महत्व"],["imp2","उच्च+मध्यम"],["ज़ोन","ज़ोन-बदलाव"],["होरा","होरा"],["B6 शर्तें","B6 शर्तें"],["नक्षत्र","नक्षत्र"],["राशि","राशि"],["स्थिति","स्थिति"],["जन्म-पहलू","जन्म-पहलू"]];
+const HCACHE_RP = {};
+let RP_TIMER = null;
+
+// NYC horas for the NY civil date containing ms (or the previous civil date, before sunrise)
+function horaFor(ms, loc) {
+  const base = etDate(ms);
+  for (const d of [base, addDays(base, -1)]) {
+    const key = d + "|" + loc.lat + "|" + loc.lon;
+    if (!(key in HCACHE_RP)) HCACHE_RP[key] = horasFor(d, loc.lat, loc.lon);
+    const h = horaAt(HCACHE_RP[key], ms);
+    if (h) return h;
+  }
+  return null;
+}
+
+function rpIdx(R, ms) { return Math.min(R.n - 1, Math.max(0, Math.floor((ms - R.a) / (R.stepMin * 60000)))); }
+function rpPct(R, z) { return (100 * R.cnt[z] / R.n).toFixed(1); }
+
+function rpBuild(a, b, mode, stepMin) {
+  const stepMs = stepMin * 60000;
+  const n = Math.floor((b - a) / stepMs) + 1;
+  if (n > RP_MAX) return {err: `इस अवधि में ${n} नमूने होंगे; अधिकतम ${RP_MAX} है। अवधि घटाएँ या अंतराल बढ़ाएँ।`};
+  const samples = [];
+  for (let t = a; t <= b; t += stepMs) {
+    const s = stateAt(t, NYC);
+    if (mode === "natal") s.asc = NATAL.asc;
+    samples.push(s);
+  }
+  CUR_STEP = stepMs;
+  let A;
+  try { A = analyseSamples(samples); } finally { CUR_STEP = STEP; }
+  const rows = samples.map(s => {
+    const sc = scoreState(s.lon, s.asc), h = horaFor(s.ms, NYC);
+    return {ms: s.ms, zone: sc.zone, total: sc.total, nak: NK[nakI(s.lon[1])], pada: pada(s.lon[1]),
+      moonSign: SG[sgn(s.lon[1])], lagna: `${SG[sgn(s.asc)]} ${dg(s.asc).toFixed(2)}°`,
+      crash: crashParts(s.lon).length, hora: h ? h.lord : "", horaKind: h ? h.kind : ""};
+  });
+  const log = A.ev.map(e => ({ms: e.ms, type: kindName(e.kind), text: e.text, tone: e.tone || 0, imp: rpImpOf(e)}));
+  for (let i = 1; i < rows.length; i++) {
+    const p = rows[i - 1], r = rows[i];
+    if (r.zone !== p.zone) log.push({ms: r.ms, type: "ज़ोन", text: `${RP_ZL[p.zone]} → ${RP_ZL[r.zone]} (अंक ${r.total > 0 ? "+" : ""}${r.total})`, tone: r.zone === "BUY" ? 1 : r.zone === "SELL" ? -1 : 0, imp: r.zone === "RANGE" ? 1 : 3});
+    if (r.hora !== p.hora || r.horaKind !== p.horaKind)
+      log.push({ms: r.ms, type: "होरा", text: `${PH[r.hora] || "—"} होरा${r.horaKind === "night" ? " (रात)" : ""} शुरू`, tone: 0, imp: 1});
+    if (r.crash !== p.crash) log.push({ms: r.ms, type: "B6 शर्तें", text: `${p.crash} → ${r.crash} सक्रिय`, tone: 0, imp: r.crash > p.crash ? 3 : 1});
+  }
+  log.sort((x, y) => x.ms - y.ms);
+  const highs = log.filter(e => e.imp >= 3);
+  const clusters = [];
+  for (let i = 0; i < highs.length; ) {
+    let j = i;
+    while (j + 1 < highs.length && highs[j + 1].ms - highs[i].ms <= 10 * 60000) j++;
+    const grp = highs.slice(i, j + 1);
+    if (grp.length >= 2) {
+      clusters.push({ms: grp[0].ms, type: "स्पाइक क्लस्टर", text: `${grp.length} उच्च-महत्व घटनाएँ 10 मि में: ${grp.slice(0, 3).map(g => g.text).join(" + ")}${grp.length > 3 ? " …" : ""}`, tone: 0, imp: 3, cluster: true});
+      i = j + 1;
+    } else i++;
+  }
+  log.push(...clusters);
+  log.sort((x, y) => x.ms - y.ms);
+  const cnt = {BUY: 0, SELL: 0, RANGE: 0};
+  let maxR = rows[0], minR = rows[0];
+  rows.forEach(r => { cnt[r.zone]++; if (r.total > maxR.total) maxR = r; if (r.total < minR.total) minR = r; });
+  const horas = [];
+  let d = addDays(etDate(a), -1);
+  const end = etDate(b);
+  let g = 0;
+  while (d <= end && g++ < 12) {
+    const H = horasFor(d, NYC.lat, NYC.lon);
+    if (H) H.horas.forEach(h => { if (h.e > a && h.s < b) horas.push(h); });
+    d = addDays(d, 1);
+  }
+  return {a, b, mode, stepMin, n: rows.length, rows, log, cnt, maxR, minR,
+    maxCrash: Math.max(...rows.map(r => r.crash)), horas, evCount: A.ev.length};
+}
+
+function nowCardHTML(mode) {
+  const ms = nowIST();
+  const s = stateAt(ms, NYC);
+  if (mode === "natal") s.asc = NATAL.asc;
+  const sc = scoreState(s.lon, s.asc), h = horaFor(ms, NYC), cr = crashParts(s.lon);
+  return `<div><b>${istDate(ms)} ${istHM(ms)} IST</b> <span class="sub">(हर 60 सेकंड ताज़ा)</span></div>
+    ${zoneBadge(sc.zone)} <span class="badge">अंक ${sc.total > 0 ? "+" : ""}${sc.total}</span>
+    <span class="badge">${esc(NK[nakI(s.lon[1])])} पद ${pada(s.lon[1])}</span>
+    <span class="badge">लग्न ${SG[sgn(s.asc)]} ${dg(s.asc).toFixed(1)}°</span>
+    <span class="badge">होरा: ${h ? PH[h.lord] + (h.kind === "night" ? " (रात)" : "") : "—"}</span>
+    <span class="badge">B6 शर्तें: ${cr.length}</span>`;
+}
+
+function rpText(R) {
+  const L = [];
+  L.push("NASDAQ वैदिक V12 — रिपोर्ट");
+  L.push(`अवधि (IST): ${istDate(R.a)} ${istHM(R.a)} → ${istDate(R.b)} ${istHM(R.b)}`);
+  L.push(`कुंडली-आधार: ${R.mode === "natal" ? "NASDAQ जन्म-लग्न (स्थिर)" : "लाइव NY लग्न"} · अंतराल ${R.stepMin} मि · नमूने ${R.n}`);
+  L.push(`ज़ोन-हिस्सा (समय का अनुपात, संभावना नहीं): BUY ${rpPct(R, "BUY")}% · SELL ${rpPct(R, "SELL")}% · रेंज ${rpPct(R, "RANGE")}%`);
+  L.push("यह शैक्षिक शोध है, निवेश सलाह नहीं। सभी संकेत परिकल्पना हैं और सांख्यिकीय रूप से सिद्ध नहीं।");
+  L.push("");
+  L.push("अपडेट-लॉग (IST | प्रकार | विवरण):");
+  R.log.forEach(e => L.push(`${e.imp >= 3 ? "[उच्च] " : ""}${istDate(e.ms)} ${istHM(e.ms)} | ${e.type} | ${e.text}`));
+  L.push("");
+  L.push("होरा (NYC, IST):");
+  R.horas.forEach(h => L.push(`${istHM(h.s)}–${istHM(h.e)} | ${PH[h.lord]} | ${h.kind === "night" ? "रात" : "दिन"}`));
+  return L.join("\n");
+}
+function rpCsv(R) {
+  const head = "IST,ET,चंद्र नक्षत्र,पद,चंद्र राशि,लग्न,अंक,ज़ोन,B6 शर्तें,होरा";
+  const q = v => `"${String(v).replace(/"/g, '""')}"`;
+  const lines = R.rows.map(r => [`${istDate(r.ms)} ${istHM(r.ms)}`, etHM(r.ms), r.nak, r.pada, r.moonSign, r.lagna, r.total, RP_ZL[r.zone], r.crash, r.hora ? PH[r.hora] : "—"].map(q).join(","));
+  return [head, ...lines].join("\n");
+}
+function rpStamp(R) { return istDate(R.a).replace(/-/g, "") + "_" + istHM(R.a).replace(":", ""); }
+
+function rpReport(R) {
+  const modeTxt = R.mode === "natal" ? "NASDAQ जन्म-लग्न (10:00 EST, स्थिर)" : "लाइव NY लग्न (हर नमूने पर NYC से)";
+  const B = Math.min(200, R.n), per = R.n / B;
+  let bar = "";
+  for (let i = 0; i < B; i++) {
+    const r = R.rows[Math.min(R.n - 1, Math.floor(i * per))];
+    bar += `<i title="${istHM(r.ms)} ${RP_ZL[r.zone]} ${r.total}" style="flex:1;background:${RP_ZC[r.zone]}"></i>`;
+  }
+  const summary = `<div class="card"><h2>सारांश</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+      <div><div class="sub">अवधि (IST)</div><b>${istDate(R.a)} ${istHM(R.a)} → ${istDate(R.b)} ${istHM(R.b)}</b></div>
+      <div><div class="sub">कुंडली-आधार</div>${modeTxt}</div>
+      <div><div class="sub">नमूने / अंतराल</div><b>${R.n} · ${R.stepMin} मि</b></div>
+      <div><div class="sub">सटीक घटनाएँ / लॉग-पंक्तियाँ</div><b>${R.evCount} / ${R.log.length}</b></div>
+      <div><div class="sub">🔥 उच्च-महत्व / स्पाइक क्लस्टर</div><b>${R.log.filter(e => e.imp >= 3).length} / ${R.log.filter(e => e.cluster).length}</b></div>
+      <div><div class="sub">समय का हिस्सा (ज़ोन)</div>🟢 BUY ${rpPct(R, "BUY")}% · 🔴 SELL ${rpPct(R, "SELL")}% · 🟡 रेंज ${rpPct(R, "RANGE")}%</div>
+      <div><div class="sub">अंक का शिखर / न्यूनतम</div>${R.maxR.total > 0 ? "+" : ""}${R.maxR.total} (${istHM(R.maxR.ms)}) / ${R.minR.total} (${istHM(R.minR.ms)})</div>
+      <div><div class="sub">B6 शर्तें अधिकतम एक साथ</div><b>${R.maxCrash}</b></div>
+    </div>
+    <div style="display:flex;height:16px;border-radius:4px;overflow:hidden;margin:8px 0">${bar}</div>
+    <p class="sub">ज़ोन-हिस्सा समय का अनुपात है, संभावना नहीं। यह परिकल्पना है, सिद्ध नहीं।</p>
+    <div class="chips"><button class="p" id="rpCsv">CSV दिखाएँ</button> <button class="g" id="rpTxt">TXT रिपोर्ट दिखाएँ</button></div>
+    ${st.rp.out ? `<p class="sub" style="margin:8px 0 4px">नीचे का पाठ चुनकर कॉपी करें (${st.rp.out.kind === "csv" ? "CSV, स्प्रेडशीट में चिपकाएँ" : "TXT रिपोर्ट"}):</p><textarea id="rpOut" readonly onclick="this.select()" style="width:100%;min-height:240px;font:12px/1.4 ui-monospace,Menlo,monospace;background:var(--s2);color:var(--tx);border:1px solid var(--ln);border-radius:8px;padding:8px">${esc(st.rp.out.text)}</textarea>` : ""}
+  </div>`;
+  const F = st.rp.f || "all";
+  const shown = R.log.filter(e => F === "all" ? true : F === "imp3" ? e.imp >= 3 : F === "imp2" ? e.imp >= 2 : e.type === F);
+  const LIM = 1500;
+  const logRows = shown.slice(0, LIM).map(e => {
+    const s = R.rows[rpIdx(R, e.ms)];
+    return `<tr><td>${istDate(e.ms).slice(5)} ${istHM(e.ms)}</td><td>${e.imp >= 3 ? "🔥 " : e.imp === 2 ? "• " : ""}${esc(e.type)}</td><td class="${e.tone > 0 ? "tone-p" : e.tone < 0 ? "tone-n" : ""}">${esc(e.text)}</td>
+      <td><span class="badge ${s.zone === "BUY" ? "b-up" : s.zone === "SELL" ? "b-dn" : "b-wn"}">${RP_ZL[s.zone]}</span></td><td>${s.total > 0 ? "+" : ""}${s.total}</td><td>${esc(s.nak)}</td><td>${esc(s.lagna)}</td><td>${s.hora ? PH[s.hora] : "—"}</td></tr>`;
+  }).join("");
+  const log = `<div class="card"><h2>अपडेट-लॉग (${shown.length} पंक्तियाँ${shown.length > LIM ? `, पहली ${LIM} दिख रही हैं` : ""})</h2>
+    <div class="chips" style="margin-bottom:8px">${RP_FILTERS.map(([k, l]) => `<button class="g" data-rpf="${k}" ${F === k ? 'style="border-color:var(--ac)"' : ""}>${l}</button>`).join(" ")}</div>
+    <div class="tblwrap" style="max-height:560px;overflow:auto"><table><thead><tr><th>IST</th><th>प्रकार</th><th>विवरण</th><th>ज़ोन</th><th>अंक</th><th>चंद्र नक्षत्र</th><th>लग्न</th><th>होरा</th></tr></thead>
+    <tbody>${logRows || `<tr><td colspan="8">इस फ़िल्टर में कोई पंक्ति नहीं।</td></tr>`}</tbody></table></div>
+    <p class="sub">समय नमूना-अंतराल (${R.stepMin} मि) के भीतर है। नक्षत्र/राशि के क्षण रैखिक अंतर्वेशन से, पहलू के क्षण परवलय से।</p></div>`;
+  const horaRows = R.horas.slice(0, 400).map(h => `<tr><td>${istHM(h.s)}</td><td>${istHM(h.e)}</td><td>${PH[h.lord]}</td><td>${h.kind === "night" ? "रात" : "दिन"}</td></tr>`).join("");
+  const horas = `<div class="card"><h2>होरा (NYC सूर्योदय-सूर्यास्त से, IST)</h2>
+    <div class="tblwrap" style="max-height:360px;overflow:auto"><table><thead><tr><th>से</th><th>तक</th><th>स्वामी</th><th>प्रकार</th></tr></thead><tbody>${horaRows || `<tr><td colspan="4">उपलब्ध नहीं।</td></tr>`}</tbody></table></div></div>`;
+  const rules = `<div class="card"><h2>उपयोग किए गए नियम (परिकल्पना)</h2><ul style="margin:0;padding-left:18px">
+    <li>अंक (B7): चंद्र नक्षत्र ख़रीद/बिकवाली-सूची ±2 (B2), समूह मॉडिफ़ायर (B3), परम उच्च/नीच ±0.5° (B4), मृत्यु-भाग ±0.5° (B5) −1 प्रति, लग्न मृत्यु-भाग −2, B6 क्रैश-शर्तें −1 प्रति।</li>
+    <li>ज़ोन: अंक ≥ +2 BUY, ≤ −2 SELL, बीच में रेंज।</li>
+    <li>घटनाएँ: चंद्र नक्षत्र और ग्रह राशि प्रवेश, जन्म-बिंदु पहलू (orb ±2.5°), मृत्यु-भाग/B6 शर्तों की शुरुआत।</li>
+    <li>${R.mode === "natal" ? "लग्न-आधारित नियम (मृत्यु-भाग लग्न, B6.5 भाव) NASDAQ जन्म-लग्न से।" : "लग्न-आधारित नियम हर नमूने पर NYC लग्न से।"}</li>
+    <li>होरा और लग्न NYC के लिए; NY सत्र का DST अपने-आप। होरा-बदलाव नमूना-अंतराल जितना सटीक।</li>
+    <li>NQ मूल्य-डेटा से परीक्षण नहीं हुआ। कोई दिशा-संकेत सिद्ध नहीं।</li></ul></div>`;
+  return summary + log + horas + rules;
+}
+
+
+/* ---- V12 importance & live watch ---- */
+let RP_PREV = null, RP_ALERTS = [];
+function rpImpOf(e) {
+  if (e.kind === "aspect") return e.orbv !== undefined && e.orbv <= 0.25 ? 3 : (e.orbv !== undefined && e.orbv <= 1 ? 2 : 1);
+  if (e.kind === "state") return (e.text.includes("मृत्यु-भाग") || e.text.includes("B6")) ? 3 : 1;
+  if (e.kind === "sign") return /^(राहु|केतु|शनि|गुरु)/.test(e.text) ? 2 : 1;
+  if (e.kind === "nak") return 2;
+  return 1;
+}
+function rpSnap(ms, mode) {
+  const s = stateAt(ms, NYC);
+  if (mode === "natal") s.asc = NATAL.asc;
+  const sc = scoreState(s.lon, s.asc);
+  const N = NATAL.lon.concat([NATAL.asc]), asp = new Map();
+  for (let p = 0; p < 9; p++) for (let n = 0; n < 10; n++) for (const [ang, name] of ASP) {
+    const v = Math.abs(sepOf(s.lon[p], N[n]) - ang);
+    if (v <= 0.25) asp.set(`${p}|${n}|${ang}`, `${PH[PL[p]]} ${name} ${n === 9 ? "जन्म लग्न" : "जन्म " + PH[PL[n]]} (orb ${v.toFixed(2)}°)`);
+  }
+  const mbP = [];
+  for (let p = 0; p < 9; p++) if (mbHit(p, s.lon[p])) mbP.push(p);
+  return {ms, zone: sc.zone, total: sc.total, crash: crashParts(s.lon).length, mbLag: mbHit(LAGMB, s.asc), mbP, asp, nak: NK[nakI(s.lon[1])]};
+}
+function rpWatchTick() {
+  const cur = rpSnap(nowIST(), st.rp.mode);
+  if (RP_PREV) {
+    const al = [];
+    if (cur.zone !== RP_PREV.zone) al.push({imp: cur.zone === "RANGE" ? 1 : 3, text: `ज़ोन ${RP_ZL[RP_PREV.zone]} → ${RP_ZL[cur.zone]} (अंक ${cur.total > 0 ? "+" : ""}${cur.total})`});
+    if (cur.crash > RP_PREV.crash) al.push({imp: 3, text: `B6 शर्तें ${RP_PREV.crash} → ${cur.crash}`});
+    if (cur.mbLag && !RP_PREV.mbLag) al.push({imp: 3, text: "लग्न मृत्यु-भाग पर (±0.5°)"});
+    cur.mbP.filter(p => !RP_PREV.mbP.includes(p)).forEach(p => al.push({imp: 3, text: `${PH[PL[p]]} मृत्यु-भाग पर (±0.5°)`}));
+    for (const [k, t] of cur.asp) if (!RP_PREV.asp.has(k)) al.push({imp: 3, text: `${t} — नया`});
+    if (cur.nak !== RP_PREV.nak) al.push({imp: 2, text: `चंद्र नक्षत्र ${cur.nak}`});
+    al.forEach(a => RP_ALERTS.unshift({...a, t: cur.ms}));
+    RP_ALERTS.splice(60);
+  }
+  RP_PREV = cur;
+}
+function rpAlertsHTML() {
+  if (!RP_ALERTS.length) return `<p class="sub">अभी तक कोई अलर्ट नहीं।</p>`;
+  return RP_ALERTS.map(a => `<div class="ev"><b>${istHM(a.t)}</b><div>${a.imp >= 3 ? "🔥 " : ""}${esc(a.text)}</div></div>`).join("");
+}
+function watchCard() {
+  const w = st.rp.watch;
+  return `<div class="card"><h2>⏱ अभी की स्थिति और लाइव वॉच (हर 1 मि)</h2>
+    <div id="rpNow">${nowCardHTML(st.rp.mode)}</div>
+    <div style="margin-top:8px"><button class="${w ? "g" : "p"}" id="rpWatch">${w ? "लाइव वॉच बंद करें" : "लाइव वॉच चालू करें"}</button></div>
+    <p class="sub">चालू रहने पर हर मिनट जाँच: ज़ोन-बदलाव, B6 शर्तों में बढ़त, लग्न या ग्रह का मृत्यु-भाग पर आना, नया ≤0.25° पहलू, नक्षत्र-बदलाव। यह केवल खुले पेज पर चलता है; अलर्ट सेव नहीं होते। ये ज्योतिष-ट्रिगर हैं, बाज़ार के भाव के स्पाइक नहीं।</p>
+    ${w ? `<div id="rpAlerts">${rpAlertsHTML()}</div>` : ""}
+  </div>`;
+}
+
+function vRP() {
+  const r = st.rp;
+  const form = `<div class="card"><h2>📑 रिपोर्ट बिल्डर — शुरू से अंत तक</h2>
+    <div class="row">
+      <label>शुरू (IST)<input id="rpFrom" type="datetime-local" value="${r.from}"></label>
+      <label>अंत (IST)<input id="rpTo" type="datetime-local" value="${r.to}"></label>
+      <label>कुंडली-आधार<select id="rpMode"><option value="live" ${r.mode === "live" ? "selected" : ""}>लाइव NY लग्न (हर समय)</option><option value="natal" ${r.mode === "natal" ? "selected" : ""}>NASDAQ जन्म-लग्न (स्थिर)</option></select></label>
+      <label>अपडेट अंतराल<select id="rpStep">${[1, 5, 15, 30, 60].map(v => `<option value="${v}" ${r.step === v ? "selected" : ""}>${v} मिनट</option>`).join("")}</select></label>
+    </div>
+    <div style="margin-top:8px"><button class="p" id="rpGo">रिपोर्ट बनाएँ</button></div>
+    <p class="sub">समय IST में। ग्रह-स्थिति, लग्न, होरा और नियम इंजन से हर नमूने पर। अधिकतम ${RP_MAX} नमूने (1 मि पर लगभग 5.5 दिन, 5 मि पर लगभग 27 दिन)। सभी संकेत परिकल्पना हैं।</p>
+  </div>`;
+  let body;
+  if (r.res && r.res.err) body = `<div class="warn">${esc(r.res.err)}</div>`;
+  else if (r.res) body = rpReport(r.res);
+  else body = `<div class="card"><p class="sub">ऊपर अवधि चुनें और “रिपोर्ट बनाएँ” दबाएँ। डिफ़ॉल्ट: अभी से 24 घंटे, लाइव लग्न, हर 5 मिनट।</p></div>`;
+  return form + watchCard() + body;
+}
+
+/* ================= macro logic ================= */
+const MKEY = "nqv11.macro";
+function loadMacro() { try { return JSON.parse(localStorage.getItem(MKEY) || "[]"); } catch (e) { return []; } }
+function saveMacro(l) { try { localStorage.setItem(MKEY, JSON.stringify(l)); } catch (e) {} }
+function scoreMacro(e, regime) {
+  const f = parseFloat(e.forecast), a = parseFloat(e.actual);
+  if (e.actual === "" || e.actual == null || isNaN(a)) return {s: null, label: "नतीजा बाकी"};
+  if (isNaN(f) || f === 0) return {s: null, label: "अनुमान ज़ीरो/गायब"};
+  const sur = (a - f) / Math.abs(f);
+  if (Math.abs(sur) < 0.02) return {s: 0, label: "in-line (0)"};
+  let dir = (e.cat === "labor" || e.cat === "inflation") ? -1 : e.cat === "growth" ? 1 : -1;
+  if (regime === "growth" && (e.cat === "labor" || e.cat === "growth")) dir = -dir;
+  if (e.cat === "labor" && /unemploy|बेरोज़|बेरोजगार/i.test(e.name)) dir = -dir;
+  const w = parseInt(e.impact, 10) || 1;
+  const s = w * dir * Math.min(Math.abs(sur) / 0.10, 1);
+  return {s, label: `${s > 0 ? "+" : ""}${s.toFixed(2)} ${s > 0 ? "(नैस्डैक +)" : "(नैस्डैक −)"}`};
+}
+function macroTotal(list, regime) {
+  let total = 0, used = 0, excluded = 0, pendingHigh = 0;
+  for (const e of list) {
+    const sc = scoreMacro(e, regime);
+    if (e.status !== "VERIFIED") { excluded++; continue; }
+    if (sc.s === null) { if (parseInt(e.impact, 10) === 3) pendingHigh++; continue; }
+    total += sc.s; used++;
+  }
+  const label = total >= 1 ? "🟢 BULLISH (परिकल्पना)" : total <= -1 ? "🔴 BEARISH (परिकल्पना)" : "🟡 SIDEWAYS (परिकल्पना)";
+  return {total, used, excluded, pendingHigh, label};
+}
+
+/* ================= render & events ================= */
+const VIEWS = {day: vDay, asia: vAsia, ny: vNY, dl: vDL, cc: vCC, dual: vDual, rp: vRP, ev: vEv, mac: vMac, ver: vVer};
+function render() {
+  drawNav();
+  $("#dpick").value = st.iso;
+  $("#view").innerHTML = VIEWS[st.tab]();
+  clearInterval(RP_TIMER); RP_TIMER = null;
+  if (st.tab === "rp") RP_TIMER = setInterval(() => {
+    const el = $("#rpNow"); if (el) el.innerHTML = nowCardHTML(st.rp.mode);
+    if (st.rp.watch) { rpWatchTick(); const al = $("#rpAlerts"); if (al) al.innerHTML = rpAlertsHTML(); }
+  }, 60000);
+  $("#foot").innerHTML = `NASDAQ वैदिक V12 · शैक्षिक शोध · इंजन: JS (Standish/Meeus) · लाहिरी अनुमान · सभी दिशा-संकेत परिकल्पना`;
+}
+function go(tab) { st.tab = tab; render(); window.scrollTo(0, 0); }
+document.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-tab],[data-go],[data-evf],[data-del],[data-iso],[data-cm],#m_add,#rpGo,#rpCsv,#rpTxt,#rpWatch,[data-rpf],#dualGo,#dualNow,#dprev,#dnext,#dtoday");
+  if (!t) return;
+  if (t.dataset.tab) go(t.dataset.tab);
+  else if (t.dataset.go) go(t.dataset.go);
+  else if (t.dataset.evf) { st.evFilter = t.dataset.evf; render(); }
+  else if (t.dataset.del) { const l = loadMacro(); l.splice(+t.dataset.del, 1); saveMacro(l); render(); }
+  else if (t.dataset.cm) { const [y, m] = st.cm.split("-").map(Number); const d = new Date(Date.UTC(y, m - 1 + Number(t.dataset.cm), 1)); st.cm = d.toISOString().slice(0, 7); render(); }
+  else if (t.dataset.iso && t.classList.contains("rowdl") === false && t.classList.contains("cd") === false && t.tagName === "TR") { st.iso = t.dataset.iso; go("day"); }
+  else if (t.dataset.iso) { st.iso = t.dataset.iso; go("day"); }
+  else if (t.id === "dprev") { st.iso = addDays(st.iso, -1); render(); }
+  else if (t.id === "dnext") { st.iso = addDays(st.iso, 1); render(); }
+  else if (t.id === "dtoday") { st.iso = todayISO(); render(); }
+  else if (t.id === "dualNow") { st.dual.ms = nowIST(); render(); }
+  else if (t.id === "dualGo") {
+    const v = $("#dualIST").value; if (!v) return;
+    st.dual.ms = parseIST(v); st.dual.loc = +$("#dualLoc").value; render();
+  }
+  else if (t.id === "rpWatch") {
+    st.rp.watch = !st.rp.watch;
+    RP_PREV = st.rp.watch ? rpSnap(nowIST(), st.rp.mode) : null;
+    if (!st.rp.watch) RP_ALERTS = [];
+    render();
+  }
+  else if (t.dataset.rpf) { st.rp.f = t.dataset.rpf; render(); }
+  else if (t.id === "rpGo") {
+    const f = $("#rpFrom").value, to = $("#rpTo").value;
+    if (!f || !to) { alert("शुरू और अंत समय भरें।"); return; }
+    st.rp = {...st.rp, from: f, to, mode: $("#rpMode").value, step: +$("#rpStep").value, res: null, out: null};
+    const a = parseIST(f), b = parseIST(to);
+    st.rp.res = b <= a ? {err: "अंत समय शुरू के बाद होना चाहिए।"} : rpBuild(a, b, st.rp.mode, st.rp.step);
+    render();
+  }
+  else if (t.id === "rpCsv" && st.rp.res && !st.rp.res.err) { st.rp.out = {kind: "csv", text: rpCsv(st.rp.res)}; render(); }
+  else if (t.id === "rpTxt" && st.rp.res && !st.rp.res.err) { st.rp.out = {kind: "txt", text: rpText(st.rp.res)}; render(); }
+  else if (t.id === "m_add") {
+    const name = $("#m_name").value.trim();
+    if (!name) { alert("इवेंट का नाम भरें।"); return; }
+    const e = {name, cat: $("#m_cat").value, impact: $("#m_imp").value, ist: $("#m_ist").value, forecast: $("#m_fc").value, previous: $("#m_pv").value, actual: $("#m_ac").value, source: $("#m_src").value.trim(), status: $("#m_st").value};
+    if (e.status === "VERIFIED" && !e.source) { alert("VERIFIED के लिए स्रोत लिखें।"); return; }
+    const l = loadMacro(); l.push(e); saveMacro(l); render();
+  }
+});
+document.addEventListener("change", ev => {
+  const t = ev.target;
+  if (t.id === "dpick" && t.value) { st.iso = t.value; render(); }
+  else if (t.id === "m_reg") { st.regime = t.value; render(); }
+  else if (t.id === "dlFrom") { st.dlFrom = t.value; render(); }
+  else if (t.id === "dlTo") { st.dlTo = t.value; render(); }
+});
+render();
+</script>
+</body>
+</html>
+
+</body></html>
